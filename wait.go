@@ -33,7 +33,7 @@ func (confirm confirmFunc) wrap(wait waitFunc) waitFunc {
 	}
 }
 
-func (d *App) WaitFunc(sv *Service, confirm confirmFunc) (waitFunc, error) {
+func (d *App) WaitFunc(sv *Service, confirm confirmFunc, waitUntilType *string) (waitFunc, error) {
 	defaultFunc := confirm.wrap(d.WaitServiceStable)
 	if sv == nil || sv.DeploymentController == nil {
 		return defaultFunc, nil
@@ -43,9 +43,11 @@ func (d *App) WaitFunc(sv *Service, confirm confirmFunc) (waitFunc, error) {
 		case types.DeploymentControllerTypeCodeDeploy:
 			return d.WaitForCodeDeploy, nil
 		case types.DeploymentControllerTypeEcs:
-			if d.WaitServiceDeploy() {
-				return confirm.wrap(d.WaitServiceDeployStable), nil
+			if (waitUntilType != nil && *waitUntilType == "deployed") {
+				// wait for service to be deployed
+				return confirm.wrap(d.WaitServiceDeployCompleted), nil
 			} else {
+				// wait for service to be stable
 				return defaultFunc, nil
 			}
 		default:
@@ -88,7 +90,7 @@ func (d *App) Wait(ctx context.Context, opt WaitOption) error {
 		return err
 	}
 	d.LogJSON(sv.DeploymentController)
-	doWait, err := d.WaitFunc(sv, nil)
+	doWait, err := d.WaitFunc(sv, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -141,7 +143,7 @@ func (d *App) WaitServiceStable(ctx context.Context, sv *Service) error {
 	return nil
 }
 
-func (d *App) WaitServiceDeployStable(ctx context.Context, sv *Service) error {
+func (d *App) WaitServiceDeployCompleted(ctx context.Context, sv *Service) error {
 	const (
 		pollInterval = 15 * time.Second
 		maxWaitTime  = 10 * time.Minute

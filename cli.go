@@ -17,7 +17,6 @@ type CLIOptions struct {
 	Timeout           *time.Duration    `help:"timeout. Override in a configuration file." env:"ECSPRESSO_TIMEOUT"`
 	FilterCommand     string            `help:"filter command" env:"ECSPRESSO_FILTER_COMMAND"`
 	Color             bool              `help:"enable colorized output" env:"ECSPRESSO_COLOR" default:"true" negatable:""`
-	WaitServiceDeploy bool              `help:"wait until the latest service deploy completes instead of waiting for service stable." env:"WAIT_SERVICE_DEPLOY"`
 
 	Appspec    *AppSpecOption    `cmd:"" help:"output AppSpec YAML for CodeDeploy to STDOUT"`
 	Delete     *DeleteOption     `cmd:"" help:"delete service"`

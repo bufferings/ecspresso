@@ -33,7 +33,7 @@ func (confirm confirmFunc) wrap(wait waitFunc) waitFunc {
 	}
 }
 
-func (d *App) WaitFunc(sv *Service, confirm confirmFunc, waitUntilType *string) (waitFunc, error) {
+func (d *App) WaitFunc(sv *Service, confirm confirmFunc, waitUntilType string) (waitFunc, error) {
 	defaultFunc := confirm.wrap(d.WaitServiceStable)
 	if sv == nil || sv.DeploymentController == nil {
 		return defaultFunc, nil
@@ -43,7 +43,7 @@ func (d *App) WaitFunc(sv *Service, confirm confirmFunc, waitUntilType *string) 
 		case types.DeploymentControllerTypeCodeDeploy:
 			return d.WaitForCodeDeploy, nil
 		case types.DeploymentControllerTypeEcs:
-			if (waitUntilType != nil && *waitUntilType == "deployed") {
+			if waitUntilType == "deployed" {
 				// wait for service to be deployed
 				return confirm.wrap(d.WaitServiceDeployCompleted), nil
 			} else {
@@ -90,7 +90,7 @@ func (d *App) Wait(ctx context.Context, opt WaitOption) error {
 		return err
 	}
 	d.LogJSON(sv.DeploymentController)
-	doWait, err := d.WaitFunc(sv, nil, nil)
+	doWait, err := d.WaitFunc(sv, nil, "")
 	if err != nil {
 		return err
 	}

@@ -103,7 +103,7 @@ func (d *App) Deploy(ctx context.Context, opt DeployOption) error {
 		return err
 	}
 
-	doWait, err := d.WaitFunc(sv, d.confirmPrimaryTD(tdArn), &opt.WaitUntil)
+	doWait, err := d.WaitFunc(sv, d.confirmPrimaryTD(tdArn), opt.WaitUntil)
 	if err != nil {
 		return err
 	}

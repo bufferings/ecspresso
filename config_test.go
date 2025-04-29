@@ -308,10 +308,13 @@ func TestLoadConfigForCodeDeploy(t *testing.T) {
 			t.Error(err)
 		}
 		if conf.CodeDeploy.ApplicationName != "myapp" {
-			t.Errorf("expected application name, but %v", conf.CodeDeploy.ApplicationName)
+			t.Errorf("expected application name=myapp, but %v", conf.CodeDeploy.ApplicationName)
 		}
 		if conf.CodeDeploy.DeploymentGroupName != "mydeployment" {
-			t.Errorf("expected deployment group name, but %v", conf.CodeDeploy.DeploymentGroupName)
+			t.Errorf("expected deployment group name=mydeployment, but %v", conf.CodeDeploy.DeploymentGroupName)
+		}
+		if conf.CodeDeploy.DeploymentConfigName != "myConfigName" {
+			t.Errorf("expected deployment config name=myConfigName, but %v", conf.CodeDeploy.DeploymentConfigName)
 		}
 	}
 }

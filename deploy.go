@@ -305,10 +305,16 @@ func (d *App) findDeploymentInfo(ctx context.Context) (*cdTypes.DeploymentInfo, 
 			d.LogJSON(dg)
 			for _, ecsService := range dg.EcsServices {
 				if *ecsService.ClusterName == d.config.Cluster && *ecsService.ServiceName == d.config.Service {
+					var configName *string
+					if d.config.CodeDeploy.DeploymentConfigName != "" {
+						configName = aws.String(d.config.CodeDeploy.DeploymentConfigName)
+					} else {
+						configName = dg.DeploymentConfigName
+					}
 					return &cdTypes.DeploymentInfo{
 						ApplicationName:      app.ApplicationName,
 						DeploymentGroupName:  dg.DeploymentGroupName,
-						DeploymentConfigName: dg.DeploymentConfigName,
+						DeploymentConfigName: configName,
 					}, nil
 				}
 			}

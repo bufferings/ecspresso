@@ -344,6 +344,7 @@ Important notes:
 codedeploy:
   application_name: myapp
   deployment_group_name: mydeployment
+  deployment_config_name: myDeploymentConfig # optional, override DeploymentGroup setting
 ```
 
 `ecspresso deploy` creates a new deployment for CodeDeploy, and it continues on CodeDeploy.

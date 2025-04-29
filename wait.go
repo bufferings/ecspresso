@@ -14,7 +14,15 @@ import (
 	cdTypes "github.com/aws/aws-sdk-go-v2/service/codedeploy/types"
 	"github.com/aws/aws-sdk-go-v2/service/ecs"
 	"github.com/aws/aws-sdk-go-v2/service/ecs/types"
+	"github.com/samber/lo"
 	"github.com/schollz/progressbar/v3"
+)
+
+type waitUntil string
+
+const (
+	waitUntilStable   waitUntil = "stable"
+	waitUntilDeployed waitUntil = "deployed"
 )
 
 type waitFunc func(ctx context.Context, sv *Service) error
@@ -33,7 +41,7 @@ func (confirm confirmFunc) wrap(wait waitFunc) waitFunc {
 	}
 }
 
-func (d *App) WaitFunc(sv *Service, confirm confirmFunc) (waitFunc, error) {
+func (d *App) WaitFunc(sv *Service, confirm confirmFunc, until waitUntil) (waitFunc, error) {
 	defaultFunc := confirm.wrap(d.WaitServiceStable)
 	if sv == nil || sv.DeploymentController == nil {
 		return defaultFunc, nil
@@ -43,7 +51,14 @@ func (d *App) WaitFunc(sv *Service, confirm confirmFunc) (waitFunc, error) {
 		case types.DeploymentControllerTypeCodeDeploy:
 			return d.WaitForCodeDeploy, nil
 		case types.DeploymentControllerTypeEcs:
-			return defaultFunc, nil
+			switch until {
+			case waitUntilDeployed:
+				return confirm.wrap(d.WaitServiceDeployCompleted), nil
+			case waitUntilStable, "":
+				return defaultFunc, nil
+			default:
+				return nil, fmt.Errorf("unsupported waitUntil: %s", until)
+			}
 		default:
 			return nil, fmt.Errorf("unsupported deployment controller type: %s", dc.Type)
 		}
@@ -71,20 +86,22 @@ func (d *App) confirmPrimaryTD(tdArn string) confirmFunc {
 }
 
 type WaitOption struct {
+	WaitUntil string `aliases:"until" help:"Choose whether to wait for service stable or the deployment finishes. (stable|deployed)" default:"stable" enum:"stable,deployed"`
 }
 
 func (d *App) Wait(ctx context.Context, opt WaitOption) error {
 	ctx, cancel := d.Start(ctx)
 	defer cancel()
 
-	d.Log("Waiting for the service stable")
+	until := waitUntil(opt.WaitUntil)
+	d.Log("Waiting for the service %s", until)
 
 	sv, err := d.DescribeServiceStatus(ctx, 0)
 	if err != nil {
 		return err
 	}
 	d.LogJSON(sv.DeploymentController)
-	doWait, err := d.WaitFunc(sv, nil)
+	doWait, err := d.WaitFunc(sv, nil, until)
 	if err != nil {
 		return err
 	}
@@ -96,7 +113,7 @@ func (d *App) Wait(ctx context.Context, opt WaitOption) error {
 		return err
 	}
 
-	d.Log("Service is stable now. Completed!")
+	d.Log("Service is %s now. Completed!", until)
 	return nil
 }
 
@@ -106,6 +123,7 @@ func (d *App) WaitServiceStable(ctx context.Context, sv *Service) error {
 	defer cancel()
 
 	tick := time.NewTicker(10 * time.Second)
+	defer tick.Stop()
 	st := &showState{lastEventAt: time.Now()}
 	go func() {
 		for {
@@ -133,6 +151,63 @@ func (d *App) WaitServiceStable(ctx context.Context, sv *Service) error {
 	// show the service status once more (correct all logs)
 	if err := d.showServiceStatus(ctx, st); err != nil {
 		d.Log("[WARNING] %s", err.Error())
+	}
+	return nil
+}
+
+func (d *App) WaitServiceDeployCompleted(ctx context.Context, sv *Service) error {
+	d.Log("Waiting for service deployed...(it will take a few minutes)")
+	time.Sleep(10 * time.Second) // wait for new deployment created
+
+	listResp, err := d.ecs.ListServiceDeployments(ctx, &ecs.ListServiceDeploymentsInput{
+		Cluster: &d.Cluster,
+		Service: &d.Service,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to list service deployments: %w", err)
+	}
+	if len(listResp.ServiceDeployments) == 0 {
+		return errors.New("no deployments found for the service")
+	}
+	// find the latest deployment
+	deployment := lo.MaxBy(listResp.ServiceDeployments, func(item types.ServiceDeploymentBrief, max types.ServiceDeploymentBrief) bool {
+		return item.CreatedAt.After(*max.CreatedAt)
+	})
+	deploymentArn := deployment.ServiceDeploymentArn
+	d.Log("Waiting for service deployment %s to complete...", arnToName(*deploymentArn))
+
+	tick := time.NewTicker(10 * time.Second)
+	defer tick.Stop()
+	st := &showState{lastEventAt: time.Now()}
+	for range tick.C {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+		if err := d.showServiceStatus(ctx, st); err != nil {
+			d.Log("[WARNING] %s", err.Error())
+			continue
+		}
+
+		resp, err := d.ecs.DescribeServiceDeployments(ctx, &ecs.DescribeServiceDeploymentsInput{
+			ServiceDeploymentArns: []string{*deploymentArn},
+		})
+		if err != nil {
+			return fmt.Errorf("failed to describe service deployments: %w", err)
+		}
+		if len(resp.ServiceDeployments) == 1 {
+			status := resp.ServiceDeployments[0].Status
+			switch status {
+			case types.ServiceDeploymentStatusSuccessful, types.ServiceDeploymentStatusRollbackSuccessful:
+				d.Log("Service deployment completed %s", status)
+				return nil
+			case types.ServiceDeploymentStatusStopped, types.ServiceDeploymentStatusRollbackFailed, types.ServiceDeploymentStatusStopRequested:
+				return fmt.Errorf("Service deployment failed %s", status)
+			default:
+				d.Log("[DEBUG] Deployment %s, waiting...", status)
+			}
+		}
 	}
 	return nil
 }
@@ -185,7 +260,7 @@ type showState struct {
 func (d *App) showServiceStatus(ctx context.Context, st *showState) error {
 	out, err := d.ecs.DescribeServices(ctx, d.DescribeServicesInput())
 	if err != nil {
-		return fmt.Errorf("failed to describe service deployments: %w", err)
+		return fmt.Errorf("failed to describe services: %w", err)
 	}
 	if len(out.Services) == 0 {
 		return ErrNotFound(fmt.Sprintf("service %s is not found", d.Service))

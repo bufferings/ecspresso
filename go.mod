@@ -6,7 +6,7 @@ toolchain go1.24.2
 
 require (
 	github.com/Songmu/prompter v0.5.1
-	github.com/alecthomas/kong v0.8.1
+	github.com/alecthomas/kong v1.10.0
 	github.com/aws/aws-sdk-go-v2 v1.32.8
 	github.com/aws/aws-sdk-go-v2/config v1.28.10
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.51
@@ -46,7 +46,7 @@ require (
 	github.com/samber/lo v1.46.0
 	github.com/schollz/progressbar/v3 v3.14.6
 	github.com/shogo82148/go-retry v1.1.1
-	golang.org/x/sys v0.30.0
+	golang.org/x/sys v0.32.0
 )
 
 require (
@@ -122,12 +122,12 @@ require (
 	go.opentelemetry.io/otel v1.21.0 // indirect
 	go.opentelemetry.io/otel/metric v1.21.0 // indirect
 	go.opentelemetry.io/otel/trace v1.21.0 // indirect
-	golang.org/x/crypto v0.35.0 // indirect
-	golang.org/x/net v0.34.0 // indirect
+	golang.org/x/crypto v0.37.0 // indirect
+	golang.org/x/net v0.39.0 // indirect
 	golang.org/x/oauth2 v0.16.0 // indirect
-	golang.org/x/sync v0.11.0 // indirect
-	golang.org/x/term v0.29.0 // indirect
-	golang.org/x/text v0.22.0 // indirect
+	golang.org/x/sync v0.13.0 // indirect
+	golang.org/x/term v0.31.0 // indirect
+	golang.org/x/text v0.24.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/api v0.155.0 // indirect

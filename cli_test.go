@@ -635,14 +635,22 @@ var cliTests = []struct {
 		args: []string{"wait"},
 		sub:  "wait",
 		subOption: &ecspresso.WaitOption{
-			Until: "stable",
+			WaitUntil: "stable",
 		},
 	},
 	{
+		args: []string{"wait", "--wait-until", "deployed"},
+		sub:  "wait",
+		subOption: &ecspresso.WaitOption{
+			WaitUntil: "deployed",
+		},
+	},
+	{
+		// alias --until == --wait-until
 		args: []string{"wait", "--until", "deployed"},
 		sub:  "wait",
 		subOption: &ecspresso.WaitOption{
-			Until: "deployed",
+			WaitUntil: "deployed",
 		},
 	},
 	{

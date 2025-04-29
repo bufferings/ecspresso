@@ -86,14 +86,14 @@ func (d *App) confirmPrimaryTD(tdArn string) confirmFunc {
 }
 
 type WaitOption struct {
-	Until string `help:"Choose whether to wait for service stable or the deployment finishes. (stable|deployed)" default:"stable" enum:"stable,deployed"`
+	WaitUntil string `aliases:"until" help:"Choose whether to wait for service stable or the deployment finishes. (stable|deployed)" default:"stable" enum:"stable,deployed"`
 }
 
 func (d *App) Wait(ctx context.Context, opt WaitOption) error {
 	ctx, cancel := d.Start(ctx)
 	defer cancel()
 
-	until := waitUntil(opt.Until)
+	until := waitUntil(opt.WaitUntil)
 	d.Log("Waiting for the service %s", until)
 
 	sv, err := d.DescribeServiceStatus(ctx, 0)

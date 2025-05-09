@@ -51,7 +51,7 @@ func (p ConfigPlugin) AppendFuncMap(c *Config, funcMap template.FuncMap) error {
 		for _, appendedFuncs := range c.templateFuncs {
 			if _, exists := appendedFuncs[name]; exists {
 				if lo.Contains(defaultPluginNames, p.Name) {
-					Log("[DEBUG] template function %s already exists by default plugins. skip", name)
+					LogDebug("template function %s already exists by default plugins. skip", name)
 					continue
 				}
 				return fmt.Errorf("template function %s already exists. set func_prefix to %s plugin", name, p.Name)
@@ -69,7 +69,7 @@ func (p ConfigPlugin) AppendJsonnetNativeFuncs(c *Config, funcs []*jsonnet.Nativ
 		for _, appendedFuncs := range c.jsonnetNativeFuncs {
 			if appendedFuncs.Name == f.Name {
 				if lo.Contains(defaultPluginNames, p.Name) {
-					Log("[DEBUG] jsonnet native function %s already exists by default plugins. skip", f.Name)
+					LogDebug("jsonnet native function %s already exists by default plugins. skip", f.Name)
 					continue
 				}
 				return fmt.Errorf("jsonnet native function %s already exists. set func_prefix to %s plugin", f.Name, p.Name)

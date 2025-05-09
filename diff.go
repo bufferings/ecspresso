@@ -42,7 +42,7 @@ func (d *App) Diff(ctx context.Context, opt DiffOption) error {
 	var remoteTaskDefArn string
 	// diff for services only when service defined
 	if d.config.Service != "" {
-		d.Log("[DEBUG] diff service compare with %s", d.config.Service)
+		d.LogDebug("diff service compare with %s", d.config.Service)
 		newSv, err := d.LoadServiceDefinition(d.config.ServiceDefinitionPath)
 		if err != nil {
 			return fmt.Errorf("failed to load service definition: %w", err)
@@ -50,7 +50,7 @@ func (d *App) Diff(ctx context.Context, opt DiffOption) error {
 		remoteSv, err := d.DescribeService(ctx)
 		if err != nil {
 			if errors.As(err, &errNotFound) {
-				d.Log("[INFO] service not found, will create a new service")
+				d.LogInfo("service not found, will create a new service")
 			} else {
 				return fmt.Errorf("failed to describe service: %w", err)
 			}
@@ -72,7 +72,7 @@ func (d *App) Diff(ctx context.Context, opt DiffOption) error {
 		arn, err := d.findLatestTaskDefinitionArn(ctx, *newTd.Family)
 		if err != nil {
 			if errors.As(err, &errNotFound) {
-				d.Log("[INFO] task definition not found, will register a new task definition")
+				d.LogInfo("task definition not found, will register a new task definition")
 			} else {
 				return err
 			}
@@ -81,7 +81,7 @@ func (d *App) Diff(ctx context.Context, opt DiffOption) error {
 	}
 	var remoteTd *TaskDefinitionInput
 	if remoteTaskDefArn != "" {
-		d.Log("[DEBUG] diff task definition compare with %s", remoteTaskDefArn)
+		d.LogDebug("diff task definition compare with %s", remoteTaskDefArn)
 		remoteTd, err = d.DescribeTaskDefinition(ctx, remoteTaskDefArn)
 		if err != nil {
 			return err

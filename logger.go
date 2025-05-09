@@ -2,54 +2,77 @@ package ecspresso
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
-	"log"
+	"log/slog"
 	"os"
 
-	"github.com/fatih/color"
-	"github.com/fujiwara/logutils"
+	"github.com/fujiwara/sloghandler"
 )
 
 var (
-	commonLogger *log.Logger
+	logLevel           = new(slog.LevelVar)
+	commonLogger       = newLogger(os.Stderr)
+	slogHandlerOptions = &sloghandler.HandlerOptions{
+		Color: true,
+		HandlerOptions: slog.HandlerOptions{
+			Level: logLevel,
+		},
+	}
 )
 
-func init() {
-	commonLogger = newLogger()
-	commonLogger.SetOutput(newLogFilter(os.Stderr, "INFO"))
+func newLogger(w io.Writer) *slog.Logger {
+	return slog.New(sloghandler.NewLogHandler(w, slogHandlerOptions))
 }
 
-func newLogFilter(w io.Writer, minLevel string) *logutils.LevelFilter {
-	return &logutils.LevelFilter{
-		Levels: []logutils.LogLevel{"DEBUG", "INFO", "WARNING", "ERROR"},
-		ModifierFuncs: []logutils.ModifierFunc{
-			nil, // DEBUG
-			nil, // default
-			logutils.Color(color.FgYellow),
-			logutils.Color(color.FgRed),
-		},
-		MinLevel: logutils.LogLevel(minLevel),
-		Writer:   w,
-	}
+func LogDebug(f string, v ...interface{}) {
+	msg := fmt.Sprintf(f, v...)
+	commonLogger.Debug(msg)
 }
 
-func newLogger() *log.Logger {
-	return log.New(io.Discard, "", log.LstdFlags)
+func LogInfo(f string, v ...interface{}) {
+	msg := fmt.Sprintf(f, v...)
+	commonLogger.Info(msg)
 }
 
-func Log(f string, v ...interface{}) {
-	commonLogger.Printf(f, v...)
+func LogWarn(f string, v ...interface{}) {
+	msg := fmt.Sprintf(f, v...)
+	commonLogger.Warn(msg)
 }
 
-func (d *App) Log(f string, v ...interface{}) {
-	d.logger.Printf(d.Name()+" "+f, v...)
+func LogError(f string, v ...interface{}) {
+	msg := fmt.Sprintf(f, v...)
+	commonLogger.Error(msg)
+}
+
+func (d *App) LogDebug(f string, v ...interface{}) {
+	msg := fmt.Sprintf(f, v...)
+	d.logger.Debug(msg)
+}
+
+func (d *App) LogInfo(f string, v ...interface{}) {
+	msg := fmt.Sprintf(f, v...)
+	d.logger.Info(msg)
+}
+
+func (d *App) LogWarn(f string, v ...interface{}) {
+	msg := fmt.Sprintf(f, v...)
+	d.logger.Warn(msg)
+}
+
+func (d *App) LogError(f string, v ...interface{}) {
+	msg := fmt.Sprintf(f, v...)
+	d.logger.Error(msg)
 }
 
 func (d *App) LogJSON(v interface{}) {
 	b, err := json.Marshal(v)
 	if err != nil {
-		d.logger.Printf("[WARNING] failed to marshal json: %s", err)
+		d.logger.Warn("failed to marshal json", "error", err.Error())
 		return
 	}
-	d.logger.Println("[DEBUG] " + string(b))
+	if logLevel.Level() == slog.LevelDebug {
+		// Print JSON in debug level only
+		fmt.Fprintln(os.Stderr, string(b))
+	}
 }

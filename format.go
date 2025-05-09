@@ -9,9 +9,10 @@ import (
 	aasTypes "github.com/aws/aws-sdk-go-v2/service/applicationautoscaling/types"
 	logsTypes "github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs/types"
 	"github.com/aws/aws-sdk-go-v2/service/ecs/types"
+	"github.com/fujiwara/sloghandler"
 )
 
-var EventTimeFormat = "2006/01/02 15:04:05"
+var EventTimeFormat = sloghandler.TimeFormat
 
 func formatDeployment(dp types.Deployment) string {
 	return fmt.Sprintf(

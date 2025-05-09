@@ -98,8 +98,8 @@ func (d *App) initConfigurationFile(ctx context.Context, configFilePath string, 
 	} else if sv.isCodeDeploy() {
 		info, err := d.findDeploymentInfo(ctx)
 		if err != nil {
-			Log("[WARNING] failed to find CodeDeploy deployment info: %s", err)
-			Log("[WARNING] you need to set config.codedeploy section manually")
+			LogWarn("failed to find CodeDeploy deployment info: %s", err)
+			LogWarn("you need to set config.codedeploy section manually")
 		} else {
 			conf.CodeDeploy = &ConfigCodeDeploy{
 				ApplicationName:     *info.ApplicationName,
@@ -126,7 +126,7 @@ func (d *App) initConfigurationFile(ctx context.Context, configFilePath string, 
 				return fmt.Errorf("unable to marshal config to YAML: %w", err)
 			}
 		}
-		d.Log("save the config to %s", configFilePath)
+		d.LogInfo("save the config to %s", configFilePath)
 		if err := d.saveFile(configFilePath, b, CreateFileMode, opt.ForceOverwrite); err != nil {
 			return err
 		}
@@ -172,7 +172,7 @@ func (d *App) initServiceDefinition(ctx context.Context, opt InitOption) (*Servi
 			}
 			b = []byte(out)
 		}
-		d.Log("save the service definition %s to %s", svArn, conf.ServiceDefinitionPath)
+		d.LogInfo("save the service definition %s to %s", svArn, conf.ServiceDefinitionPath)
 		if err := d.saveFile(conf.ServiceDefinitionPath, b, CreateFileMode, opt.ForceOverwrite); err != nil {
 			return nil, "", err
 		}
@@ -199,7 +199,7 @@ func (d *App) initTaskDefinition(ctx context.Context, opt InitOption, tdArn stri
 			}
 			b = []byte(out)
 		}
-		d.Log("save the task definition %s to %s", tdArn, conf.TaskDefinitionPath)
+		d.LogInfo("save the task definition %s to %s", tdArn, conf.TaskDefinitionPath)
 		if err := d.saveFile(conf.TaskDefinitionPath, b, CreateFileMode, opt.ForceOverwrite); err != nil {
 			return nil, err
 		}
@@ -231,7 +231,7 @@ func (d *App) saveFile(path string, b []byte, mode os.FileMode, force bool) erro
 	if _, err := os.Stat(path); err == nil && !force {
 		ok := prompter.YN(fmt.Sprintf("Overwrite existing file %s?", path), false)
 		if !ok {
-			d.Log("skip %s", path)
+			d.LogInfo("skip %s", path)
 			return nil
 		}
 	}

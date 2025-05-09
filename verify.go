@@ -159,7 +159,7 @@ func (v *verifier) existsEnvironmentFile(ctx context.Context, envFile types.Envi
 
 func (d *App) newAssumedVerifier(ctx context.Context, cfg aws.Config, executionRole *string, opt *VerifyOption) (*verifier, error) {
 	if executionRole == nil {
-		d.Log("[INFO] executionRoleArn is not set. Continue to verify with current session.")
+		d.LogInfo("executionRoleArn is not set. Continue to verify with current session.")
 		return newVerifier(&cfg, &cfg, opt), nil
 	}
 	svc := sts.NewFromConfig(d.config.awsv2Config)
@@ -168,10 +168,10 @@ func (d *App) newAssumedVerifier(ctx context.Context, cfg aws.Config, executionR
 		RoleSessionName: aws.String("ecspresso-verifier"),
 	})
 	if err != nil {
-		d.Log("[INFO] failed to assume role to taskExecutionRole. Continue to verify with current session. %s", err.Error())
+		d.LogInfo("failed to assume role to taskExecutionRole. Continue to verify with current session. %s", err.Error())
 		return newVerifier(&cfg, &cfg, opt), nil
 	}
-	d.Log("[INFO] success to assume role: %s", aws.ToString(executionRole))
+	d.LogInfo("success to assume role: %s", aws.ToString(executionRole))
 	ec := aws.Config{}
 	ec.Region = d.config.Region
 	ec.Credentials = credentials.NewStaticCredentialsProvider(
@@ -207,7 +207,7 @@ func (d *App) Verify(ctx context.Context, opt VerifyOption) error {
 	ctx, cancel := d.Start(ctx)
 	defer cancel()
 
-	d.Log("Starting verify")
+	d.LogInfo("Starting verify")
 	resources := []struct {
 		name string
 		fn   verifyResourceFunc
@@ -221,7 +221,7 @@ func (d *App) Verify(ctx context.Context, opt VerifyOption) error {
 			return err
 		}
 	}
-	d.Log("Verify OK!")
+	d.LogInfo("Verify OK!")
 	return nil
 }
 
@@ -359,7 +359,7 @@ func (d *App) verifyServiceDefinition(ctx context.Context) error {
 		err := verifyResource(ctx, name, func(context.Context) error {
 			if ebs := vc.ManagedEBSVolume; ebs != nil {
 				if len(ebs.TagSpecifications) > 1 {
-					d.Log("[WARNING] %s has more than one tag specifications. Only the first tag specification is used.", name)
+					d.LogWarn("%s has more than one tag specifications. Only the first tag specification is used.", name)
 				}
 				roleArn := aws.ToString(ebs.RoleArn)
 				if err := verifyResource(ctx, fmt.Sprintf("RoleArn[%s]", roleArn), func(ctx context.Context) error {
@@ -487,7 +487,7 @@ func (d *App) verifyRegistryImage(ctx context.Context, image, user, password str
 	} else {
 		tag = rr[1]
 	}
-	d.Log("[DEBUG] image=%s tag=%s", image, tag)
+	d.LogDebug("image=%s tag=%s", image, tag)
 
 	repo := registry.New(image, user, password)
 	ok, err := repo.HasImage(ctx, tag)
@@ -579,10 +579,10 @@ func (d *App) verifyImage(ctx context.Context, image string) error {
 		return errors.New("image is not defined")
 	}
 	if m := ecrImageURLRegex.FindStringSubmatch(image); len(m) == 3 {
-		d.Log("[DEBUG] VERIFY ECR Image %s in region %s", image, m[2])
+		d.LogDebug("VERIFY ECR Image %s in region %s", image, m[2])
 		return d.verifyECRImage(ctx, image, m[2]) // m[1] is aws account id, m[2] is region
 	}
-	d.Log("[DEBUG] VERIFY Registry Image %s", image)
+	d.LogDebug("VERIFY Registry Image %s", image)
 	return d.verifyRegistryImage(ctx, image, "", "")
 }
 
@@ -641,7 +641,7 @@ func (d *App) verifyContainer(ctx context.Context, c *types.ContainerDefinition,
 
 func (d *App) verifyLogConfiguration(ctx context.Context, c *types.ContainerDefinition) error {
 	options := c.LogConfiguration.Options
-	d.Log("[DEBUG] LogConfiguration[awslogs] options=%v", options)
+	d.LogDebug("LogConfiguration[awslogs] options=%v", options)
 	group, region, prefix := options["awslogs-group"], options["awslogs-region"], options["awslogs-stream-prefix"]
 	if group == "" {
 		return errors.New("awslogs-group is required")
@@ -661,14 +661,14 @@ func (d *App) verifyLogConfiguration(ctx context.Context, c *types.ContainerDefi
 			var ex *cloudwatchlogsTypes.ResourceAlreadyExistsException
 			if errors.As(err, &ex) {
 				// ignore error if log group already exists
-				d.Log("[DEBUG] log group %s already exists, ignored", group)
+				d.LogDebug("log group %s already exists, ignored", group)
 			} else if d.verifier.IsAssumed() {
 				return fmt.Errorf("failed to create log group %s: %w", group, err)
 			} else {
-				d.Log("[WARNING] failed to create log group %s: %s", group, err)
+				d.LogWarn("failed to create log group %s: %s", group, err)
 			}
 		} else {
-			d.Log("[INFO] created log group %s", group)
+			d.LogInfo("created log group %s", group)
 		}
 	}
 

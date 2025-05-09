@@ -48,7 +48,7 @@ func (d *App) modifyAutoScaling(ctx context.Context, opt DeployOption) error {
 	if p.isEmpty() {
 		return nil
 	}
-	d.Log("[INFO] Modify auto scaling settings %s", p.String())
+	d.LogInfo("Modify auto scaling settings %s", p.String())
 
 	resourceId := fmt.Sprintf("service/%s/%s", d.Cluster, d.Service)
 	out, err := d.autoScaling.DescribeScalableTargets(
@@ -63,8 +63,8 @@ func (d *App) modifyAutoScaling(ctx context.Context, opt DeployOption) error {
 		return fmt.Errorf("failed to describe scalable targets: %w", err)
 	}
 	if len(out.ScalableTargets) == 0 {
-		d.Log("[WARNING] No scalable target for %s", resourceId)
-		d.Log("[INFO] Skip modifying auto scaling settings")
+		d.LogWarn("No scalable target for %s", resourceId)
+		d.LogInfo("Skip modifying auto scaling settings")
 		return nil
 	}
 
@@ -72,7 +72,7 @@ func (d *App) modifyAutoScaling(ctx context.Context, opt DeployOption) error {
 		return nil
 	}
 	for _, target := range out.ScalableTargets {
-		d.Log("[INFO] Register scalable target %s %s", *target.ResourceId, p.String())
+		d.LogInfo("Register scalable target %s %s", *target.ResourceId, p.String())
 		_, err := d.autoScaling.RegisterScalableTarget(
 			ctx,
 			&applicationautoscaling.RegisterScalableTargetInput{

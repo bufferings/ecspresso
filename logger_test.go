@@ -2,25 +2,25 @@ package ecspresso_test
 
 import (
 	"bytes"
+	"log/slog"
 	"testing"
 
 	"github.com/kayac/ecspresso/v2"
 )
 
-var logLevels = []string{"DEBUG", "INFO", "WARNING", "ERROR"}
+var logLevels = []slog.Level{slog.LevelDebug, slog.LevelInfo, slog.LevelWarn, slog.LevelError}
 
 func TestCommonLogger(t *testing.T) {
 	for _, level := range logLevels {
 		b := new(bytes.Buffer)
-		logger := ecspresso.NewLogger()
-		logger.SetOutput(ecspresso.NewLogFilter(b, level))
+		logger := ecspresso.NewLogger(b)
+		ecspresso.LogLevel.Set(level)
 		ecspresso.SetLogger(logger)
 
-		ecspresso.Log("test %s", level)
-		ecspresso.Log("[DEBUG] test %s", level)
-		ecspresso.Log("[INFO] test %s", level)
-		ecspresso.Log("[WARNING] test %s", level)
-		ecspresso.Log("[ERROR] test %s", level)
+		ecspresso.LogDebug("test %s", level)
+		ecspresso.LogInfo("test %s", level)
+		ecspresso.LogWarn("test %s", level)
+		ecspresso.LogError("test %s", level)
 		t.Log(b.String())
 	}
 }
@@ -29,15 +29,14 @@ func TestLogger(t *testing.T) {
 	app := &ecspresso.App{}
 	for _, level := range logLevels {
 		b := new(bytes.Buffer)
-		logger := ecspresso.NewLogger()
-		logger.SetOutput(ecspresso.NewLogFilter(b, level))
+		logger := ecspresso.NewLogger(b)
+		ecspresso.LogLevel.Set(level)
 		app.SetLogger(logger)
 
-		app.Log("test %s", "test")
-		app.Log("[DEBUG] test %s", "test")
-		app.Log("[INFO] test %s", "test")
-		app.Log("[WARNING] test %s", "test")
-		app.Log("[ERROR] test %s", "test")
+		app.LogDebug("test %s", "test")
+		app.LogInfo("test %s", "test")
+		app.LogWarn("test %s", "test")
+		app.LogError("test %s", "test")
 		t.Log(b.String())
 	}
 }

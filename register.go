@@ -21,17 +21,17 @@ func (d *App) Register(ctx context.Context, opt RegisterOption) error {
 	ctx, cancel := d.Start(ctx)
 	defer cancel()
 
-	d.Log("Starting register task definition %s", opt.DryRunString())
+	d.LogInfo("Starting register task definition %s", opt.DryRunString())
 	td, err := d.LoadTaskDefinition(d.config.TaskDefinitionPath)
 	if err != nil {
 		return err
 	}
 	if opt.DryRun {
-		d.Log("task definition:")
+		d.LogInfo("task definition:")
 		if err := d.OutputJSONForAPI(os.Stdout, td); err != nil {
 			return err
 		}
-		d.Log("DRY RUN OK")
+		d.LogInfo("DRY RUN OK")
 		return nil
 	}
 

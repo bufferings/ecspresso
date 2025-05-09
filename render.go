@@ -19,7 +19,7 @@ type RenderOption struct {
 func (d *App) Render(ctx context.Context, opt RenderOption) error {
 	out := bufio.NewWriter(os.Stdout)
 	defer out.Flush()
-	d.Log("[DEBUG] targets %v", opt.Targets)
+	d.LogDebug("targets %v", opt.Targets)
 	for _, target := range *opt.Targets {
 		switch target {
 		case "config":

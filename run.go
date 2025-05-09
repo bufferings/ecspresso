@@ -45,7 +45,7 @@ func (d *App) Run(ctx context.Context, opt RunOption) error {
 	ctx, cancel := d.Start(ctx)
 	defer cancel()
 
-	d.Log("Running task %s", opt.DryRunString())
+	d.LogInfo("Running task %s", opt.DryRunString())
 	ov := types.TaskOverride{}
 	if opt.TaskOverrideStr != "" {
 		if err := json.Unmarshal([]byte(opt.TaskOverrideStr), &ov); err != nil {
@@ -60,7 +60,7 @@ func (d *App) Run(ctx context.Context, opt RunOption) error {
 			return fmt.Errorf("failed to read overrides-file %s: %w", ovFile, err)
 		}
 	}
-	d.Log("[DEBUG] Overrides")
+	d.LogInfo("[DEBUG] Overrides")
 	d.LogJSON(ov)
 
 	tdForRun, err := d.resolveTaskDefinitionForRun(ctx, opt)
@@ -68,9 +68,9 @@ func (d *App) Run(ctx context.Context, opt RunOption) error {
 		return err
 	}
 	if tdForRun.Arn == "" && tdForRun.TaskDefinitionInput != nil {
-		d.Log("Task definition family %s will be registered", aws.ToString(tdForRun.TaskDefinitionInput.Family))
+		d.LogInfo("Task definition family %s will be registered", aws.ToString(tdForRun.TaskDefinitionInput.Family))
 	} else {
-		d.Log("Task definition ARN: %s", tdForRun.Arn)
+		d.LogInfo("Task definition ARN: %s", tdForRun.Arn)
 		var err error
 		td, err := d.DescribeTaskDefinition(ctx, tdForRun.Arn)
 		if err != nil {
@@ -82,10 +82,10 @@ func (d *App) Run(ctx context.Context, opt RunOption) error {
 	if watchContainer == nil {
 		return fmt.Errorf("container %s not found in the task definition", opt.WatchContainer)
 	}
-	d.Log("Watch container: %s", aws.ToString(watchContainer.Name))
+	d.LogInfo("Watch container: %s", aws.ToString(watchContainer.Name))
 
 	if opt.DryRun {
-		d.Log("DRY RUN OK")
+		d.LogInfo("DRY RUN OK")
 		return nil
 	}
 
@@ -94,7 +94,7 @@ func (d *App) Run(ctx context.Context, opt RunOption) error {
 		return err
 	}
 	if !opt.Wait {
-		d.Log("Run task invoked")
+		d.LogInfo("Run task invoked")
 		return nil
 	}
 	if err := d.WaitRunTask(ctx, task, watchContainer, time.Now(), opt.waitUntilRunning()); err != nil {
@@ -103,13 +103,13 @@ func (d *App) Run(ctx context.Context, opt RunOption) error {
 	if err := d.DescribeTaskStatus(ctx, task, watchContainer); err != nil {
 		return err
 	}
-	d.Log("Run task completed!")
+	d.LogInfo("Run task completed!")
 
 	return nil
 }
 
 func (d *App) RunTask(ctx context.Context, tdArn string, ov *types.TaskOverride, opt *RunOption) (*types.Task, error) {
-	d.Log("Running task with %s", tdArn)
+	d.LogInfo("Running task with %s", tdArn)
 
 	sv, err := d.LoadServiceDefinition(d.config.ServiceDefinitionPath)
 	if err != nil {
@@ -150,7 +150,7 @@ func (d *App) RunTask(ctx context.Context, tdArn string, ov *types.TaskOverride,
 		if err != nil {
 			return nil, fmt.Errorf("failed to list tags for service: %w", err)
 		}
-		d.Log("[DEBUG] propagate tags from service %s", *sv.ServiceArn)
+		d.LogInfo("[DEBUG] propagate tags from service %s", *sv.ServiceArn)
 		d.LogJSON(out)
 		in.Tags = append(in.Tags, out.Tags...)
 	case "", "NONE":
@@ -160,7 +160,7 @@ func (d *App) RunTask(ctx context.Context, tdArn string, ov *types.TaskOverride,
 	default:
 		in.PropagateTags = types.PropagateTagsTaskDefinition
 	}
-	d.Log("[DEBUG] run task input")
+	d.LogInfo("[DEBUG] run task input")
 	d.LogJSON(in)
 
 	out, err := d.ecs.RunTask(ctx, in)
@@ -170,7 +170,7 @@ func (d *App) RunTask(ctx context.Context, tdArn string, ov *types.TaskOverride,
 	if len(out.Failures) > 0 {
 		f := out.Failures[0]
 		if f.Arn != nil {
-			d.Log("Task ARN: %s", *f.Arn)
+			d.LogInfo("Task ARN: %s", *f.Arn)
 		}
 		return nil, fmt.Errorf("failed to run task: %s %s", aws.ToString(f.Reason), aws.ToString(f.Detail))
 	}
@@ -179,25 +179,25 @@ func (d *App) RunTask(ctx context.Context, tdArn string, ov *types.TaskOverride,
 		return nil, fmt.Errorf("failed to run task: no tasks run")
 	}
 	task := out.Tasks[0]
-	d.Log("Task ARN: %s", aws.ToString(task.TaskArn))
+	d.LogInfo("Task ARN: %s", aws.ToString(task.TaskArn))
 	return &task, nil
 }
 
 func (d *App) WaitRunTask(ctx context.Context, task *types.Task, watchContainer *types.ContainerDefinition, startedAt time.Time, untilRunning bool) error {
-	d.Log("Waiting for run task...(it may take a while)")
+	d.LogInfo("Waiting for run task...(it may take a while)")
 	waitCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
 	lc := watchContainer.LogConfiguration
 	if lc == nil || lc.LogDriver != types.LogDriverAwslogs || lc.Options["awslogs-stream-prefix"] == "" {
-		d.Log("awslogs not configured")
+		d.LogInfo("awslogs not configured")
 		if err := d.waitTask(ctx, task, untilRunning); err != nil {
 			return err
 		}
 		return nil
 	}
 
-	d.Log("Watching container: %s", *watchContainer.Name)
+	d.LogInfo("Watching container: %s", *watchContainer.Name)
 	logGroup, logStream := d.GetLogInfo(task, watchContainer)
 	time.Sleep(3 * time.Second) // wait for log stream
 
@@ -223,18 +223,18 @@ func (d *App) WaitRunTask(ctx context.Context, task *types.Task, watchContainer 
 func (d *App) waitTask(ctx context.Context, task *types.Task, untilRunning bool) error {
 	id := arnToName(*task.TaskArn)
 	if untilRunning {
-		d.Log("Waiting for task ID %s until running", id)
+		d.LogInfo("Waiting for task ID %s until running", id)
 		waiter := ecs.NewTasksRunningWaiter(d.ecs, func(o *ecs.TasksRunningWaiterOptions) {
 			o.MaxDelay = waiterMaxDelay
 		})
 		if err := waiter.Wait(ctx, d.DescribeTasksInput(task), d.Timeout()); err != nil {
 			return err
 		}
-		d.Log("Task ID %s is running", id)
+		d.LogInfo("Task ID %s is running", id)
 		return nil
 	}
 
-	d.Log("Waiting for task ID %s until stopped", id)
+	d.LogInfo("Waiting for task ID %s until stopped", id)
 	waiter := ecs.NewTasksStoppedWaiter(d.ecs, func(o *ecs.TasksStoppedWaiterOptions) {
 		o.MaxDelay = waiterMaxDelay
 	})
@@ -265,7 +265,7 @@ func (d *App) resolveTaskDefinitionForRun(ctx context.Context, opt RunOption) (*
 		if err != nil {
 			return nil, err
 		}
-		d.Log("Revision is not specified. Use latest task definition family " + family)
+		d.LogInfo("Revision is not specified. Use latest task definition family " + family)
 		latestTdArn, err := d.findLatestTaskDefinitionArn(ctx, family)
 		if err != nil {
 			return nil, err
@@ -279,7 +279,7 @@ func (d *App) resolveTaskDefinitionForRun(ctx context.Context, opt RunOption) (*
 		if rev != "" {
 			return &taskDefinitionForRun{Arn: fmt.Sprintf("%s:%s", family, rev)}, nil
 		}
-		d.Log("Revision is not specified. Use latest task definition family " + family)
+		d.LogInfo("Revision is not specified. Use latest task definition family " + family)
 		latestTdArn, err := d.findLatestTaskDefinitionArn(ctx, family)
 		if err != nil {
 			return nil, err
@@ -296,7 +296,7 @@ func (d *App) resolveTaskDefinitionForRun(ctx context.Context, opt RunOption) (*
 		}
 		{
 			b, _ := MarshalJSONForAPI(in)
-			d.Log("[DEBUG] task definition: %s", string(b))
+			d.LogInfo("[DEBUG] task definition: %s", string(b))
 		}
 		if opt.DryRun {
 			return &taskDefinitionForRun{Arn: "", TaskDefinitionInput: in}, nil
@@ -311,7 +311,7 @@ func (d *App) resolveTaskDefinitionForRun(ctx context.Context, opt RunOption) (*
 
 func (d *App) resolveTaskdefinition(ctx context.Context) (family string, revision string, err error) {
 	if d.config.Service != "" {
-		d.Log("[DEBUG] loading service")
+		d.LogInfo("[DEBUG] loading service")
 		sv, err := d.DescribeService(ctx)
 		if err != nil {
 			return "", "", err
@@ -323,7 +323,7 @@ func (d *App) resolveTaskdefinition(ctx context.Context) (family string, revisio
 		}
 		return p[0], p[1], nil
 	} else {
-		d.Log("[DEBUG] loading task definition")
+		d.LogInfo("[DEBUG] loading task definition")
 		td, err := d.LoadTaskDefinition(d.config.TaskDefinitionPath)
 		if err != nil {
 			return "", "", err

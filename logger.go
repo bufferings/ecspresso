@@ -25,11 +25,6 @@ func newLogger(w io.Writer) *slog.Logger {
 	return slog.New(sloghandler.NewLogHandler(w, slogHandlerOptions))
 }
 
-func Log(f string, v ...interface{}) {
-	msg := fmt.Sprintf(f, v...)
-	commonLogger.Info(msg)
-}
-
 func LogDebug(f string, v ...interface{}) {
 	msg := fmt.Sprintf(f, v...)
 	commonLogger.Debug(msg)
@@ -48,11 +43,6 @@ func LogWarn(f string, v ...interface{}) {
 func LogError(f string, v ...interface{}) {
 	msg := fmt.Sprintf(f, v...)
 	commonLogger.Error(msg)
-}
-
-func (d *App) Log(f string, v ...interface{}) {
-	msg := fmt.Sprintf(f, v...)
-	d.logger.Info(msg)
 }
 
 func (d *App) LogDebug(f string, v ...interface{}) {
@@ -81,5 +71,8 @@ func (d *App) LogJSON(v interface{}) {
 		d.logger.Warn("failed to marshal json", "error", err.Error())
 		return
 	}
-	fmt.Fprintln(os.Stderr, string(b)) // TODO
+	if logLevel.Level() == slog.LevelDebug {
+		// Print JSON in debug level only
+		fmt.Fprintln(os.Stderr, string(b))
+	}
 }

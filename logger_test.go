@@ -17,7 +17,6 @@ func TestCommonLogger(t *testing.T) {
 		ecspresso.LogLevel.Set(level)
 		ecspresso.SetLogger(logger)
 
-		ecspresso.Log("test %s", level)
 		ecspresso.LogDebug("test %s", level)
 		ecspresso.LogInfo("test %s", level)
 		ecspresso.LogWarn("test %s", level)
@@ -34,7 +33,6 @@ func TestLogger(t *testing.T) {
 		ecspresso.LogLevel.Set(level)
 		app.SetLogger(logger)
 
-		app.Log("test %s", "test")
 		app.LogDebug("test %s", "test")
 		app.LogInfo("test %s", "test")
 		app.LogWarn("test %s", "test")

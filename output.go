@@ -38,7 +38,7 @@ func WriteOutput(v any) (int, error) {
 		if s, ok := v.(stringer); ok {
 			return io.WriteString(w, s.String()+"\n")
 		} else {
-			io.WriteString(w, fmt.Sprintf("%s\n", v))
+			return io.WriteString(w, fmt.Sprintf("%s\n", v))
 		}
 	}
 	return 0, fmt.Errorf("unknown log format %s", logFormat)

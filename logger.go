@@ -12,7 +12,7 @@ import (
 
 var (
 	logLevel           = new(slog.LevelVar)
-	commonLogger       = slog.New(sloghandler.NewLogHandler(os.Stderr, slogHandlerOptions))
+	commonLogger       = newLogger(os.Stderr)
 	slogHandlerOptions = &sloghandler.HandlerOptions{
 		Color: true,
 		HandlerOptions: slog.HandlerOptions{
@@ -21,8 +21,8 @@ var (
 	}
 )
 
-func newLogger() *slog.Logger {
-	return slog.New(sloghandler.NewLogHandler(io.Discard, slogHandlerOptions))
+func newLogger(w io.Writer) *slog.Logger {
+	return slog.New(sloghandler.NewLogHandler(w, slogHandlerOptions))
 }
 
 func Log(f string, v ...interface{}) {

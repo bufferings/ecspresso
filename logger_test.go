@@ -13,7 +13,7 @@ var logLevels = []slog.Level{slog.LevelDebug, slog.LevelInfo, slog.LevelWarn, sl
 func TestCommonLogger(t *testing.T) {
 	for _, level := range logLevels {
 		b := new(bytes.Buffer)
-		logger := ecspresso.NewLogger()
+		logger := ecspresso.NewLogger(b)
 		ecspresso.LogLevel.Set(level)
 		ecspresso.SetLogger(logger)
 
@@ -30,7 +30,7 @@ func TestLogger(t *testing.T) {
 	app := &ecspresso.App{}
 	for _, level := range logLevels {
 		b := new(bytes.Buffer)
-		logger := ecspresso.NewLogger()
+		logger := ecspresso.NewLogger(b)
 		ecspresso.LogLevel.Set(level)
 		app.SetLogger(logger)
 

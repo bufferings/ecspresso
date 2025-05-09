@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -169,7 +170,7 @@ func New(ctx context.Context, opt *CLIOptions, newAppOptions ...AppOption) (*App
 
 	appOpts := appOptions{
 		loader: newConfigLoader(opt.ExtStr, opt.ExtCode),
-		logger: newLogger(),
+		logger: newLogger(os.Stderr),
 	}
 	for _, fn := range newAppOptions {
 		fn(&appOpts)
@@ -210,8 +211,8 @@ func New(ctx context.Context, opt *CLIOptions, newAppOptions ...AppOption) (*App
 		lattice:     vpclattice.NewFromConfig(conf.awsv2Config),
 		loader:      appOpts.loader,
 		config:      appOpts.config,
-		logger:      appOpts.logger,
 	}
+	d.logger = appOpts.logger.With("", d.Name())
 
 	d.LogDebug("config file path: %s", opt.ConfigFilePath)
 	d.LogDebug("timeout: %s", d.config.Timeout)

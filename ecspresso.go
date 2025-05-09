@@ -88,27 +88,27 @@ func (d *App) newServiceFromTypes(ctx context.Context, in types.Service) (*Servi
 		return &sv, nil
 	}
 	if len(dps) == 0 {
-		d.Log("[WARNING] no primary deployment")
+		d.LogWarn("no primary deployment")
 		return &sv, nil
 	}
 	dp := dps[0]
-	d.Log("[DEBUG] deployment: %s %s", *dp.Id, *dp.Status)
+	d.LogDebug("deployment: %s %s", *dp.Id, *dp.Status)
 
 	// ServiceConnect
 	if dp.ServiceConnectConfiguration != nil {
-		d.Log("[DEBUG] ServiceConnectConfiguration: %#v", dp.ServiceConnectConfiguration)
+		d.LogDebug("ServiceConnectConfiguration: %#v", dp.ServiceConnectConfiguration)
 		sv.ServiceConnectConfiguration = dp.ServiceConnectConfiguration
 	}
 
 	// VolumeConfigurations
 	if dp.VolumeConfigurations != nil {
-		d.Log("[DEBUG] VolumeConfigurations: %#v", dp.VolumeConfigurations)
+		d.LogDebug("VolumeConfigurations: %#v", dp.VolumeConfigurations)
 		sv.VolumeConfigurations = dp.VolumeConfigurations
 	}
 
 	// VPC Lattice
 	if dp.VpcLatticeConfigurations != nil {
-		d.Log("[DEBUG] VpcLatticeConfigurations: %#v", dp.VpcLatticeConfigurations)
+		d.LogDebug("VpcLatticeConfigurations: %#v", dp.VpcLatticeConfigurations)
 		sv.VpcLatticeConfigurations = dp.VpcLatticeConfigurations
 	}
 
@@ -181,7 +181,7 @@ func New(ctx context.Context, opt *CLIOptions, newAppOptions ...AppOption) (*App
 	} else {
 		logLevel.Set(slog.LevelInfo)
 	}
-	Log("[INFO] ecspresso version: %s", Version)
+	LogInfo("ecspresso version: %s", Version)
 
 	// load config file
 	if appOpts.config == nil {
@@ -213,8 +213,8 @@ func New(ctx context.Context, opt *CLIOptions, newAppOptions ...AppOption) (*App
 		logger:      appOpts.logger,
 	}
 
-	d.Log("[DEBUG] config file path: %s", opt.ConfigFilePath)
-	d.Log("[DEBUG] timeout: %s", d.config.Timeout)
+	d.LogDebug("config file path: %s", opt.ConfigFilePath)
+	d.LogDebug("timeout: %s", d.config.Timeout)
 	return d, nil
 }
 
@@ -269,11 +269,11 @@ func (d *App) DescribeService(ctx context.Context) (*Service, error) {
 	status := aws.ToString(out.Services[0].Status)
 	switch status {
 	case "DRAINING":
-		d.Log("[WARNING] service %s is %s", d.Service, status)
+		d.LogWarn("service %s is %s", d.Service, status)
 	case "INACTIVE":
 		return nil, ErrNotFound(fmt.Sprintf("service %s is %s", d.Service, status))
 	default:
-		d.Log("[DEBUG] service %s is %s", d.Service, status)
+		d.LogDebug("service %s is %s", d.Service, status)
 	}
 	sv, err := d.newServiceFromTypes(ctx, out.Services[0])
 	if err != nil {
@@ -334,7 +334,7 @@ func (d *App) describeAutoScaling(ctx context.Context, s *Service) error {
 	if err != nil {
 		var oe *smithy.OperationError
 		if errors.As(err, &oe) {
-			d.Log("[WARNING] failed to describe scalable targets: %s", oe)
+			d.LogWarn("failed to describe scalable targets: %s", oe)
 			return nil
 		}
 		return fmt.Errorf("failed to describe scalable targets: %w", err)
@@ -359,7 +359,7 @@ func (d *App) describeAutoScaling(ctx context.Context, s *Service) error {
 	if err != nil {
 		var oe *smithy.OperationError
 		if errors.As(err, &oe) {
-			d.Log("[WARNING] failed to describe scaling policies: %s", oe)
+			d.LogWarn("failed to describe scaling policies: %s", oe)
 			return nil
 		}
 		return fmt.Errorf("failed to describe scaling policies: %w", err)
@@ -377,7 +377,7 @@ func (d *App) DescribeTaskStatus(ctx context.Context, task *types.Task, watchCon
 	}
 	if len(out.Failures) > 0 {
 		f := out.Failures[0]
-		d.Log("Task ARN: " + *f.Arn)
+		d.LogInfo("Task ARN: " + *f.Arn)
 		return fmt.Errorf(*f.Reason)
 	}
 
@@ -475,7 +475,7 @@ func (d *App) Name() string {
 }
 
 func (d *App) RegisterTaskDefinition(ctx context.Context, td *TaskDefinitionInput) (*TaskDefinition, error) {
-	d.Log("Registering a new task definition...")
+	d.LogInfo("Registering a new task definition...")
 	if len(td.Tags) == 0 {
 		td.Tags = nil // Tags can not be empty.
 	}
@@ -488,7 +488,7 @@ func (d *App) RegisterTaskDefinition(ctx context.Context, td *TaskDefinitionInpu
 		return nil, fmt.Errorf("failed to register task definition: %w", err)
 	}
 	otd := TaskDefinition(*out.TaskDefinition)
-	d.Log("Task definition is registered %s", otd.Name())
+	d.LogInfo("Task definition is registered %s", otd.Name())
 	return &otd, nil
 }
 
@@ -536,7 +536,7 @@ func unmarshalJSON(src []byte, v interface{}, path string) error {
 		if !strings.Contains(err.Error(), "unknown field") {
 			return err
 		}
-		Log("[WARNING] %s in %s", err, path)
+		LogWarn("%s in %s", err, path)
 		// unknown field -> try lax decoder
 		lax := json.NewDecoder(bytes.NewReader(src))
 		return lax.Decode(&v)
@@ -560,9 +560,9 @@ func (d *App) LoadServiceDefinition(path string) (*Service, error) {
 
 	sv.ServiceName = aws.String(d.config.Service)
 	if sv.DesiredCount == nil {
-		d.Log("[DEBUG] Loaded DesiredCount: nil (-1)")
+		d.LogDebug("Loaded DesiredCount: nil (-1)")
 	} else {
-		d.Log("[DEBUG] Loaded DesiredCount: %d", *sv.DesiredCount)
+		d.LogDebug("Loaded DesiredCount: %d", *sv.DesiredCount)
 	}
 
 	if err := d.config.Ignore.Apply(&sv); err != nil {
@@ -580,8 +580,8 @@ func (d *App) GetLogInfo(task *types.Task, c *types.ContainerDefinition) (string
 	logStream := strings.Join([]string{logStreamPrefix, *c.Name, taskID}, "/")
 	logGroup := lc.Options["awslogs-group"]
 
-	d.Log("logGroup: %s", logGroup)
-	d.Log("logStream: %s", logStream)
+	d.LogInfo("logGroup: %s", logGroup)
+	d.LogInfo("logStream: %s", logStream)
 
 	return logGroup, logStream
 }

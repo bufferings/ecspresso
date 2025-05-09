@@ -18,10 +18,10 @@ func TestCommonLogger(t *testing.T) {
 		ecspresso.SetLogger(logger)
 
 		ecspresso.Log("test %s", level)
-		ecspresso.Log("[DEBUG] test %s", level)
-		ecspresso.Log("[INFO] test %s", level)
-		ecspresso.Log("[WARNING] test %s", level)
-		ecspresso.Log("[ERROR] test %s", level)
+		ecspresso.LogDebug("test %s", level)
+		ecspresso.LogInfo("test %s", level)
+		ecspresso.LogWarn("test %s", level)
+		ecspresso.LogError("test %s", level)
 		t.Log(b.String())
 	}
 }
@@ -35,10 +35,10 @@ func TestLogger(t *testing.T) {
 		app.SetLogger(logger)
 
 		app.Log("test %s", "test")
-		app.Log("[DEBUG] test %s", "test")
-		app.Log("[INFO] test %s", "test")
-		app.Log("[WARNING] test %s", "test")
-		app.Log("[ERROR] test %s", "test")
+		app.LogDebug("test %s", "test")
+		app.LogInfo("test %s", "test")
+		app.LogWarn("test %s", "test")
+		app.LogError("test %s", "test")
 		t.Log(b.String())
 	}
 }

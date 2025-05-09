@@ -13,7 +13,7 @@ import (
 )
 
 func (d *App) createService(ctx context.Context, opt DeployOption) error {
-	d.Log("Starting create service %s", opt.DryRunString())
+	d.LogInfo("Starting create service %s", opt.DryRunString())
 	svd, err := d.LoadServiceDefinition(d.config.ServiceDefinitionPath)
 	if err != nil {
 		return err
@@ -29,11 +29,11 @@ func (d *App) createService(ctx context.Context, opt DeployOption) error {
 	}
 
 	if opt.DryRun {
-		d.Log("task definition:")
+		d.LogInfo("task definition:")
 		d.OutputJSONForAPI(os.Stderr, td)
-		d.Log("service definition:")
+		d.LogInfo("service definition:")
 		d.OutputJSONForAPI(os.Stderr, svd)
-		d.Log("DRY RUN OK")
+		d.LogInfo("DRY RUN OK")
 		return nil
 	}
 
@@ -44,7 +44,7 @@ func (d *App) createService(ctx context.Context, opt DeployOption) error {
 		if err != nil {
 			return err
 		}
-		d.Log("Using latest task definition %s", tdArn)
+		d.LogInfo("Using latest task definition %s", tdArn)
 	} else {
 		newTd, err := d.RegisterTaskDefinition(ctx, td)
 		if err != nil {
@@ -82,7 +82,7 @@ func (d *App) createService(ctx context.Context, opt DeployOption) error {
 	if _, err := d.ecs.CreateService(ctx, createServiceInput); err != nil {
 		return fmt.Errorf("failed to create service: %w", err)
 	}
-	d.Log("Service is created")
+	d.LogInfo("Service is created")
 
 	if !opt.Wait {
 		return nil
@@ -102,12 +102,12 @@ func (d *App) createService(ctx context.Context, opt DeployOption) error {
 
 	if err := doWait(ctx, sv); err != nil {
 		if errors.As(err, &errNotFound) && sv.isCodeDeploy() {
-			d.Log("[INFO] %s", err)
+			d.LogInfo("%s", err)
 			return d.WaitTaskSetStable(ctx, sv)
 		}
 		return err
 	}
 
-	d.Log("Service is stable now. Completed!")
+	d.LogInfo("Service is stable now. Completed!")
 	return nil
 }

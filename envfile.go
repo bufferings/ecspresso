@@ -11,7 +11,7 @@ func ExportEnvFile(file string) error {
 	if file == "" {
 		return nil
 	}
-	Log("[DEBUG] loading envfile: %s", file)
+	LogDebug("loading envfile: %s", file)
 
 	f, err := os.Open(file)
 	if err != nil {

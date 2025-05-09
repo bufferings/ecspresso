@@ -19,9 +19,9 @@ func main() {
 	exitCode, err := ecspresso.CLI(ctx, ecspresso.ParseCLIv2)
 	if err != nil {
 		if errors.Is(err, context.Canceled) {
-			ecspresso.Log("[WARNING] Interrupted")
+			ecspresso.LogWarn("Interrupted")
 		} else {
-			ecspresso.Log("[ERROR] FAILED. %s", err)
+			ecspresso.LogError("FAILED. %s", err)
 		}
 	}
 	os.Exit(exitCode)

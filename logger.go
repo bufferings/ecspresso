@@ -30,9 +30,49 @@ func Log(f string, v ...interface{}) {
 	commonLogger.Info(msg)
 }
 
+func LogDebug(f string, v ...interface{}) {
+	msg := fmt.Sprintf(f, v...)
+	commonLogger.Debug(msg)
+}
+
+func LogInfo(f string, v ...interface{}) {
+	msg := fmt.Sprintf(f, v...)
+	commonLogger.Info(msg)
+}
+
+func LogWarn(f string, v ...interface{}) {
+	msg := fmt.Sprintf(f, v...)
+	commonLogger.Warn(msg)
+}
+
+func LogError(f string, v ...interface{}) {
+	msg := fmt.Sprintf(f, v...)
+	commonLogger.Error(msg)
+}
+
 func (d *App) Log(f string, v ...interface{}) {
 	msg := fmt.Sprintf(f, v...)
 	d.logger.Info(msg)
+}
+
+func (d *App) LogDebug(f string, v ...interface{}) {
+	msg := fmt.Sprintf(f, v...)
+	d.logger.Debug(msg)
+}
+
+func (d *App) LogInfo(f string, v ...interface{}) {
+	msg := fmt.Sprintf(f, v...)
+	d.logger.Info(msg)
+}
+
+func (d *App) LogWarn(f string, v ...interface{}) {
+	msg := fmt.Sprintf(f, v...)
+	d.logger.Warn(msg)
+}
+
+func (d *App) LogError(f string, v ...interface{}) {
+	msg := fmt.Sprintf(f, v...)
+	d.logger.Error(msg)
 }
 
 func (d *App) LogJSON(v interface{}) {

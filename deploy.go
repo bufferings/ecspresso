@@ -77,17 +77,17 @@ func calcDesiredCount(sv *Service, opt DeployOption) *int32 {
 }
 
 func (d *App) Deploy(ctx context.Context, opt DeployOption) error {
-	d.Log("[DEBUG] deploy")
+	d.LogDebug("deploy")
 	d.LogJSON(opt)
 	ctx, cancel := d.Start(ctx)
 	defer cancel()
 
 	var sv *Service
-	d.Log("Starting deploy %s", opt.DryRunString())
+	d.LogInfo("Starting deploy %s", opt.DryRunString())
 	sv, err := d.DescribeServiceStatus(ctx, 0)
 	if err != nil {
 		if errors.As(err, &errNotFound) {
-			d.Log("Service %s not found. Creating a new service %s", d.Service, opt.DryRunString())
+			d.LogInfo("Service %s not found. Creating a new service %s", d.Service, opt.DryRunString())
 			return d.createService(ctx, opt)
 		}
 		return err
@@ -125,7 +125,7 @@ func (d *App) Deploy(ctx context.Context, opt DeployOption) error {
 			}
 			sv = newSv // updated
 		} else {
-			d.Log("service attributes will not change")
+			d.LogInfo("service attributes will not change")
 		}
 		if err := d.UpdateServiceTags(ctx, sv, addedTags, updatedTags, deletedTags, opt); err != nil {
 			return err
@@ -135,9 +135,9 @@ func (d *App) Deploy(ctx context.Context, opt DeployOption) error {
 		count = calcDesiredCount(sv, opt)
 	}
 	if count != nil {
-		d.Log("desired count: %d", *count)
+		d.LogInfo("desired count: %d", *count)
 	} else {
-		d.Log("desired count: unchanged")
+		d.LogInfo("desired count: unchanged")
 	}
 
 	// manage auto scaling
@@ -146,7 +146,7 @@ func (d *App) Deploy(ctx context.Context, opt DeployOption) error {
 	}
 
 	if opt.DryRun {
-		d.Log("DRY RUN OK")
+		d.LogInfo("DRY RUN OK")
 		return nil
 	}
 
@@ -155,20 +155,20 @@ func (d *App) Deploy(ctx context.Context, opt DeployOption) error {
 	}
 
 	if !opt.Wait {
-		d.Log("Service is deployed.")
+		d.LogInfo("Service is deployed.")
 		return nil
 	}
 
 	if err := doWait(ctx, sv); err != nil {
 		if errors.As(err, &errNotFound) {
-			d.Log("[INFO] %s", err)
+			d.LogInfo("%s", err)
 			// no need to wait
 			return nil
 		}
 		return err
 	}
 
-	d.Log("Service is %s now. Completed!", opt.WaitUntil)
+	d.LogInfo("Service is %s now. Completed!", opt.WaitUntil)
 	return nil
 }
 
@@ -185,7 +185,7 @@ func (d *App) UpdateServiceTasks(ctx context.Context, taskDefinitionArn string, 
 		msg = msg + " with force new deployment"
 	}
 	msg = msg + "..."
-	d.Log(msg)
+	d.LogInfo(msg)
 	d.LogJSON(in)
 
 	_, err := d.ecs.UpdateService(ctx, in)
@@ -233,7 +233,7 @@ func svToUpdateServiceInput(sv *Service) *ecs.UpdateServiceInput {
 func (d *App) UpdateServiceAttributes(ctx context.Context, sv *Service, taskDefinitionArn string, opt DeployOption) error {
 	in := svToUpdateServiceInput(sv)
 	if sv.isCodeDeploy() {
-		d.Log("[INFO] deployment by CodeDeploy")
+		d.LogInfo("deployment by CodeDeploy")
 		// unable to update attributes below with a CODE_DEPLOY deployment controller.
 		in.NetworkConfiguration = nil
 		in.PlatformVersion = nil
@@ -243,7 +243,7 @@ func (d *App) UpdateServiceAttributes(ctx context.Context, sv *Service, taskDefi
 		in.TaskDefinition = nil
 		in.CapacityProviderStrategy = nil
 	} else {
-		d.Log("[INFO] deployment by ECS rolling update")
+		d.LogInfo("deployment by ECS rolling update")
 		in.ForceNewDeployment = opt.ForceNewDeployment
 		in.TaskDefinition = aws.String(taskDefinitionArn)
 	}
@@ -251,10 +251,10 @@ func (d *App) UpdateServiceAttributes(ctx context.Context, sv *Service, taskDefi
 	in.Cluster = aws.String(d.Cluster)
 
 	if opt.DryRun {
-		d.Log("[INFO] update service input: %s", MustMarshalJSONStringForAPI(in))
+		d.LogInfo("update service input: %s", MustMarshalJSONStringForAPI(in))
 		return nil
 	}
-	d.Log("Updating service attributes...")
+	d.LogInfo("Updating service attributes...")
 
 	if out, err := d.ecs.UpdateService(ctx, in); err != nil {
 		return fmt.Errorf("failed to update service attributes: %w", err)
@@ -267,7 +267,7 @@ func (d *App) UpdateServiceAttributes(ctx context.Context, sv *Service, taskDefi
 
 func (d *App) DeployByCodeDeploy(ctx context.Context, taskDefinitionArn string, count *int32, sv *Service, opt DeployOption) error {
 	if count != nil {
-		d.Log("updating desired count to %d", *count)
+		d.LogInfo("updating desired count to %d", *count)
 	}
 	_, err := d.ecs.UpdateService(
 		ctx,
@@ -290,7 +290,7 @@ func (d *App) DeployByCodeDeploy(ctx context.Context, taskDefinitionArn string, 
 
 func (d *App) findDeploymentInfo(ctx context.Context) (*cdTypes.DeploymentInfo, error) {
 	// search deploymentGroup in CodeDeploy
-	d.Log("[DEBUG] find applications in CodeDeploy")
+	d.LogDebug("find applications in CodeDeploy")
 	apps, err := d.findCodeDeployApplications(ctx)
 	if err != nil {
 		return nil, err
@@ -338,7 +338,7 @@ func (d *App) findCodeDeployApplications(ctx context.Context) ([]cdTypes.Applica
 	if len(appNames) == 0 {
 		return nil, ErrNotFound("no CodeDeploy applications found")
 	}
-	d.Log("[DEBUG] found CodeDeploy applications: %v", appNames)
+	d.LogDebug("found CodeDeploy applications: %v", appNames)
 
 	var apps []cdTypes.ApplicationInfo
 	// BatchGetApplications accepts applications less than 100
@@ -350,7 +350,7 @@ func (d *App) findCodeDeployApplications(ctx context.Context) ([]cdTypes.Applica
 			return nil, fmt.Errorf("failed to batch get applications in CodeDeploy: %w", err)
 		}
 		for _, info := range res.ApplicationsInfo {
-			d.Log("[DEBUG] application %s compute platform %s", *info.ApplicationName, info.ComputePlatform)
+			d.LogDebug("application %s compute platform %s", *info.ApplicationName, info.ComputePlatform)
 			if info.ComputePlatform != cdTypes.ComputePlatformEcs {
 				continue
 			}
@@ -379,7 +379,7 @@ func (d *App) findCodeDeployDeploymentGroups(ctx context.Context, appName string
 			groupNames = append(groupNames, p.DeploymentGroups...)
 		}
 	}
-	d.Log("[DEBUG] CodeDeploy found deploymentGroups: %v", groupNames)
+	d.LogDebug("CodeDeploy found deploymentGroups: %v", groupNames)
 
 	var groups []cdTypes.DeploymentGroupInfo
 	// BatchGetDeploymentGroups accepts applications less than 100
@@ -404,7 +404,7 @@ func (d *App) createDeployment(ctx context.Context, sv *Service, taskDefinitionA
 	if d.config.AppSpec != nil {
 		spec.Hooks = d.config.AppSpec.Hooks
 	}
-	d.Log("[DEBUG] appSpecContent: %s", spec.String())
+	d.LogDebug("appSpecContent: %s", spec.String())
 
 	// deployment
 	dp, err := d.findDeploymentInfo(ctx)
@@ -442,7 +442,7 @@ func (d *App) createDeployment(ctx context.Context, sv *Service, taskDefinitionA
 		}
 	}
 
-	d.Log("[DEBUG] creating a deployment to CodeDeploy %v", dd)
+	d.LogDebug("creating a deployment to CodeDeploy %v", dd)
 
 	res, err := d.codedeploy.CreateDeployment(ctx, dd)
 	if err != nil {
@@ -455,12 +455,12 @@ func (d *App) createDeployment(ctx context.Context, sv *Service, taskDefinitionA
 		id,
 		d.config.Region,
 	)
-	d.Log("Deployment %s is created on CodeDeploy:", id)
-	d.Log(u)
+	d.LogInfo("Deployment %s is created on CodeDeploy:", id)
+	d.LogInfo(u)
 
 	if isatty.IsTerminal(os.Stdout.Fd()) {
 		if err := exec.Command("open", u).Start(); err != nil {
-			d.Log("Couldn't open URL %s", u)
+			d.LogInfo("Couldn't open URL %s", u)
 		}
 	}
 	return nil
@@ -488,7 +488,7 @@ func (d *App) DeployFunc(sv *Service) (deployFunc, error) {
 
 func (d *App) UpdateServiceTags(ctx context.Context, sv *Service, added, updated, deleted []types.Tag, opt DeployOption) error {
 	if len(added) == 0 && len(updated) == 0 && len(deleted) == 0 {
-		d.Log("[DEBUG] no service tags to update")
+		d.LogDebug("no service tags to update")
 		return nil
 	}
 	var tags []types.Tag
@@ -501,11 +501,11 @@ func (d *App) UpdateServiceTags(ctx context.Context, sv *Service, added, updated
 
 	if len(tags) > 0 {
 		for _, t := range tags {
-			d.Log("[INFO] updating service tags: %s=%s", aws.ToString(t.Key), aws.ToString(t.Value))
+			d.LogInfo("updating service tags: %s=%s", aws.ToString(t.Key), aws.ToString(t.Value))
 		}
 	}
 	if len(untagKeys) > 0 {
-		d.Log("[INFO] deleting service tags: %v", untagKeys)
+		d.LogInfo("deleting service tags: %v", untagKeys)
 	}
 	if opt.DryRun {
 		return nil
@@ -558,7 +558,7 @@ func (d *App) taskDefinitionArnForDeploy(ctx context.Context, sv *Service, opt D
 	}
 
 	if opt.DryRun {
-		d.Log("[INFO] task definition:")
+		d.LogInfo("task definition:")
 		d.OutputJSONForAPI(os.Stderr, td)
 		return "", nil
 	}

@@ -176,12 +176,6 @@ func New(ctx context.Context, opt *CLIOptions, newAppOptions ...AppOption) (*App
 		fn(&appOpts)
 	}
 
-	// set log level
-	if opt.Debug {
-		logLevel.Set(slog.LevelDebug)
-	} else {
-		logLevel.Set(slog.LevelInfo)
-	}
 	LogInfo("ecspresso version: %s", Version)
 
 	// load config file

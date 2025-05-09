@@ -344,6 +344,7 @@ Important notes:
 codedeploy:
   application_name: myapp
   deployment_group_name: mydeployment
+  deployment_config_name: myDeploymentConfig # optional, override DeploymentGroup setting
 ```
 
 `ecspresso deploy` creates a new deployment for CodeDeploy, and it continues on CodeDeploy.
@@ -1146,6 +1147,58 @@ local secretsmanager_arn = std.native('secretsmanager_arn');
       valueFrom: secretsmanager_arn('foo'),
     }
   ]
+}
+```
+
+### Execute external commands
+
+The `external` plugin introduces functions to execute any external commands.
+
+For example, `jq -n "{ Now: now | todateiso8601" }` returns the current date in ISO8601 format as a JSON object.
+
+```console
+$ jq -n "{ Now: now | todateiso8601 }"
+{
+  "Now": "2024-10-25T16:13:22Z"
+}
+```
+
+You can use this command as a template function in the definition files.
+
+First, define the plugin in the configuration file.
+
+ecspresso.yml
+```yaml
+plugins:
+  - name: external
+    config:
+      name: jq
+      command: ["jq", "-n"]
+      num_args: 1
+      timeout: 5
+```
+
+The `config` section defines the following parameters:
+
+- `name`: template function name
+- `command`: external command and arguments (array)
+  - The command must return a JSON string or any strings to stdout.
+- `num_args`: number of arguments (optional, default 0)
+- `parser`: parser type "json" or "string" (optional, default "json")
+- `timeout`: command execution timeout seconds (optional, default never timeout)
+
+And use the template function in the definition files as follows.
+
+```jsonnet
+local jq = std.native('jq');
+{
+  today: jq('{ Now: now | todateiso8601 }').Now,
+}
+```
+
+```json
+{
+  "today": "{{ (jq `{Now: now | todateiso8601}`).Now }}"
 }
 ```
 

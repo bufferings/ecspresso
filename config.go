@@ -73,8 +73,9 @@ type Config struct {
 }
 
 type ConfigCodeDeploy struct {
-	ApplicationName     string `yaml:"application_name,omitempty" json:"application_name,omitempty"`
-	DeploymentGroupName string `yaml:"deployment_group_name,omitempty" json:"deployment_group_name,omitempty"`
+	ApplicationName      string `yaml:"application_name,omitempty" json:"application_name,omitempty"`
+	DeploymentGroupName  string `yaml:"deployment_group_name,omitempty" json:"deployment_group_name,omitempty"`
+	DeploymentConfigName string `yaml:"deployment_config_name,omitempty" json:"deployment_config_name,omitempty"`
 }
 
 // Load loads configuration file from file path.

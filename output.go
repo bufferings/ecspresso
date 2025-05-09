@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 )
 
@@ -16,7 +17,7 @@ type stringer interface {
 }
 
 func WriteOutput(v any) (int, error) {
-	w := defaultWriteTo
+	w := os.Stdout
 	switch logFormat {
 	case logFormatJSON:
 		switch v := v.(type) {

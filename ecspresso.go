@@ -37,7 +37,6 @@ var Version string
 var delayForServiceChanged = 3 * time.Second
 var waiterMaxDelay = 15 * time.Second
 var spcIndent = "  "
-var defaultWriteTo = os.Stdout
 
 type TaskDefinition types.TaskDefinition
 

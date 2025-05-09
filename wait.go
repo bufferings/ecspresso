@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"sort"
 	"time"
 
@@ -307,10 +308,10 @@ func (d *App) codeDeployProgressBar(ctx context.Context, dpID string) error {
 		// disable progress bar in JSON format
 		opts = append(opts, progressbar.OptionSetWriter(io.Discard))
 	} else {
-		opts = append(opts, progressbar.OptionSetWriter(defaultWriteTo))
+		opts = append(opts, progressbar.OptionSetWriter(os.Stdout))
 		defer func() {
 			// append new line after progress bar
-			defaultWriteTo.Write([]byte("\n"))
+			os.Stdout.Write([]byte("\n"))
 		}()
 	}
 	bar := progressbar.NewOptions(100, opts...)

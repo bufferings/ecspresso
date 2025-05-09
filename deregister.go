@@ -89,7 +89,7 @@ func (d *App) deregiserRevision(ctx context.Context, opt DeregisterOption, inUse
 		return fmt.Errorf("confirmation failed")
 	}
 
-	d.LogInfo("Deregistring %s", name)
+	d.LogInfo("Deregistering %s", name)
 	if _, err := d.ecs.DeregisterTaskDefinition(ctx, &ecs.DeregisterTaskDefinitionInput{
 		TaskDefinition: aws.String(name),
 	}); err != nil {

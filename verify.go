@@ -236,27 +236,28 @@ type verifyState struct {
 }
 
 func newVerifyState(cache bool) *verifyState {
-	v := &verifyState{}
+	vs := &verifyState{}
 	if cache {
-		v.cache = make(verifyCache, 100)
+		vs.cache = make(verifyCache, 100)
 	} else {
-		v.cache = verifyCache(nil)
+		vs.cache = verifyCache(nil)
 	}
-	v.level = 0
-	return v
+	vs.level = 0
+	return vs
 }
 
 type verifyCache map[string]error
 
-func (v verifyCache) Do(ctx context.Context, name string, fn verifyResourceFunc) (error, bool) {
-	if v == nil {
+func (vc verifyCache) Do(ctx context.Context, name string, fn verifyResourceFunc) (error, bool) {
+	if vc == nil {
+		// no cache
 		return fn(ctx), false
 	}
-	if err, ok := v[name]; ok {
+	if err, ok := vc[name]; ok {
 		return err, true
 	}
 	err := fn(ctx)
-	v[name] = err
+	vc[name] = err
 	return err, false
 }
 

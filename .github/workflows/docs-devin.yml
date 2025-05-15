@@ -16,6 +16,6 @@ jobs:
         run: |
           curl -X POST -H 'Content-Type: application/json' \
                --data '{
-                 "text": "<@A06A3TU8H39> `bufferings/ecspresso` のブランチ `'"${{ github.ref_name }}"'` が更新されました！\nブランチの最新のソースコードから `docs-devin` フォルダ内にHTMLドキュメント更新をお願いします。"
+                 "text": "<@U08PYJ5B9LK> `bufferings/ecspresso` のブランチ `'"${{ github.ref_name }}"'` が更新されました！\nブランチの最新のソースコードから `docs-devin` フォルダ内にHTMLドキュメント更新をお願いします。"
                }' \
                "${{ secrets.SLACK_DEVIN_CALLER_WEBHOOK_URL }}"

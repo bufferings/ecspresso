@@ -1,13 +1,13 @@
 name: tagpr and release
-on:
-  push:
-    branches: ["v2"]
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: "release tag"
-        required: false
-        type: string
+# on:
+#   push:
+#     branches: ["v2"]
+#   workflow_dispatch:
+#     inputs:
+#       tag:
+#         description: "release tag"
+#         required: false
+#         type: string
 
 permissions:
   pull-requests: write

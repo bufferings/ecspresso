@@ -3,8 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ecspresso - AWS ECS デプロイメントツール</title>
+  <title>概要 - ecspresso</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'default',
+        securityLevel: 'loose'
+      });
+    });
+  </script>
 </head>
 <body>
   <header>
@@ -17,56 +27,117 @@
     <div class="sidebar">
       <nav>
         <ul>
-          <li><a href="index.html">概要</a></li>
-          <li><a href="installation.html">インストール</a></li>
-          <li><a href="usage.html">使い方</a></li>
-          <li><a href="configuration.html">設定</a></li>
-          <li><a href="commands.html">コマンド</a></li>
-          <li><a href="advanced.html">高度な機能</a></li>
-          <li><a href="plugins.html">プラグイン</a></li>
+          <li><a href="index.html">1.0 概要</a></li>
+          <li><a href="installation.html">1.1 インストールと開始方法</a></li>
+          <li><a href="architecture.html">1.2 アーキテクチャ概要</a></li>
+          <li><a href="workflow.html">1.3 ワークフローとCI/CD統合</a></li>
+          <li><a href="cli.html">2.0 コマンドラインインターフェース</a></li>
+          <li><a href="commands-reference.html">2.1 CLIコマンドリファレンス</a></li>
+          <li><a href="deployment-commands.html">2.2 デプロイメントコマンド</a></li>
+          <li><a href="task-commands.html">2.3 タスク管理コマンド</a></li>
+          <li><a href="utility-commands.html">2.4 ユーティリティコマンド</a></li>
+          <li><a href="core.html">3.0 コア機能</a></li>
+          <li><a href="deployment.html">3.1 デプロイメント管理</a></li>
+          <li><a href="task-definition.html">3.2 タスク定義管理</a></li>
+          <li><a href="verification.html">3.3 リソース検証</a></li>
+          <li><a href="diffing.html">3.4 リソース差分</a></li>
+          <li><a href="configuration.html">4.0 設定管理</a></li>
+          <li><a href="config-format.html">4.1 設定ファイル形式</a></li>
+          <li><a href="definitions.html">4.2 タスクとサービス定義</a></li>
+          <li><a href="plugins.html">4.3 プラグインシステム</a></li>
+          <li><a href="jsonnet.html">4.4 Jsonnet統合</a></li>
+          <li><a href="development.html">5.0 開発と貢献</a></li>
+          <li><a href="building.html">5.1 ビルドとテスト</a></li>
+          <li><a href="release.html">5.2 リリースプロセス</a></li>
+          <li><a href="codebase.html">5.3 コードベース構造</a></li>
+          <li><a href="logging.html">5.4 ログとエラー処理</a></li>
           <li><a href="changes.html">変更履歴</a></li>
         </ul>
       </nav>
     </div>
     
     <div class="content">
-      <h2>概要</h2>
-      <p>ecspresso は Amazon Elastic Container Service (ECS) へのデプロイを簡素化・自動化するためのコマンドラインツールです。AWS上でコンテナ化されたアプリケーションを管理するDevOpsエンジニア、SREチーム、クラウドエンジニア向けに設計されています。</p>
+      <h2>1.0 概要</h2>
       
-      <h3>主な機能</h3>
-      <ul>
-        <li>宣言的な設定ファイルを使用した ECS サービスのデプロイ、スケーリング、ロールバック</li>
-        <li>ローカル構成と実際にデプロイされたリソースを比較して差異を特定</li>
-        <li>ECS コンテナ内での一時的なタスクやコマンドの実行</li>
-        <li>デプロイ前のリソース構成の検証</li>
-        <li>AWS CodeDeploy を通じたブルー/グリーンデプロイメントなどの高度なデプロイ戦略のサポート</li>
-      </ul>
+      <div class="toc">
+        <div class="toc-title">目次</div>
+        <ul>
+          <li><a href="#introduction">はじめに</a></li>
+          <li><a href="#key-features">主な機能</a></li>
+          <li><a href="#components">主要コンポーネント</a></li>
+          <li><a href="#latest-updates">最新アップデート</a></li>
+        </ul>
+      </div>
       
-      <h3>プロジェクト構成</h3>
-      <p>ecspresso は以下のコアシステムで構成されています：</p>
-      <ul>
-        <li><strong>CLI インターフェース</strong>: ユーザーコマンドのエントリーポイントとなり、基盤となる機能へのクリーンなインターフェースを提供します。</li>
-        <li><strong>設定管理</strong>: 設定ファイルの読み込み、解析、検証を処理します。</li>
-        <li><strong>デプロイ操作</strong>: サービスのデプロイ、ロールバック、更新を管理します。</li>
-        <li><strong>タスク操作</strong>: ECS タスクの実行、停止、コマンド実行を処理します。</li>
-        <li><strong>リソース検証</strong>: デプロイ前の AWS リソースを検証します。</li>
-        <li><strong>プラグインシステム</strong>: Terraform state、CloudFormation、SSM、Secrets Manager 用のプラグインを通じて機能を拡張します。</li>
-        <li><strong>AWS SDK 統合</strong>: AWS SDK for Go v2 を介して様々な AWS サービスと連携します。</li>
-      </ul>
+      <section id="introduction" class="section">
+        <h3>はじめに</h3>
+        <p>ecspressoは、Amazon ECS（Elastic Container Service）へのデプロイメントを簡素化および自動化するためのコマンドラインツールです。DevOpsエンジニア、SREチーム、AWSでコンテナ化されたアプリケーションを管理するクラウドエンジニアを対象としています。</p>
+        
+        <p>このツールは、Go言語で実装され、AWSのSDKを使用してECSサービスとの対話を行います。主要なロジックは<code>ecspresso.go</code>ファイルに定義された<code>App</code>構造体を中心に構築されています。</p>
+      </section>
       
-      <h3>最新アップデート (v2.5.0)</h3>
-      <p>最新バージョンには、以下の新機能と改善が含まれています：</p>
-      <ul>
-        <li>deploy --wait-until オプションの追加によるサービスデプロイの詳細な制御</li>
-        <li>機能拡張のための外部プラグインシステムの追加</li>
-        <li>CodeDeploy の設定に deployment_config_name の追加</li>
-        <li>ロガーを log/slog に切り替え</li>
-        <li>ログと出力の JSON フォーマットサポートの追加</li>
-        <li>コンテキスト化された状態による検証モジュールの改善</li>
-        <li>AppSpec の JSON サポートの追加</li>
-      </ul>
+      <section id="key-features" class="section">
+        <h3>主な機能</h3>
+        <ul>
+          <li>宣言的な設定ファイルを使用したECSサービスのデプロイ、スケーリング、ロールバック</li>
+          <li>ローカル設定とデプロイされたリソースの比較によるドリフト検出</li>
+          <li>ECSコンテナ内での一時的なタスクの実行とコマンド実行</li>
+          <li>デプロイ前のリソース構成の検証</li>
+          <li>AWS CodeDeployを介したブルー/グリーンデプロイメント戦略のサポート</li>
+        </ul>
+      </section>
       
-      <p>詳細については、<a href="changes.html">変更履歴</a>をご確認ください。</p>
+      <section id="components" class="section">
+        <h3>主要コンポーネント</h3>
+        <p>ecspressoは以下の主要コンポーネントで構成されています：</p>
+        
+        <div class="mermaid">
+          flowchart TD
+            A[App構造体] --> B[CLI]
+            A --> C[設定管理]
+            A --> D[デプロイ操作]
+            A --> E[タスク操作]
+            A --> F[リソース検証]
+            A --> G[差分比較]
+            A --> H[プラグインシステム]
+            C --> I[YAML/JSON/Jsonnet]
+            D --> J[ECSデプロイ]
+            D --> K[CodeDeployデプロイ]
+            E --> L[タスク実行]
+            E --> M[コンテナ内コマンド実行]
+            F --> N[IAM/ECS/ECR/VPC検証]
+            H --> O[tfstate]
+            H --> P[CloudFormation]
+            H --> Q[SSM]
+            H --> R[Secrets Manager]
+        </div>
+        
+        <ul>
+          <li><strong>App構造体</strong>：<code>ecspresso.go</code>で定義された中心的なオーケストレーター。AWS SDKクライアントと設定への参照を含み、すべての主要な操作を実装。</li>
+          <li><strong>CLI</strong>：<code>cli.go</code>でコマンドライン引数を解析し、適切なハンドラーにディスパッチ。</li>
+          <li><strong>設定管理</strong>：<code>config.go</code>で<code>ecspresso.yml</code>からの設定値を管理。</li>
+          <li><strong>デプロイ操作</strong>：<code>deploy.go</code>でECSサービスのデプロイロジックを実装。</li>
+          <li><strong>リソース検証</strong>：<code>verify.go</code>でリソースが正しく構成されていることを確認。</li>
+          <li><strong>差分比較</strong>：<code>diff.go</code>でローカル定義と実際のリソースの違いを表示。</li>
+          <li><strong>タスク管理</strong>：<code>tasks.go</code>および<code>run.go</code>でタスクの実行と管理を担当。</li>
+          <li><strong>プラグインシステム</strong>：<code>plugin.go</code>で機能拡張のための柔軟なプラグインシステムを提供。</li>
+        </ul>
+      </section>
+      
+      <section id="latest-updates" class="section">
+        <h3>最新アップデート</h3>
+        <p>ソースコード分析に基づく最新バージョン（v2.5.0）の主な機能と改善点：</p>
+        <ul>
+          <li><code>deploy --wait-until</code>オプションの追加による細かなサービスデプロイ制御</li>
+          <li>外部プラグインシステムの追加によるカスタム拡張の容易化</li>
+          <li>CodeDeployの設定に<code>deployment_config_name</code>オプションの追加</li>
+          <li>Goの標準ロガー<code>log/slog</code>への移行による改善されたログ機能</li>
+          <li>ログと出力のJSON形式サポートの追加によるプログラム的処理の強化</li>
+          <li>コンテキスト化された状態による検証モジュールの改善</li>
+        </ul>
+        
+        <p>詳細については、<a href="changes.html">変更履歴</a>をご確認ください。</p>
+      </section>
     </div>
   </div>
   

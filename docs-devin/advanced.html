@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced Features - ecspresso</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>ecspresso</h1>
+    <p>A deployment tool for Amazon ECS</p>
+  </header>
+  
+  <div class="container">
+    <div class="sidebar">
+      <nav>
+        <ul>
+          <li><a href="index.html">Overview</a></li>
+          <li><a href="installation.html">Installation</a></li>
+          <li><a href="usage.html">Usage</a></li>
+          <li><a href="configuration.html">Configuration</a></li>
+          <li><a href="commands.html">Commands</a></li>
+          <li><a href="advanced.html">Advanced Features</a></li>
+          <li><a href="plugins.html">Plugins</a></li>
+          <li><a href="changes.html">Change Log</a></li>
+        </ul>
+      </nav>
+    </div>
+    
+    <div class="content">
+      <h2>Advanced Features</h2>
+      
+      <h3>Version Constraint</h3>
+      <p><code>required_version</code> in the configuration file is for fixing the version of ecspresso.</p>
+      <pre><code>required_version: "&gt;= 2.0.0, &lt; 3"</code></pre>
+      <p>This allows ecspresso to execute if the version is greater than or equal to 2.0.0 and less than 3. If the version does not fall within this range, execution will fail.</p>
+      
+      <h3>Manage Application Auto Scaling</h3>
+      <p>For ECS services using Application Auto Scaling, adjusting the minimum and maximum auto-scaling settings with the <code>ecspresso scale</code> command is a breeze. Simply specify either <code>scale --auto-scaling-min</code> or <code>scale --auto-scaling-max</code> to modify the settings.</p>
+      <pre><code>$ ecspresso scale --tasks 5 --auto-scaling-min 5 --auto-scaling-max 20</code></pre>
+      
+      <p><code>ecspresso deploy</code> and <code>scale</code> can suspend and resume application auto scaling:</p>
+      <ul>
+        <li><code>--suspend-auto-scaling</code> sets suspended state to true.</li>
+        <li><code>--resume-auto-scaling</code> sets suspended state to false.</li>
+      </ul>
+      
+      <h3>Use Jsonnet instead of JSON and YAML</h3>
+      <p>ecspresso supports the <a href="https://jsonnet.org/">Jsonnet</a> file format.</p>
+      <ul>
+        <li>v1.7 and later: Jsonnet support for service and task definitions</li>
+        <li>v2.0 and later: Jsonnet support for the configuration file</li>
+        <li>v2.4 and later: supports Jsonnet functions</li>
+      </ul>
+      
+      <p>If a file has the <code>.jsonnet</code> extension, ecspresso will proceed in the following order:</p>
+      <ol>
+        <li>process it as Jsonnet</li>
+        <li>convert it to JSON</li>
+        <li>load it with evaluation template syntax.</li>
+      </ol>
+      
+      <h3>Jsonnet Functions</h3>
+      <p>v2.4 and later supports Jsonnet native functions in Jsonnet files.</p>
+      <p>In the .jsonnet file:</p>
+      <ol>
+        <li>Define <code>local func = std.native('func');</code></li>
+        <li>Use <code>func()</code></li>
+      </ol>
+      
+      <p>Jsonnet functions are evaluated when rendering Jsonnet files, which helps avoid conflicts with template syntax.</p>
+      
+      <h4><code>env</code>, <code>must_env</code></h4>
+      <pre><code>local env = std.native('env');
+local must_env = std.native('must_env');
+{
+  foo: env('FOO', 'default value'),
+  bar: must_env('BAR'),
+  bazNumber: std.parseInt(env('BAZ_NUMBER', '0')),
+  booBool: std.parseJson(env('BOO_BOOL', 'false')),
+}</code></pre>
+      
+      <h3>Deploy to Fargate</h3>
+      <p>When deploying services to Fargate, both task definitions and service definitions require specific settings.</p>
+      
+      <p>For task definitions:</p>
+      <ul>
+        <li>requiresCompatibilities (requires "FARGATE")</li>
+        <li>networkMode (requires "awsvpc")</li>
+        <li>cpu (required)</li>
+        <li>memory (required)</li>
+        <li>executionRoleArn (optional)</li>
+      </ul>
+      
+      <p>For service-definitions:</p>
+      <ul>
+        <li>launchType (requires "FARGATE")</li>
+        <li>networkConfiguration (requires "awsvpcConfiguration")</li>
+      </ul>
+      
+      <h3>ECS Service Connect Support</h3>
+      <p>ecspresso supports <a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect.html">ECS Service Connect</a>.</p>
+      <p>To configure, define <code>serviceConnectConfiguration</code> in service definitions and <code>portMappings</code> in task definitions.</p>
+      
+      <h3>EBS Volume Support</h3>
+      <p>ecspresso supports <a href="https://docs.aws.amazon.com/ja_jp/AmazonECS/latest/developerguide/ebs-volumes.html">Amazon EBS Volumes</a>.</p>
+      <p>To configure, define <code>volumeConfigurations</code> in service definitions, and <code>mountPoints</code> and <code>volumes</code> in task definitions.</p>
+      
+      <h3>VPC Lattice Support</h3>
+      <p>ecspresso supports <a href="https://aws.amazon.com/vpc/lattice/">VPC Lattice</a> integration.</p>
+      <p>Define <code>portMappings</code> in the task definition and <code>vpcLatticeConfigurations</code> in the service definition.</p>
+    </div>
+  </div>
+  
+  <footer class="footer">
+    <p>© KAYAC Inc. - <a href="https://github.com/kayac/ecspresso">GitHub Repository</a></p>
+  </footer>
+</body>
+</html>

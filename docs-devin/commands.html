@@ -1,39 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Commands - ecspresso</title>
+  <title>コマンド - ecspresso</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header>
     <h1>ecspresso</h1>
-    <p>A deployment tool for Amazon ECS</p>
+    <p>Amazon ECS 用デプロイメントツール</p>
   </header>
   
   <div class="container">
     <div class="sidebar">
       <nav>
         <ul>
-          <li><a href="index.html">Overview</a></li>
-          <li><a href="installation.html">Installation</a></li>
-          <li><a href="usage.html">Usage</a></li>
-          <li><a href="configuration.html">Configuration</a></li>
-          <li><a href="commands.html">Commands</a></li>
-          <li><a href="advanced.html">Advanced Features</a></li>
-          <li><a href="plugins.html">Plugins</a></li>
-          <li><a href="changes.html">Change Log</a></li>
+          <li><a href="index.html">概要</a></li>
+          <li><a href="installation.html">インストール</a></li>
+          <li><a href="usage.html">使い方</a></li>
+          <li><a href="configuration.html">設定</a></li>
+          <li><a href="commands.html">コマンド</a></li>
+          <li><a href="advanced.html">高度な機能</a></li>
+          <li><a href="plugins.html">プラグイン</a></li>
+          <li><a href="changes.html">変更履歴</a></li>
         </ul>
       </nav>
     </div>
     
     <div class="content">
-      <h2>Commands</h2>
+      <h2>コマンド</h2>
       
       <h3>Deploy</h3>
-      <p>The <code>deploy</code> command deploys an ECS service based on configuration files.</p>
-      <p>For rolling deployment:</p>
+      <p><code>deploy</code>コマンドは設定ファイルに基づいてECSサービスをデプロイします。</p>
+      <p>ローリングデプロイメントの場合：</p>
       <pre><code>$ ecspresso deploy --config ecspresso.yml
 2017/11/09 23:20:13 myService/default Starting deploy
 Service: myService
@@ -50,8 +50,8 @@ Events:
 2017/11/09 23:23:23 myService/default  PRIMARY myService:4 desired:1 pending:0 running:1
 2017/11/09 23:23:29 myService/default Service is stable now. Completed!</code></pre>
       
-      <p>For Blue/Green deployment (with AWS CodeDeploy):</p>
-      <p><code>ecspresso deploy</code> can deploy services using the CODE_DEPLOY deployment controller. Configure ecs-service-def.json as follows:</p>
+      <p>ブルー/グリーンデプロイメント（AWS CodeDeployを使用）の場合：</p>
+      <p><code>ecspresso deploy</code>はCODE_DEPLOYデプロイメントコントローラーを使用してサービスをデプロイできます。ecs-service-def.jsonを以下のように設定します：</p>
       <pre><code>{
   "deploymentController": {
     "type": "CODE_DEPLOY"
@@ -59,24 +59,24 @@ Events:
   // ...
 }</code></pre>
       
-      <p>Key options:</p>
+      <p>主なオプション：</p>
       <ul>
-        <li><code>--wait-until</code>: Specify until when to wait for deployment (stable or deployed)</li>
-        <li><code>--revision</code>: Specify a specific revision of the task definition</li>
-        <li><code>--latest-task-definition</code>: Use the latest revision of the task definition</li>
-        <li><code>--skip-task-definition</code>: Skip registering a new task definition</li>
-        <li><code>--force-new-deployment</code>: Force a new deployment even if the service definition and task definition are unchanged</li>
+        <li><code>--wait-until</code>: デプロイメントを待機する条件を指定（stableまたはdeployed）</li>
+        <li><code>--revision</code>: タスク定義の特定のリビジョンを指定</li>
+        <li><code>--latest-task-definition</code>: タスク定義の最新リビジョンを使用</li>
+        <li><code>--skip-task-definition</code>: 新しいタスク定義の登録をスキップ</li>
+        <li><code>--force-new-deployment</code>: サービス定義とタスク定義が変更されていなくても、新しいデプロイメントを強制</li>
       </ul>
       
       <h3>Diff</h3>
-      <p>Shows differences between local task/service definitions and remote (on ECS) definitions.</p>
+      <p>ローカルのタスク/サービス定義とリモート（ECS上）の定義の差分を表示します。</p>
       <pre><code>$ ecspresso diff
 --- arn:aws:ecs:ap-northeast-1:123456789012:service/ecspresso-test/nginx-local
 +++ ecs-service-def.json
 @@ -38,5 +38,5 @@
-   },
-   "placementConstraints": [],
-   "placementStrategy": [],
+ },
+ "placementConstraints": [],
+ "placementStrategy": [],
 -  "platformVersion": "1.3.0"
 +  "platformVersion": "LATEST"
  }
@@ -97,41 +97,41 @@ Events:
          "options": {</code></pre>
       
       <h3>Verify</h3>
-      <p>Verify resources related with service/task definitions.</p>
-      <p>For example it checks if:</p>
+      <p>サービス/タスク定義に関連するリソースを検証します。</p>
+      <p>例えば、以下を確認します：</p>
       <ul>
-        <li>An ECS cluster exists.</li>
-        <li>The target groups in service definitions match the container name and port defined in the definitions.</li>
-        <li>A task role and a task execution role exist and can be assumed by ecs-tasks.amazonaws.com.</li>
-        <li>Container images exist at the URL defined in task definitions. (Checks only for ECR or DockerHub public images.)</li>
-        <li>Secrets in task definitions exist and are readable.</li>
-        <li>Log streams can be created and messages can be put into the specified CloudWatch log groups streams.</li>
+        <li>ECSクラスターが存在するか。</li>
+        <li>サービス定義内のターゲットグループが、定義内のコンテナ名とポートと一致するか。</li>
+        <li>タスクロールとタスク実行ロールが存在し、ecs-tasks.amazonaws.comによって引き受けられるか。</li>
+        <li>タスク定義で定義されたURLにコンテナイメージが存在するか。（ECRまたはDockerHub公開イメージのみチェック。）</li>
+        <li>タスク定義内のシークレットが存在し、読み取り可能か。</li>
+        <li>指定されたCloudWatchロググループストリームにログストリームを作成し、メッセージを送信できるか。</li>
       </ul>
       
       <h3>Run</h3>
-      <p>Run a one-off task using the task definition.</p>
+      <p>タスク定義を使用して一時的なタスクを実行します。</p>
       <pre><code>$ ecspresso run --config ecspresso.yml --task-def=db-migrate.json</code></pre>
-      <p>If <code>--task-def</code> is not set, ecspresso will use the task definition included in the service.</p>
+      <p><code>--task-def</code>が設定されていない場合、ecspressoはサービスに含まれるタスク定義を使用します。</p>
       
       <h3>Scale</h3>
-      <p>Change the desired count of a service.</p>
+      <p>サービスの希望するカウント数を変更します。</p>
       <pre><code>$ ecspresso scale --tasks 10</code></pre>
-      <p><code>scale</code> command is equivalent to <code>deploy --skip-task-definition --no-update-service</code>.</p>
+      <p><code>scale</code>コマンドは<code>deploy --skip-task-definition --no-update-service</code>と同等です。</p>
       
       <h3>Tasks</h3>
-      <p>List tasks run by a service or having the same family to a task definition.</p>
+      <p>サービスによって実行されるタスク、またはタスク定義と同じファミリーを持つタスクを一覧表示します。</p>
       <pre><code>$ ECSPRESSO_FILTER_COMMAND=peco ecspresso tasks --find</code></pre>
       
       <h3>Exec</h3>
-      <p>Execute a command on a task.</p>
+      <p>タスク上でコマンドを実行します。</p>
       <pre><code>$ ecspresso exec --port-forward --port 80 --local-port 8080</code></pre>
       
-      <p>For more details on each command, see <code>ecspresso command --help</code>.</p>
+      <p>各コマンドの詳細については、<code>ecspresso command --help</code>を参照してください。</p>
     </div>
   </div>
   
   <footer class="footer">
-    <p>© KAYAC Inc. - <a href="https://github.com/kayac/ecspresso">GitHub Repository</a></p>
+    <p>© KAYAC Inc. - <a href="https://github.com/kayac/ecspresso">GitHub リポジトリ</a></p>
   </footer>
 </body>
 </html>

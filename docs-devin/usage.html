@@ -1,145 +1,142 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Usage - ecspresso</title>
+  <title>使い方 - ecspresso</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header>
     <h1>ecspresso</h1>
-    <p>A deployment tool for Amazon ECS</p>
+    <p>Amazon ECS 用デプロイメントツール</p>
   </header>
   
   <div class="container">
     <div class="sidebar">
       <nav>
         <ul>
-          <li><a href="index.html">Overview</a></li>
-          <li><a href="installation.html">Installation</a></li>
-          <li><a href="usage.html">Usage</a></li>
-          <li><a href="configuration.html">Configuration</a></li>
-          <li><a href="commands.html">Commands</a></li>
-          <li><a href="advanced.html">Advanced Features</a></li>
-          <li><a href="plugins.html">Plugins</a></li>
-          <li><a href="changes.html">Change Log</a></li>
+          <li><a href="index.html">概要</a></li>
+          <li><a href="installation.html">インストール</a></li>
+          <li><a href="usage.html">使い方</a></li>
+          <li><a href="configuration.html">設定</a></li>
+          <li><a href="commands.html">コマンド</a></li>
+          <li><a href="advanced.html">高度な機能</a></li>
+          <li><a href="plugins.html">プラグイン</a></li>
+          <li><a href="changes.html">変更履歴</a></li>
         </ul>
       </nav>
     </div>
     
     <div class="content">
-      <h2>Usage</h2>
+      <h2>使い方</h2>
       
-      <h3>Basic Usage</h3>
+      <h3>基本的な使い方</h3>
       <pre><code>Usage: ecspresso &lt;command&gt;
 
 Flags:
-  -h, --help                      Show context-sensitive help.
-      --envfile=ENVFILE,...       environment files ($ECSPRESSO_ENVFILE)
-      --debug                     enable debug log ($ECSPRESSO_DEBUG)
-      --ext-str=KEY=VALUE;...     external string values for Jsonnet ($ECSPRESSO_EXT_STR)
-      --ext-code=KEY=VALUE;...    external code values for Jsonnet ($ECSPRESSO_EXT_CODE)
-      --config="ecspresso.yml"    config file ($ECSPRESSO_CONFIG)
-      --assume-role-arn=""        the ARN of the role to assume ($ECSPRESSO_ASSUME_ROLE_ARN)
-      --timeout=TIMEOUT           timeout. Override in a configuration file ($ECSPRESSO_TIMEOUT).
-      --filter-command=STRING     filter command ($ECSPRESSO_FILTER_COMMAND)
-      --[no-]color                enable colorized output ($ECSPRESSO_COLOR)
+  -h, --help                      ヘルプを表示します
+      --envfile=ENVFILE,...       環境変数ファイル ($ECSPRESSO_ENVFILE)
+      --debug                     デバッグログを有効にします ($ECSPRESSO_DEBUG)
+      --ext-str=KEY=VALUE;...     Jsonnet 用の外部文字列値 ($ECSPRESSO_EXT_STR)
+      --ext-code=KEY=VALUE;...    Jsonnet 用の外部コード値 ($ECSPRESSO_EXT_CODE)
+      --config="ecspresso.yml"    設定ファイル ($ECSPRESSO_CONFIG)
+      --assume-role-arn=""        引き受ける IAM ロールの ARN ($ECSPRESSO_ASSUME_ROLE_ARN)
+      --timeout=TIMEOUT           タイムアウト。設定ファイルで上書き可能 ($ECSPRESSO_TIMEOUT)
+      --filter-command=STRING     フィルターコマンド ($ECSPRESSO_FILTER_COMMAND)
+      --[no-]color                カラー出力を有効/無効にします ($ECSPRESSO_COLOR)
 
 Commands:
   appspec
-    output AppSpec YAML for CodeDeploy to STDOUT
+    CodeDeploy 用の AppSpec YAML を標準出力に出力します
 
   delete
-    delete service
+    サービスを削除します
 
   deploy
-    deploy service
+    サービスをデプロイします
 
   deregister
-    deregister task definition
+    タスク定義を登録解除します
 
   diff
-    show diff between task definition, service definition with current running
-    service and task definition
+    タスク定義、サービス定義と現在実行中のサービスおよびタスク定義との差分を表示します
 
   exec
-    execute command on task
+    タスク上でコマンドを実行します
 
   init --service=SERVICE
-    create configuration files from existing ECS service
+    既存の ECS サービスから設定ファイルを作成します
 
   refresh
-    refresh service. equivalent to deploy --skip-task-definition
-    --force-new-deployment --no-update-service
+    サービスを更新します。deploy --skip-task-definition --force-new-deployment --no-update-service と同等です
 
   register
-    register task definition
+    タスク定義を登録します
 
   render &lt;targets&gt;
-    render config, service definition or task definition file to STDOUT
+    設定、サービス定義またはタスク定義ファイルを標準出力にレンダリングします
 
   revisions
-    show revisions of task definitions
+    タスク定義のリビジョンを表示します
 
   rollback
-    rollback service
+    サービスをロールバックします
 
   run
-    run task
+    タスクを実行します
 
   scale
-    scale service. equivalent to deploy --skip-task-definition
-    --no-update-service
+    サービスをスケールします。deploy --skip-task-definition --no-update-service と同等です
 
   status
-    show status of service
+    サービスのステータスを表示します
 
   tasks
-    list tasks that are in a service or having the same family
+    サービス内またはタスク定義と同じファミリーを持つタスクを一覧表示します
 
   verify
-    verify resources in configurations
+    設定内のリソースを検証します
 
   wait
-    wait until service stable
+    サービスが安定するまで待機します
 
   version
-    show version</code></pre>
+    バージョンを表示します</code></pre>
       
-      <p>For more options for sub-commands, See <code>ecspresso sub-command --help</code>.</p>
+      <p>サブコマンドのより詳細なオプションについては、<code>ecspresso sub-command --help</code>を参照してください。</p>
       
-      <h3>Quick Start</h3>
-      <p>ecspresso allows you to easily manage your existing/running ECS services by code.</p>
-      <p>Try <code>ecspresso init</code> for your ECS service with option <code>--region</code>, <code>--cluster</code> and <code>--service</code>:</p>
+      <h3>クイックスタート</h3>
+      <p>ecspressoを使用すると、既存/実行中のECSサービスをコードで簡単に管理できます。</p>
+      <p>ECSサービスに対して<code>--region</code>、<code>--cluster</code>、<code>--service</code>オプションを指定して<code>ecspresso init</code>を試してみてください：</p>
       
       <pre><code>$ ecspresso init --region ap-northeast-1 --cluster default --service myservice --config ecspresso.yml
 2019/10/12 01:31:48 myservice/default save service definition to ecs-service-def.json
 2019/10/12 01:31:48 myservice/default save task definition to ecs-task-def.json
 2019/10/12 01:31:48 myservice/default save config to ecspresso.yml</code></pre>
       
-      <p>Review the generated files: <code>ecspresso.yml</code>, <code>ecs-service-def.json</code>, and <code>ecs-task-def.json</code>.</p>
+      <p>生成されたファイル（<code>ecspresso.yml</code>、<code>ecs-service-def.json</code>、<code>ecs-task-def.json</code>）を確認してください。</p>
       
-      <p>Now you can deploy the service using ecspresso!</p>
+      <p>これでecspressoを使用してサービスをデプロイできます！</p>
       
       <pre><code>$ ecspresso deploy --config ecspresso.yml</code></pre>
       
-      <h3>Next step</h3>
-      <p>ecspresso can read service and task definition files as a template. A typical use case is to replace the image's tag in the task definition file.</p>
+      <h3>次のステップ</h3>
+      <p>ecspressoはサービスとタスク定義ファイルをテンプレートとして読み込むことができます。典型的な使用例はタスク定義ファイル内のイメージタグを置き換えることです。</p>
       
-      <p>Modify ecs-task-def.json as below:</p>
+      <p>ecs-task-def.json を以下のように変更します：</p>
       
       <pre><code>-  "image": "nginx:latest",
 +  "image": "nginx:{{ must_env `IMAGE_TAG` }}",</code></pre>
       
-      <p>Then, deploy the service with environment variable <code>IMAGE_TAG</code>:</p>
+      <p>次に、環境変数<code>IMAGE_TAG</code>を指定してサービスをデプロイします：</p>
       
       <pre><code>$ IMAGE_TAG=stable ecspresso deploy --config ecspresso.yml</code></pre>
     </div>
   </div>
   
   <footer class="footer">
-    <p>© KAYAC Inc. - <a href="https://github.com/kayac/ecspresso">GitHub Repository</a></p>
+    <p>© KAYAC Inc. - <a href="https://github.com/kayac/ecspresso">GitHub リポジトリ</a></p>
   </footer>
 </body>
 </html>

@@ -1,128 +1,128 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Change Log - ecspresso</title>
+  <title>変更履歴 - ecspresso</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header>
     <h1>ecspresso</h1>
-    <p>A deployment tool for Amazon ECS</p>
+    <p>Amazon ECS 用デプロイメントツール</p>
   </header>
   
   <div class="container">
     <div class="sidebar">
       <nav>
         <ul>
-          <li><a href="index.html">Overview</a></li>
-          <li><a href="installation.html">Installation</a></li>
-          <li><a href="usage.html">Usage</a></li>
-          <li><a href="configuration.html">Configuration</a></li>
-          <li><a href="commands.html">Commands</a></li>
-          <li><a href="advanced.html">Advanced Features</a></li>
-          <li><a href="plugins.html">Plugins</a></li>
-          <li><a href="changes.html">Change Log</a></li>
+          <li><a href="index.html">概要</a></li>
+          <li><a href="installation.html">インストール</a></li>
+          <li><a href="usage.html">使い方</a></li>
+          <li><a href="configuration.html">設定</a></li>
+          <li><a href="commands.html">コマンド</a></li>
+          <li><a href="advanced.html">高度な機能</a></li>
+          <li><a href="plugins.html">プラグイン</a></li>
+          <li><a href="changes.html">変更履歴</a></li>
         </ul>
       </nav>
     </div>
     
     <div class="content">
-      <h2>Change Log</h2>
+      <h2>変更履歴</h2>
       
       <h3>v2.5.0 (2025-05-10)</h3>
       <ul>
-        <li>Pin external actions to mitigate supply chain attacks</li>
-        <li>Bump github.com/golang-jwt/jwt/v4 from 4.5.1 to 4.5.2</li>
-        <li>Bump github.com/golang-jwt/jwt/v5 from 5.2.1 to 5.2.2</li>
-        <li>Bump golang.org/x/crypto from 0.32.0 to 0.35.0</li>
-        <li>Feature Request: new option: wait for Service Deployment, not for Service Stable</li>
-        <li>Add deploy --wait-until option</li>
-        <li>set WaitUntil for internal use</li>
-        <li>Bump the aws-sdk-go-v2 group across 1 directory with 16 updates</li>
-        <li>Add external plugin</li>
-        <li>Add deployment_config_name to config of CodeDeploy</li>
-        <li>switch a logger to log/slog</li>
-        <li>Add JSON format support for logs and outputs</li>
-        <li>replace time.Sleep with sleepContext for handling context cancellation</li>
-        <li>refactor: improve verify module to use contextualized state</li>
-        <li>feat: add JSON support for AppSpec</li>
+        <li>サプライチェーン攻撃を軽減するために外部アクションをピン留め</li>
+        <li>github.com/golang-jwt/jwt/v4 を 4.5.1 から 4.5.2 にアップデート</li>
+        <li>github.com/golang-jwt/jwt/v5 を 5.2.1 から 5.2.2 にアップデート</li>
+        <li>golang.org/x/crypto を 0.32.0 から 0.35.0 にアップデート</li>
+        <li>機能リクエスト: 新しいオプション: サービスの安定を待つのではなく、サービスのデプロイメントを待つ</li>
+        <li>deploy --wait-until オプションを追加</li>
+        <li>内部使用のために WaitUntil を設定</li>
+        <li>16のアップデートを含む1つのディレクトリ全体で aws-sdk-go-v2 グループをアップデート</li>
+        <li>外部プラグインを追加</li>
+        <li>CodeDeploy の設定に deployment_config_name を追加</li>
+        <li>ロガーを log/slog に切り替え</li>
+        <li>ログと出力の JSON フォーマットサポートを追加</li>
+        <li>コンテキストのキャンセル処理のために time.Sleep を sleepContext に置き換え</li>
+        <li>リファクタリング: コンテキスト化された状態を使用して検証モジュールを改善</li>
+        <li>機能: AppSpec の JSON サポートを追加</li>
       </ul>
       
       <h3>v2.4.6 (2025-03-01)</h3>
       <ul>
-        <li>Bump golang.org/x/crypto from 0.24.0 to 0.31.0</li>
-        <li>update golang.org/x/net v0.34.0</li>
-        <li>Bump github.com/fujiwara/tfstate-lookup from 1.3.2 to 1.4.2</li>
-        <li>Bump the aws-sdk-go-v2 group across 1 directory with 16 updates</li>
-        <li>use hosted arm runner</li>
-        <li>Bump github.com/hashicorp/go-slug from 0.15.0 to 0.16.3</li>
-        <li>update modules</li>
-        <li>fix nightly build</li>
-        <li>fix: add support for AWS China ECR URLs</li>
-        <li>test: add test case for AWS China ECR image</li>
-        <li>remove healthCheckGracePeriodSeconds validation</li>
-        <li>use Songmu/tagpr for release management</li>
+        <li>golang.org/x/crypto を 0.24.0 から 0.31.0 にアップデート</li>
+        <li>golang.org/x/net を v0.34.0 にアップデート</li>
+        <li>github.com/fujiwara/tfstate-lookup を 1.3.2 から 1.4.2 にアップデート</li>
+        <li>16のアップデートを含む1つのディレクトリ全体で aws-sdk-go-v2 グループをアップデート</li>
+        <li>ホスト型 arm ランナーを使用</li>
+        <li>github.com/hashicorp/go-slug を 0.15.0 から 0.16.3 にアップデート</li>
+        <li>モジュールを更新</li>
+        <li>ナイトリービルドを修正</li>
+        <li>修正: AWS China ECR URL のサポートを追加</li>
+        <li>テスト: AWS China ECR イメージのテストケースを追加</li>
+        <li>healthCheckGracePeriodSeconds の検証を削除</li>
+        <li>リリース管理に Songmu/tagpr を使用</li>
       </ul>
       
       <h3>v2.4.5 (2024-12-09)</h3>
       <ul>
-        <li>Update aws-sdk-go-v2/service/ecs to v1.51.0 and go mod tidy</li>
-        <li>Supports AvailabilityZoneRebalancing</li>
+        <li>aws-sdk-go-v2/service/ecs を v1.51.0 にアップデートし、go mod tidy を実行</li>
+        <li>AvailabilityZoneRebalancing をサポート</li>
       </ul>
       
       <h3>v2.4.4 (2024-11-19)</h3>
       <ul>
-        <li>Supports VPC Lattice integration</li>
+        <li>VPC Lattice 統合をサポート</li>
       </ul>
       
       <h3>v2.4.3 (2024-11-06)</h3>
       <ul>
-        <li>fix panic on run --dry-run</li>
-        <li>Bump github.com/golang-jwt/jwt/v4 from 4.5.0 to 4.5.1</li>
-        <li>fix null pointer exception</li>
+        <li>run --dry-run でのパニックを修正</li>
+        <li>github.com/golang-jwt/jwt/v4 を 4.5.0 から 4.5.1 にアップデート</li>
+        <li>null ポインタ例外を修正</li>
       </ul>
       
       <h3>v2.4.2 (2024-10-21)</h3>
       <ul>
-        <li>returns error if --watch-container is not found</li>
-        <li>Bump github.com/aws/aws-sdk-go-v2/service/ecs to v1.47.4</li>
+        <li>--watch-container が見つからない場合にエラーを返す</li>
+        <li>github.com/aws/aws-sdk-go-v2/service/ecs を v1.47.4 にアップデート</li>
       </ul>
       
       <h3>v2.4.1 (2024-08-30)</h3>
       <ul>
-        <li>Fix typo: <code>task</code> -&gt; <code>tasks</code></li>
-        <li>fix resolving name of service connect namespace</li>
+        <li>タイプミスを修正: <code>task</code> -&gt; <code>tasks</code></li>
+        <li>service connect 名前空間の名前解決を修正</li>
       </ul>
       
       <h3>v2.4.0 (2024-08-06)</h3>
       <ul>
-        <li>Bump github.com/aws/smithy-go from 1.20.2 to 1.20.3</li>
-        <li>Add Jsonnet native functions</li>
-        <li>run --revision and --latest-task-definition are exclusive</li>
-        <li>remove fallback to ssm.GetParmater API</li>
-        <li>bump versions</li>
-        <li>add disables colorized output option</li>
-        <li>adds test for #718</li>
-        <li>Add diff --external. Runs external diff command</li>
-        <li>Add ignore.tags into a configuration</li>
-        <li>Fix/retry registry</li>
-        <li>Clarify README</li>
-        <li>Exit non-zero status when deployment is rolled back</li>
-        <li>Bump the aws-sdk-go-v2 group across 1 directory with 15 updates</li>
-        <li>Bump github.com/schollz/progressbar/v3 from 3.13.1 to 3.14.6</li>
-        <li>Bump github.com/goccy/go-yaml from 1.9.5 to 1.12.0</li>
-        <li>Bump github.com/opencontainers/image-spec from 1.0.2 to 1.1.0</li>
-        <li>Bump github.com/kayac/go-config from 0.6.0 to 0.7.0</li>
+        <li>github.com/aws/smithy-go を 1.20.2 から 1.20.3 にアップデート</li>
+        <li>Jsonnet ネイティブ関数を追加</li>
+        <li>run --revision と --latest-task-definition は排他的</li>
+        <li>ssm.GetParmater API へのフォールバックを削除</li>
+        <li>バージョンをアップデート</li>
+        <li>カラー出力を無効にするオプションを追加</li>
+        <li>#718 のテストを追加</li>
+        <li>diff --external を追加。外部 diff コマンドを実行</li>
+        <li>設定に ignore.tags を追加</li>
+        <li>レジストリの再試行を修正</li>
+        <li>README を明確化</li>
+        <li>デプロイメントがロールバックされた場合に非ゼロステータスで終了</li>
+        <li>16のアップデートを含む1つのディレクトリ全体で aws-sdk-go-v2 グループをアップデート</li>
+        <li>github.com/schollz/progressbar/v3 を 3.13.1 から 3.14.6 にアップデート</li>
+        <li>github.com/goccy/go-yaml を 1.9.5 から 1.12.0 にアップデート</li>
+        <li>github.com/opencontainers/image-spec を 1.0.2 から 1.1.0 にアップデート</li>
+        <li>github.com/kayac/go-config を 0.6.0 から 0.7.0 にアップデート</li>
       </ul>
       
-      <p>For older versions, see the <a href="https://github.com/kayac/ecspresso/blob/v2/CHANGELOG.md">full changelog on GitHub</a>.</p>
+      <p>古いバージョンについては、<a href="https://github.com/kayac/ecspresso/blob/v2/CHANGELOG.md">GitHub の完全な変更履歴</a>を参照してください。</p>
     </div>
   </div>
   
   <footer class="footer">
-    <p>© KAYAC Inc. - <a href="https://github.com/kayac/ecspresso">GitHub Repository</a></p>
+    <p>© KAYAC Inc. - <a href="https://github.com/kayac/ecspresso">GitHub リポジトリ</a></p>
   </footer>
 </body>
 </html>

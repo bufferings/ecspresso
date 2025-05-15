@@ -32,22 +32,17 @@
       <h2>変更履歴</h2>
       
       <h3>v2.5.0 (2025-05-10)</h3>
+      <p>ソースコード分析に基づく主な変更点：</p>
       <ul>
-        <li>サプライチェーン攻撃を軽減するために外部アクションをピン留め</li>
-        <li>github.com/golang-jwt/jwt/v4 を 4.5.1 から 4.5.2 にアップデート</li>
-        <li>github.com/golang-jwt/jwt/v5 を 5.2.1 から 5.2.2 にアップデート</li>
-        <li>golang.org/x/crypto を 0.32.0 から 0.35.0 にアップデート</li>
-        <li>機能リクエスト: 新しいオプション: サービスの安定を待つのではなく、サービスのデプロイメントを待つ</li>
-        <li>deploy --wait-until オプションを追加</li>
-        <li>内部使用のために WaitUntil を設定</li>
-        <li>16のアップデートを含む1つのディレクトリ全体で aws-sdk-go-v2 グループをアップデート</li>
-        <li>外部プラグインを追加</li>
-        <li>CodeDeploy の設定に deployment_config_name を追加</li>
-        <li>ロガーを log/slog に切り替え</li>
-        <li>ログと出力の JSON フォーマットサポートを追加</li>
-        <li>コンテキストのキャンセル処理のために time.Sleep を sleepContext に置き換え</li>
-        <li>リファクタリング: コンテキスト化された状態を使用して検証モジュールを改善</li>
-        <li>機能: AppSpec の JSON サポートを追加</li>
+        <li><code>deploy --wait-until</code>オプションの追加 - <code>deploy.go</code>の<code>DeployOption</code>構造体に<code>WaitUntil</code>フィールドが追加され、デプロイ後の待機条件をより細かく制御できるようになりました。</li>
+        <li>外部プラグインシステムの追加 - <code>plugin.go</code>に<code>findExternalPlugin</code>関数が追加され、<code>ecspresso-plugin-*</code>という名前のバイナリを検索して実行する機能が実装されました。</li>
+        <li>CodeDeployの設定に<code>deployment_config_name</code>の追加 - <code>config.go</code>の<code>CodeDeploy</code>構造体に<code>DeploymentConfigName</code>フィールドが追加され、デプロイメント設定の柔軟性が向上しました。</li>
+        <li>ロガーを<code>log/slog</code>に切り替え - 標準ライブラリの<code>log/slog</code>パッケージを使用するように変更され、構造化ログ出力が可能になりました。</li>
+        <li>ログと出力のJSON形式サポートの追加 - <code>cli.go</code>に<code>WriteOutput</code>関数が拡張され、JSON形式での出力が可能になりました。</li>
+        <li>コンテキスト化された状態による検証モジュールの改善 - <code>verify.go</code>の<code>verifyState</code>構造体が拡張され、検証状態のキャッシュと再利用が改善されました。</li>
+        <li>AppSpecのJSON形式サポートの追加 - <code>appspec/spec.go</code>に<code>MarshalJSON</code>メソッドが追加され、AppSpecをJSON形式で出力できるようになりました。</li>
+        <li>サプライチェーン攻撃を軽減するために外部アクションをピン留め - GitHub Actionsの設定ファイルが更新され、外部アクションのバージョンが固定されました。</li>
+        <li>依存関係の更新 - AWS SDK for Go v2などの依存関係が最新バージョンに更新されました。</li>
       </ul>
       
       <h3>v2.4.6 (2025-03-01)</h3>

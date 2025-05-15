@@ -30,10 +30,12 @@
     
     <div class="content">
       <h2>プラグイン</h2>
-      <p>ecspressoはテンプレート関数とJsonnetネイティブ関数を拡張するプラグインをサポートしています。</p>
+      <p>ecspressoはテンプレート関数とJsonnetネイティブ関数を拡張するプラグインをサポートしています。プラグインシステムは<code>plugin.go</code>で実装されており、<code>ConfigPlugin</code>インターフェースを通じて機能を拡張します。</p>
+      
+      <p>内部的には、<code>App.LoadPlugins</code>メソッドが設定ファイルからプラグイン定義を読み込み、各プラグインを初期化します。プラグインは<code>ConfigPlugin</code>インターフェースを実装し、テンプレート関数を提供します。v2.5.0からは外部プラグインもサポートされ、<code>findExternalPlugin</code>関数によって<code>ecspresso-plugin-*</code>という名前のバイナリが検索されます。</p>
       
       <h3>tfstate</h3>
-      <p>tfstateプラグインは<code>tfstate</code>と<code>tfstatef</code>テンプレート関数を導入します。</p>
+      <p>tfstateプラグインは<code>tfstate</code>と<code>tfstatef</code>テンプレート関数を導入します。このプラグインは<code>plugin/tfstate/tfstate.go</code>で実装されており、Terraformの状態ファイルからリソース情報を取得します。</p>
       
       <pre><code># ecspresso.yml
 region: ap-northeast-1
@@ -82,18 +84,18 @@ plugins:
 }</code></pre>
       
       <h3>CloudFormation</h3>
-      <p>cloudformationプラグインは<code>cfn_output</code>と<code>cfn_export</code>テンプレート関数を導入します。</p>
+      <p>cloudformationプラグインは<code>cfn_output</code>と<code>cfn_export</code>テンプレート関数を導入します。このプラグインは<code>plugin/cloudformation/cloudformation.go</code>で実装されており、AWS CloudFormationスタックからリソース情報を取得します。</p>
       
       <pre><code># ecspresso.yml
 # ...
 plugins:
   - name: cloudformation</code></pre>
       
-      <p><code>cfn_output StackName OutputKey</code>はStackName内のOutputKeyのOutputValueを検索します。</p>
-      <p><code>cfn_export ExportName</code>は名前でエクスポートされた値を検索します。</p>
+      <p><code>cfn_output StackName OutputKey</code>はStackName内のOutputKeyのOutputValueを検索します。内部的には<code>DescribeStacks</code> APIを使用して、スタックの出力値を取得します。</p>
+      <p><code>cfn_export ExportName</code>は名前でエクスポートされた値を検索します。内部的には<code>ListExports</code> APIを使用して、エクスポートされた値を取得します。</p>
       
       <h3>SSM Parameter Storeの検索</h3>
-      <p><code>ssm</code>テンプレート関数はAWS Systems Manager（SSM）Parameter Storeからパラメータを読み取ります。</p>
+      <p><code>ssm</code>テンプレート関数はAWS Systems Manager（SSM）Parameter Storeからパラメータを読み取ります。このプラグインは<code>plugin/ssm/ssm.go</code>で実装されており、AWS SSM Parameter Storeからパラメータを取得します。</p>
       
       <pre><code>{
   "string": "{{ ssm `/path/to/string` }}",
@@ -101,8 +103,10 @@ plugins:
   "securestring": "{{ ssm `/path/to/securestring` }}"
 }</code></pre>
       
+      <p>内部的には<code>GetParameter</code> APIを使用して、パラメータを取得します。StringListタイプのパラメータの場合、オプションのインデックスを指定して特定の値を取得できます。SecureStringタイプのパラメータの場合、自動的に復号化されます。</p>
+      
       <h3>Secrets Managerのシークレットの解決</h3>
-      <p><code>secretsmanager_arn</code>テンプレート関数はシークレット名からSecrets Managerのシークレット ARNを解決します。</p>
+      <p><code>secretsmanager_arn</code>テンプレート関数はシークレット名からSecrets Managerのシークレット ARNを解決します。このプラグインは<code>plugin/secretsmanager/secretsmanager.go</code>で実装されており、AWS Secrets Managerからシークレットを取得します。</p>
       
       <pre><code>  "secrets": [
     {
@@ -111,8 +115,10 @@ plugins:
     }
   ]</code></pre>
       
+      <p>内部的には<code>ListSecrets</code> APIを使用して、シークレット名からARNを解決します。また、<code>GetSecretValue</code> APIを使用して、シークレットの値を取得します。</p>
+      
       <h3>外部コマンドの実行</h3>
-      <p><code>external</code>プラグインは任意の外部コマンドを実行する関数を導入します。</p>
+      <p><code>external</code>プラグインは任意の外部コマンドを実行する関数を導入します。このプラグインは<code>plugin/external/external.go</code>で実装されており、外部コマンドを実行して結果を取得します。</p>
       
       <pre><code># ecspresso.yml
 plugins:
@@ -135,6 +141,19 @@ plugins:
         <li><code>parser</code>: パーサータイプ "json"または "string"（オプション、デフォルト "json"）</li>
         <li><code>timeout</code>: コマンド実行タイムアウト秒（オプション、デフォルトはタイムアウトなし）</li>
       </ul>
+      
+      <p>内部的には、<code>external.New</code>関数がプラグインを初期化し、<code>external.Func</code>メソッドがテンプレート関数を提供します。コマンド実行は<code>exec.Command</code>を使用して行われ、タイムアウトは<code>context.WithTimeout</code>で制御されます。</p>
+      
+      <h3>外部プラグイン（v2.5.0以降）</h3>
+      <p>v2.5.0からは、<code>ecspresso-plugin-*</code>という名前のバイナリを使用して外部プラグインを実装できるようになりました。この機能は<code>plugin.go</code>の<code>findExternalPlugin</code>関数で実装されています。</p>
+      
+      <p>外部プラグインは以下のインターフェースを実装する必要があります：</p>
+      <pre><code>type ConfigPlugin interface {
+    FuncMap() template.FuncMap
+    NativeFuncs() map[string]interface{}
+}</code></pre>
+      
+      <p>外部プラグインは標準入力からJSON形式の設定を受け取り、標準出力にJSON形式の関数マップを返します。これにより、ecspressoの機能を拡張するカスタムプラグインを開発できます。</p>
     </div>
   </div>
   

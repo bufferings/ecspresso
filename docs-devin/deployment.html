@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>デプロイメント管理 - ecspresso</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'default',
+        securityLevel: 'loose'
+      });
+    });
+  </script>
+</head>
+<body>
+  <header>
+    <h1>ecspresso</h1>
+    <p>Amazon ECS 用デプロイメントツール</p>
+    <p><em>(「エスプレッソ」と同じ発音です ☕)</em></p>
+  </header>
+  
+  <div class="container">
+    <div class="sidebar">
+      <nav>
+        <ul>
+          <li><a href="index.html">概要</a></li>
+          <li><a href="installation.html">インストール</a></li>
+          <li><a href="usage.html">使い方</a></li>
+          <li><a href="configuration.html">設定</a></li>
+          <li><a href="commands.html">コマンド</a></li>
+          <li><a href="advanced.html">高度な機能</a></li>
+          <li><a href="plugins.html">プラグイン</a></li>
+          <li><a href="changes.html">変更履歴</a></li>
+        </ul>
+      </nav>
+    </div>
+    
+    <div class="content">
+      <h2>3.1 デプロイメント管理</h2>
+      
+      <div class="toc">
+        <div class="toc-title">目次</div>
+        <ul>
+          <li><a href="#deploy-implementation">デプロイの実装</a></li>
+          <li><a href="#deploy-strategies">デプロイ戦略</a></li>
+          <li><a href="#deploy-options">デプロイオプション</a></li>
+          <li><a href="#deploy-process">デプロイプロセス</a></li>
+          <li><a href="#rollback">ロールバック機能</a></li>
+        </ul>
+      </div>
+      
+      <section id="deploy-implementation" class="section">
+        <h3>デプロイの実装</h3>
+        <p>ecspressoのデプロイ機能は<code>deploy.go</code>ファイルに実装されています。中心となるのは<code>App</code>構造体の<code>Deploy</code>メソッドで、以下のような処理を行います：</p>
+        
+        <pre><code>func (d *App) Deploy(ctx context.Context, opt DeployOption) error {
+	ctx, cancel := d.Start(ctx)
+	defer cancel()
+	
+	// 設定の読み込みと検証
+	// タスク定義の登録（オプションによる）
+	// デプロイ戦略の選択（ECSまたはCodeDeploy）
+	// デプロイの実行
+	// サービスの安定性待機（オプションによる）
+	
+	return nil
+}</code></pre>
+        
+        <p>デプロイ処理は、選択されたデプロイ戦略に基づいて実行されます。ECSローリングデプロイとCodeDeployブルー/グリーンデプロイの2つの戦略がサポートされています。</p>
+      </section>
+      
+      <section id="deploy-strategies" class="section">
+        <h3>デプロイ戦略</h3>
+        <p>ecspressoは以下の2つのデプロイ戦略をサポートしています：</p>
+        
+        <div class="mermaid">
+          flowchart LR
+            Deploy[デプロイ] --> Strategy{戦略}
+            Strategy -->|ECS| ECS[ECSローリングデプロイ]
+            Strategy -->|CodeDeploy| CD[CodeDeployブルー/グリーン]
+            ECS --> Rolling[ローリングアップデート]
+            CD --> BlueGreen[ブルー/グリーンデプロイ]
+        </div>
+        
+        <h4>ECSローリングデプロイ</h4>
+        <p>ECSローリングデプロイは、タスクを徐々に置き換えていく戦略です。この戦略は<code>deployECS</code>関数で実装されています：</p>
+        
+        <pre><code>func (d *App) deployECS(ctx context.Context, opt DeployOption) error {
+	// サービス定義の取得
+	// タスク定義の更新
+	// サービスの更新
+	// サービスの安定性待機
+	return nil
+}</code></pre>
+        
+        <h4>CodeDeployブルー/グリーンデプロイ</h4>
+        <p>CodeDeployブルー/グリーンデプロイは、新しい環境（グリーン）を作成し、トラフィックを徐々に移行する戦略です。この戦略は<code>deployCodeDeploy</code>関数で実装されています：</p>
+        
+        <pre><code>func (d *App) deployCodeDeploy(ctx context.Context, opt DeployOption) error {
+	// AppSpecの生成
+	// デプロイメントの作成
+	// デプロイメントの待機
+	return nil
+}</code></pre>
+      </section>
+      
+      <section id="deploy-options" class="section">
+        <h3>デプロイオプション</h3>
+        <p>デプロイ操作は<code>DeployOption</code>構造体で設定できます：</p>
+        
+        <pre><code>type DeployOption struct {
+	DryRun                bool   `help:"dry run" default:"false"`
+	SkipTaskDefinition    bool   `help:"skip register task definition" default:"false" negatable:""`
+	Revision              string `help:"revision of task definition"`
+	Timeout               string `help:"timeout" default:""`
+	ForceNewDeployment    bool   `help:"force new deployment for service" default:"false" negatable:""`
+	NoWait                bool   `help:"don't wait for service stable" default:"false" negatable:""`
+	SuspendAutoScaling    bool   `help:"suspend application auto scaling while deploy" default:"false" negatable:""`
+	RollbackEvents        string `help:"rollback events on deploy" default:"" enum:"" enum:"DEPLOYMENT_FAILURE" enum:"DEPLOYMENT_STOP_ON_ALARM" enum:"DEPLOYMENT_STOP_ON_REQUEST" enum:"DEPLOYMENT_FAILURE,DEPLOYMENT_STOP_ON_ALARM" enum:"DEPLOYMENT_FAILURE,DEPLOYMENT_STOP_ON_REQUEST" enum:"DEPLOYMENT_STOP_ON_ALARM,DEPLOYMENT_STOP_ON_REQUEST" enum:"DEPLOYMENT_FAILURE,DEPLOYMENT_STOP_ON_ALARM,DEPLOYMENT_STOP_ON_REQUEST"`
+	UpdateService         bool   `help:"update service definition" default:"true" negatable:""`
+	LatestTaskDefinition  bool   `help:"deploy with the latest task definition without registering" default:"false" negatable:""`
+	WaitUntil             string `help:"wait until the service reaches a certain state" default:"STABLE" enum:"RUNNING" enum:"STABLE" enum:"COMPLETED"`
+	PutLogs               bool   `help:"put logs to CloudWatch Logs on verify" default:"true" negatable:""`
+}</code></pre>
+        
+        <p>主要なオプションには以下があります：</p>
+        <ul>
+          <li><code>DryRun</code>：実際の変更を行わずに、何が行われるかをシミュレーションします。</li>
+          <li><code>SkipTaskDefinition</code>：タスク定義の登録をスキップします。</li>
+          <li><code>ForceNewDeployment</code>：サービスの強制的な新しいデプロイメントを行います。</li>
+          <li><code>NoWait</code>：サービスの安定性を待たずに終了します。</li>
+          <li><code>WaitUntil</code>：サービスが特定の状態に達するまで待機します（RUNNING、STABLE、COMPLETED）。</li>
+        </ul>
+      </section>
+      
+      <section id="deploy-process" class="section">
+        <h3>デプロイプロセス</h3>
+        <p>ecspressoのデプロイプロセスは以下のステップで構成されています：</p>
+        
+        <div class="mermaid">
+          sequenceDiagram
+            participant App
+            participant Config as 設定管理
+            participant Verify as リソース検証
+            participant TaskDef as タスク定義
+            participant Service as サービス
+            participant AWS as AWS API
+            
+            App->>Config: 設定読み込み
+            App->>Verify: リソース検証
+            Verify-->>App: 検証結果
+            
+            alt タスク定義の登録が必要
+              App->>TaskDef: タスク定義の準備
+              App->>AWS: RegisterTaskDefinition
+              AWS-->>App: タスク定義ARN
+            end
+            
+            alt デプロイ戦略 = ECS
+              App->>Service: サービス定義の準備
+              App->>AWS: UpdateService
+              AWS-->>App: サービス更新結果
+              
+              opt 安定性待機が必要
+                App->>AWS: DescribeServices（繰り返し）
+                AWS-->>App: サービス状態
+              end
+            else デプロイ戦略 = CodeDeploy
+              App->>Service: AppSpecの準備
+              App->>AWS: CreateDeployment
+              AWS-->>App: デプロイメントID
+              
+              opt デプロイメント待機が必要
+                App->>AWS: GetDeployment（繰り返し）
+                AWS-->>App: デプロイメント状態
+              end
+            end
+        </div>
+        
+        <p>デプロイプロセスの各ステップは、<code>deploy.go</code>ファイル内の対応する関数で実装されています。</p>
+      </section>
+      
+      <section id="rollback" class="section">
+        <h3>ロールバック機能</h3>
+        <p>ecspressoは、デプロイメントの問題が発生した場合にサービスをロールバックする機能を提供しています。この機能は<code>rollback.go</code>ファイルに実装されています。</p>
+        
+        <pre><code>func (d *App) Rollback(ctx context.Context, opt RollbackOption) error {
+	ctx, cancel := d.Start(ctx)
+	defer cancel()
+	
+	// 以前のタスク定義の取得
+	// サービスの更新
+	// サービスの安定性待機
+	
+	return nil
+}</code></pre>
+        
+        <p>ロールバックオプションは<code>RollbackOption</code>構造体で設定できます：</p>
+        
+        <pre><code>type RollbackOption struct {
+	DryRun                  bool   `help:"dry run" default:"false"`
+	DeregisterTaskDefinition bool   `help:"deregister rolled back task definition" default:"false" negatable:""`
+	NoWait                  bool   `help:"don't wait for service stable" default:"false" negatable:""`
+	Revision                int    `help:"revision of task definition to rollback" default:"0"`
+}</code></pre>
+        
+        <p>また、デプロイ時に<code>RollbackEvents</code>オプションを設定することで、特定のイベント（デプロイメント失敗、アラームによる停止、リクエストによる停止）が発生した場合に自動的にロールバックすることもできます。</p>
+      </section>
+    </div>
+  </div>
+  
+  <footer class="footer">
+    <p>© KAYAC Inc. - <a href="https://github.com/kayac/ecspresso">GitHub リポジトリ</a></p>
+  </footer>
+</body>
+</html>

@@ -14,7 +14,6 @@ jobs:
     steps:
       - name: Send prompt via Incoming Webhook
         run: |
-          text
           curl -X POST -H 'Content-Type: application/json' \
                --data '{
                  "text": "<@U08PYJ5B9LK> Slackの返事は日本語でお願いします。\n`bufferings/ecspresso` のブランチ `'"${{ github.ref_name }}"'` の最新のソースコードから日本語ドキュメントをHTMLで作成して `docs-devin` フォルダ内のドキュメントを最新のドキュメントに更新してください。\nプルリクエストを出してください。\nプルリクエストを出したらセッションをExitして終了してください。"

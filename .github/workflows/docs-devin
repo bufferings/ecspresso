@@ -1,0 +1,21 @@
+# .github/workflows/notify-devin-via-webhook.yml
+name: Ask Devin to update documents via Slack Webhook
+
+on:
+  push:
+    paths-ignore:
+      - 'docs-devin/**'
+    branches:
+      - v2
+
+jobs:
+  prompt-devin:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send prompt via Incoming Webhook
+        run: |
+          curl -X POST -H 'Content-Type: application/json' \
+               --data '{
+                 "text": "@Devin `bufferings/ecspresso` のブランチ `'"${{ github.ref_name }}"'` が更新されました！\nブランチの最新のソースコードから `docs-devin` フォルダ内にHTMLドキュメント更新をお願いします。"
+               }' \
+               "${{ secrets.SLACK_DEVIN_CALLER_WEBHOOK_URL }}"

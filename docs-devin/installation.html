@@ -47,7 +47,21 @@ $ asdf global ecspresso 2.5.0</code></pre>
       <pre><code>$ aqua g -i kayac/ecspresso</code></pre>
       
       <h3>バイナリパッケージ</h3>
-      <p><a href="https://github.com/kayac/ecspresso/releases">Releases</a>からダウンロードできます。</p>
+      <p><a href="https://github.com/kayac/ecspresso/releases">Releases</a>ページからダウンロードできます。ecspressoは単一のバイナリファイルとして提供され、追加の依存関係なしで実行できます。</p>
+      
+      <h3>ソースからのビルド</h3>
+      <p>ecspressoはGo言語で実装されており、ソースコードからビルドすることも可能です。ビルドプロセスは<code>Makefile</code>で定義されています：</p>
+      <pre><code>$ git clone https://github.com/kayac/ecspresso.git
+$ cd ecspresso
+$ make build</code></pre>
+      <p>内部的には、<code>cmd/ecspresso/main.go</code>がエントリーポイントとなり、<code>ecspresso.CLI</code>関数を呼び出してコマンドライン引数を処理します。ビルドには以下の主要な依存関係が使用されています：</p>
+      <ul>
+        <li>AWS SDK for Go v2: AWS APIとの通信</li>
+        <li>github.com/alecthomas/kingpin/v2: コマンドライン引数の解析</li>
+        <li>github.com/kayac/go-config: 設定ファイルの読み込みと変数置換</li>
+        <li>github.com/google/go-jsonnet: Jsonnetファイルの処理</li>
+        <li>github.com/fatih/color: カラー出力のサポート</li>
+      </ul>
       
       <h3>CircleCI Orbs</h3>
       <p><a href="https://circleci.com/orbs/registry/orb/fujiwara/ecspresso">https://circleci.com/orbs/registry/orb/fujiwara/ecspresso</a></p>

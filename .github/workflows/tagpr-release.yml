@@ -1,5 +1,5 @@
 name: tagpr and release
-# on:
+on:
 #   push:
 #     branches: ["v2"]
 #   workflow_dispatch:

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Usage - ecspresso</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>ecspresso</h1>
+    <p>A deployment tool for Amazon ECS</p>
+  </header>
+  
+  <div class="container">
+    <div class="sidebar">
+      <nav>
+        <ul>
+          <li><a href="index.html">Overview</a></li>
+          <li><a href="installation.html">Installation</a></li>
+          <li><a href="usage.html">Usage</a></li>
+          <li><a href="configuration.html">Configuration</a></li>
+          <li><a href="commands.html">Commands</a></li>
+          <li><a href="advanced.html">Advanced Features</a></li>
+          <li><a href="plugins.html">Plugins</a></li>
+          <li><a href="changes.html">Change Log</a></li>
+        </ul>
+      </nav>
+    </div>
+    
+    <div class="content">
+      <h2>Usage</h2>
+      
+      <h3>Basic Usage</h3>
+      <pre><code>Usage: ecspresso &lt;command&gt;
+
+Flags:
+  -h, --help                      Show context-sensitive help.
+      --envfile=ENVFILE,...       environment files ($ECSPRESSO_ENVFILE)
+      --debug                     enable debug log ($ECSPRESSO_DEBUG)
+      --ext-str=KEY=VALUE;...     external string values for Jsonnet ($ECSPRESSO_EXT_STR)
+      --ext-code=KEY=VALUE;...    external code values for Jsonnet ($ECSPRESSO_EXT_CODE)
+      --config="ecspresso.yml"    config file ($ECSPRESSO_CONFIG)
+      --assume-role-arn=""        the ARN of the role to assume ($ECSPRESSO_ASSUME_ROLE_ARN)
+      --timeout=TIMEOUT           timeout. Override in a configuration file ($ECSPRESSO_TIMEOUT).
+      --filter-command=STRING     filter command ($ECSPRESSO_FILTER_COMMAND)
+      --[no-]color                enable colorized output ($ECSPRESSO_COLOR)
+
+Commands:
+  appspec
+    output AppSpec YAML for CodeDeploy to STDOUT
+
+  delete
+    delete service
+
+  deploy
+    deploy service
+
+  deregister
+    deregister task definition
+
+  diff
+    show diff between task definition, service definition with current running
+    service and task definition
+
+  exec
+    execute command on task
+
+  init --service=SERVICE
+    create configuration files from existing ECS service
+
+  refresh
+    refresh service. equivalent to deploy --skip-task-definition
+    --force-new-deployment --no-update-service
+
+  register
+    register task definition
+
+  render &lt;targets&gt;
+    render config, service definition or task definition file to STDOUT
+
+  revisions
+    show revisions of task definitions
+
+  rollback
+    rollback service
+
+  run
+    run task
+
+  scale
+    scale service. equivalent to deploy --skip-task-definition
+    --no-update-service
+
+  status
+    show status of service
+
+  tasks
+    list tasks that are in a service or having the same family
+
+  verify
+    verify resources in configurations
+
+  wait
+    wait until service stable
+
+  version
+    show version</code></pre>
+      
+      <p>For more options for sub-commands, See <code>ecspresso sub-command --help</code>.</p>
+      
+      <h3>Quick Start</h3>
+      <p>ecspresso allows you to easily manage your existing/running ECS services by code.</p>
+      <p>Try <code>ecspresso init</code> for your ECS service with option <code>--region</code>, <code>--cluster</code> and <code>--service</code>:</p>
+      
+      <pre><code>$ ecspresso init --region ap-northeast-1 --cluster default --service myservice --config ecspresso.yml
+2019/10/12 01:31:48 myservice/default save service definition to ecs-service-def.json
+2019/10/12 01:31:48 myservice/default save task definition to ecs-task-def.json
+2019/10/12 01:31:48 myservice/default save config to ecspresso.yml</code></pre>
+      
+      <p>Review the generated files: <code>ecspresso.yml</code>, <code>ecs-service-def.json</code>, and <code>ecs-task-def.json</code>.</p>
+      
+      <p>Now you can deploy the service using ecspresso!</p>
+      
+      <pre><code>$ ecspresso deploy --config ecspresso.yml</code></pre>
+      
+      <h3>Next step</h3>
+      <p>ecspresso can read service and task definition files as a template. A typical use case is to replace the image's tag in the task definition file.</p>
+      
+      <p>Modify ecs-task-def.json as below:</p>
+      
+      <pre><code>-  "image": "nginx:latest",
++  "image": "nginx:{{ must_env `IMAGE_TAG` }}",</code></pre>
+      
+      <p>Then, deploy the service with environment variable <code>IMAGE_TAG</code>:</p>
+      
+      <pre><code>$ IMAGE_TAG=stable ecspresso deploy --config ecspresso.yml</code></pre>
+    </div>
+  </div>
+  
+  <footer class="footer">
+    <p>© KAYAC Inc. - <a href="https://github.com/kayac/ecspresso">GitHub Repository</a></p>
+  </footer>
+</body>
+</html>

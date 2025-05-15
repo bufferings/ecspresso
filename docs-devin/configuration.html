@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configuration - ecspresso</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>ecspresso</h1>
+    <p>A deployment tool for Amazon ECS</p>
+  </header>
+  
+  <div class="container">
+    <div class="sidebar">
+      <nav>
+        <ul>
+          <li><a href="index.html">Overview</a></li>
+          <li><a href="installation.html">Installation</a></li>
+          <li><a href="usage.html">Usage</a></li>
+          <li><a href="configuration.html">Configuration</a></li>
+          <li><a href="commands.html">Commands</a></li>
+          <li><a href="advanced.html">Advanced Features</a></li>
+          <li><a href="plugins.html">Plugins</a></li>
+          <li><a href="changes.html">Change Log</a></li>
+        </ul>
+      </nav>
+    </div>
+    
+    <div class="content">
+      <h2>Configuration File</h2>
+      
+      <p>A configuration file for ecspresso (YAML, JSON, or Jsonnet format):</p>
+      
+      <pre><code>region: ap-northeast-1 # or AWS_REGION environment variable
+cluster: default
+service: myservice
+task_definition: taskdef.json
+timeout: 5m # default 10m
+ignore:
+  tags:
+    - ecspresso:ignore # ignore tags of service and task definition</code></pre>
+      
+      <p><code>ecspresso deploy</code> works as below:</p>
+      
+      <ul>
+        <li>Register a new task definition from <code>task-definition</code> file (JSON or Jsonnet).
+          <ul>
+            <li>Replace <code>{{ env `FOO` `bar` }}</code> syntax in the JSON file with environment variable "FOO".
+              <ul>
+                <li>If "FOO" is not defined, replaced by "bar"</li>
+              </ul>
+            </li>
+            <li>Replace <code>{{ must_env `FOO` }}</code> syntax in the JSON file wth environment variable "FOO".
+              <ul>
+                <li>If "FOO" is not defined, abort immediately.</li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li>Update service tasks by the <code>service_definition</code> file (JSON or Jsonnet).</li>
+        <li>Wait for the service to be stable.</li>
+      </ul>
+      
+      <p>Configuration files and task/service definition files are read by <a href="https://github.com/kayac/go-config">go-config</a> which provides template functions <code>env</code>, <code>must_env</code> and <code>json_escape</code>.</p>
+      
+      <h3>Template Syntax</h3>
+      
+      <p>ecspresso uses the <a href="https://pkg.go.dev/text/template">text/template standard package in Go</a> to render template files, and parses them as YAML or JSON.</p>
+      
+      <p>When using Jsonnet, ecspresso first renders the Jsonnet files and then parses them as text/template. As a result, template functions can only render string values using "{{ ... }}", since the template function syntax {{ }} conflicts with Jsonnet syntax. To render non-string values, consider using Jsonnet functions instead.</p>
+      
+      <p>By default, ecspresso provides the following as template functions:</p>
+      
+      <h4><code>env</code></h4>
+      
+      <pre><code>"{{ env `NAME` `default value` }}"</code></pre>
+      
+      <p>This replaces the placeholder with the value of the environment variable NAME. If not set, it defaults to "default value".</p>
+      
+      <h4><code>must_env</code></h4>
+      
+      <pre><code>"{{ must_env `NAME` }}"</code></pre>
+      
+      <p>This replaces the placeholder with the value of environment variable NAME. If not set, ecspresso will panic and stop forcefully.</p>
+      
+      <p>Defining critical values with <code>must_env</code> helps prevent unintended deployments by ensuring these values are set before execution.</p>
+      
+      <h4><code>json_escape</code></h4>
+      
+      <pre><code>"{{ must_env `JSON_VALUE` | json_escape }}"</code></pre>
+      
+      <p>This escapes values as JSON strings, which is useful for embedding values as strings that require escaping, such as quotes.</p>
+      
+      <h4>Plugin provided template functions</h4>
+      
+      <p>ecspresso also adds some template functions via plugins. See the <a href="plugins.html">Plugins</a> section.</p>
+    </div>
+  </div>
+  
+  <footer class="footer">
+    <p>© KAYAC Inc. - <a href="https://github.com/kayac/ecspresso">GitHub Repository</a></p>
+  </footer>
+</body>
+</html>

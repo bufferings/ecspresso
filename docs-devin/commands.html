@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Commands - ecspresso</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>ecspresso</h1>
+    <p>A deployment tool for Amazon ECS</p>
+  </header>
+  
+  <div class="container">
+    <div class="sidebar">
+      <nav>
+        <ul>
+          <li><a href="index.html">Overview</a></li>
+          <li><a href="installation.html">Installation</a></li>
+          <li><a href="usage.html">Usage</a></li>
+          <li><a href="configuration.html">Configuration</a></li>
+          <li><a href="commands.html">Commands</a></li>
+          <li><a href="advanced.html">Advanced Features</a></li>
+          <li><a href="plugins.html">Plugins</a></li>
+          <li><a href="changes.html">Change Log</a></li>
+        </ul>
+      </nav>
+    </div>
+    
+    <div class="content">
+      <h2>Commands</h2>
+      
+      <h3>Deploy</h3>
+      <p>The <code>deploy</code> command deploys an ECS service based on configuration files.</p>
+      <p>For rolling deployment:</p>
+      <pre><code>$ ecspresso deploy --config ecspresso.yml
+2017/11/09 23:20:13 myService/default Starting deploy
+Service: myService
+Cluster: default
+TaskDefinition: myService:3
+Deployments:
+    PRIMARY myService:3 desired:1 pending:0 running:1
+Events:
+2017/11/09 23:20:13 myService/default Creating a new task definition by myTask.json
+2017/11/09 23:20:13 myService/default Registering a new task definition...
+2017/11/09 23:20:13 myService/default Task definition is registered myService:4
+2017/11/09 23:20:13 myService/default Updating service...
+2017/11/09 23:20:13 myService/default Waiting for service stable...(it will take a few minutes)
+2017/11/09 23:23:23 myService/default  PRIMARY myService:4 desired:1 pending:0 running:1
+2017/11/09 23:23:29 myService/default Service is stable now. Completed!</code></pre>
+      
+      <p>For Blue/Green deployment (with AWS CodeDeploy):</p>
+      <p><code>ecspresso deploy</code> can deploy services using the CODE_DEPLOY deployment controller. Configure ecs-service-def.json as follows:</p>
+      <pre><code>{
+  "deploymentController": {
+    "type": "CODE_DEPLOY"
+  },
+  // ...
+}</code></pre>
+      
+      <p>Key options:</p>
+      <ul>
+        <li><code>--wait-until</code>: Specify until when to wait for deployment (stable or deployed)</li>
+        <li><code>--revision</code>: Specify a specific revision of the task definition</li>
+        <li><code>--latest-task-definition</code>: Use the latest revision of the task definition</li>
+        <li><code>--skip-task-definition</code>: Skip registering a new task definition</li>
+        <li><code>--force-new-deployment</code>: Force a new deployment even if the service definition and task definition are unchanged</li>
+      </ul>
+      
+      <h3>Diff</h3>
+      <p>Shows differences between local task/service definitions and remote (on ECS) definitions.</p>
+      <pre><code>$ ecspresso diff
+--- arn:aws:ecs:ap-northeast-1:123456789012:service/ecspresso-test/nginx-local
++++ ecs-service-def.json
+@@ -38,5 +38,5 @@
+   },
+   "placementConstraints": [],
+   "placementStrategy": [],
+-  "platformVersion": "1.3.0"
++  "platformVersion": "LATEST"
+ }
+ 
+--- arn:aws:ecs:ap-northeast-1:123456789012:task-definition/ecspresso-test:202
++++ ecs-task-def.json
+@@ -1,6 +1,10 @@
+ {
+   "containerDefinitions": [
+     {
+       "cpu": 0,
+       "environment": [],
+       "essential": true,
+-      "image": "nginx:latest",
++      "image": "nginx:alpine",
+       "logConfiguration": {
+         "logDriver": "awslogs",
+         "options": {</code></pre>
+      
+      <h3>Verify</h3>
+      <p>Verify resources related with service/task definitions.</p>
+      <p>For example it checks if:</p>
+      <ul>
+        <li>An ECS cluster exists.</li>
+        <li>The target groups in service definitions match the container name and port defined in the definitions.</li>
+        <li>A task role and a task execution role exist and can be assumed by ecs-tasks.amazonaws.com.</li>
+        <li>Container images exist at the URL defined in task definitions. (Checks only for ECR or DockerHub public images.)</li>
+        <li>Secrets in task definitions exist and are readable.</li>
+        <li>Log streams can be created and messages can be put into the specified CloudWatch log groups streams.</li>
+      </ul>
+      
+      <h3>Run</h3>
+      <p>Run a one-off task using the task definition.</p>
+      <pre><code>$ ecspresso run --config ecspresso.yml --task-def=db-migrate.json</code></pre>
+      <p>If <code>--task-def</code> is not set, ecspresso will use the task definition included in the service.</p>
+      
+      <h3>Scale</h3>
+      <p>Change the desired count of a service.</p>
+      <pre><code>$ ecspresso scale --tasks 10</code></pre>
+      <p><code>scale</code> command is equivalent to <code>deploy --skip-task-definition --no-update-service</code>.</p>
+      
+      <h3>Tasks</h3>
+      <p>List tasks run by a service or having the same family to a task definition.</p>
+      <pre><code>$ ECSPRESSO_FILTER_COMMAND=peco ecspresso tasks --find</code></pre>
+      
+      <h3>Exec</h3>
+      <p>Execute a command on a task.</p>
+      <pre><code>$ ecspresso exec --port-forward --port 80 --local-port 8080</code></pre>
+      
+      <p>For more details on each command, see <code>ecspresso command --help</code>.</p>
+    </div>
+  </div>
+  
+  <footer class="footer">
+    <p>© KAYAC Inc. - <a href="https://github.com/kayac/ecspresso">GitHub Repository</a></p>
+  </footer>
+</body>
+</html>

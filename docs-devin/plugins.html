@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plugins - ecspresso</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>ecspresso</h1>
+    <p>A deployment tool for Amazon ECS</p>
+  </header>
+  
+  <div class="container">
+    <div class="sidebar">
+      <nav>
+        <ul>
+          <li><a href="index.html">Overview</a></li>
+          <li><a href="installation.html">Installation</a></li>
+          <li><a href="usage.html">Usage</a></li>
+          <li><a href="configuration.html">Configuration</a></li>
+          <li><a href="commands.html">Commands</a></li>
+          <li><a href="advanced.html">Advanced Features</a></li>
+          <li><a href="plugins.html">Plugins</a></li>
+          <li><a href="changes.html">Change Log</a></li>
+        </ul>
+      </nav>
+    </div>
+    
+    <div class="content">
+      <h2>Plugins</h2>
+      <p>ecspresso supports plugins to extend template functions and Jsonnet native functions.</p>
+      
+      <h3>tfstate</h3>
+      <p>The tfstate plugin introduces the <code>tfstate</code> and <code>tfstatef</code> template functions.</p>
+      
+      <pre><code># ecspresso.yml
+region: ap-northeast-1
+cluster: default
+service: test
+service_definition: ecs-service-def.json
+task_definition: ecs-task-def.json
+plugins:
+  - name: tfstate
+    config:
+      url: s3://my-bucket/terraform.tfstate
+      # or path: terraform.tfstate    # path to local file</code></pre>
+      
+      <pre><code># ecs-service-def.json
+{
+  "networkConfiguration": {
+    "awsvpcConfiguration": {
+      "subnets": [
+        "{{ tfstatef `aws_subnet.private['%s'].id` `az-a` }}"
+      ],
+      "securityGroups": [
+        "{{ tfstate `data.aws_security_group.default.id` }}"
+      ]
+    }
+  }
+}</code></pre>
+      
+      <p><code>{{ tfstate "resource_type.resource_name.attr" }}</code> will expand to the attribute value of the resource in tfstate.</p>
+      
+      <p><code>{{ tfstatef "resource_type.resource_name['%s'].attr" "index" }}</code> is similar to <code>{{ tfstatef "resource_type.resource_name['index'].attr" }}</code>. This function is useful for build a resource addresses with environment variables.</p>
+      
+      <h4>tfstate Jsonnet function</h4>
+      <pre><code>local tfstate = std.native('tfstate');
+{
+  networkConfiguration: {
+    awsvpcConfiguration: {
+      subnets: [
+        tfstate('aws_subnet.private["%s"].id' % 'az-z'),
+        tfstate(std.format('aws_subnet.private["%s"].id', 'az-b')),
+      ],
+      securityGroups: [
+        tfstate('data.aws_security_group.default.id'),
+      ]
+    }
+  }
+}</code></pre>
+      
+      <h3>CloudFormation</h3>
+      <p>The cloudformation plugin introduces the <code>cfn_output</code> and <code>cfn_export</code> template functions.</p>
+      
+      <pre><code># ecspresso.yml
+# ...
+plugins:
+  - name: cloudformation</code></pre>
+      
+      <p><code>cfn_output StackName OutputKey</code> looks up the OutputValue of OutputKey in the StackName.</p>
+      <p><code>cfn_export ExportName</code> looks up the exported value by name.</p>
+      
+      <h3>SSM Parameter Store lookups</h3>
+      <p>The <code>ssm</code> template function reads parameters from AWS Systems Manager (SSM) Parameter Store.</p>
+      
+      <pre><code>{
+  "string": "{{ ssm `/path/to/string` }}",
+  "stringlist": "{{ ssm `/path/to/stringlist` 1 }}",
+  "securestring": "{{ ssm `/path/to/securestring` }}"
+}</code></pre>
+      
+      <h3>Resolve secretsmanager secret ARN</h3>
+      <p>The <code>secretsmanager_arn</code> template function resolves the Secrets Manager secret ARN by secret name.</p>
+      
+      <pre><code>  "secrets": [
+    {
+      "name": "FOO",
+      "valueFrom": "{{ secretsmanager_arn `foo` }}"
+    }
+  ]</code></pre>
+      
+      <h3>Execute external commands</h3>
+      <p>The <code>external</code> plugin introduces functions to execute any external commands.</p>
+      
+      <pre><code># ecspresso.yml
+plugins:
+  - name: external
+    config:
+      name: jq
+      command: ["jq", "-n"]
+      num_args: 1
+      timeout: 5</code></pre>
+      
+      <p>The <code>config</code> section defines the following parameters:</p>
+      <ul>
+        <li><code>name</code>: template function name</li>
+        <li><code>command</code>: external command and arguments (array)
+          <ul>
+            <li>The command must return a JSON string or any strings to stdout.</li>
+          </ul>
+        </li>
+        <li><code>num_args</code>: number of arguments (optional, default 0)</li>
+        <li><code>parser</code>: parser type "json" or "string" (optional, default "json")</li>
+        <li><code>timeout</code>: command execution timeout seconds (optional, default never timeout)</li>
+      </ul>
+    </div>
+  </div>
+  
+  <footer class="footer">
+    <p>© KAYAC Inc. - <a href="https://github.com/kayac/ecspresso">GitHub Repository</a></p>
+  </footer>
+</body>
+</html>

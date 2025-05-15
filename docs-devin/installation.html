@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Installation - ecspresso</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>ecspresso</h1>
+    <p>A deployment tool for Amazon ECS</p>
+  </header>
+  
+  <div class="container">
+    <div class="sidebar">
+      <nav>
+        <ul>
+          <li><a href="index.html">Overview</a></li>
+          <li><a href="installation.html">Installation</a></li>
+          <li><a href="usage.html">Usage</a></li>
+          <li><a href="configuration.html">Configuration</a></li>
+          <li><a href="commands.html">Commands</a></li>
+          <li><a href="advanced.html">Advanced Features</a></li>
+          <li><a href="plugins.html">Plugins</a></li>
+          <li><a href="changes.html">Change Log</a></li>
+        </ul>
+      </nav>
+    </div>
+    
+    <div class="content">
+      <h2>Installation</h2>
+      
+      <h3>Homebrew (macOS and Linux)</h3>
+      <pre><code>$ brew install kayac/tap/ecspresso</code></pre>
+      
+      <h3>asdf (macOS and Linux)</h3>
+      <pre><code>$ asdf plugin add ecspresso
+# or
+$ asdf plugin add ecspresso https://github.com/kayac/asdf-ecspresso.git
+
+$ asdf install ecspresso 2.5.0
+$ asdf global ecspresso 2.5.0</code></pre>
+      
+      <h3>aqua (macOS and Linux)</h3>
+      <p><a href="https://aquaproj.github.io/">aqua</a> is a CLI version manager.</p>
+      <pre><code>$ aqua g -i kayac/ecspresso</code></pre>
+      
+      <h3>Binary packages</h3>
+      <p>Download from <a href="https://github.com/kayac/ecspresso/releases">Releases</a> page.</p>
+      
+      <h3>CircleCI Orbs</h3>
+      <p><a href="https://circleci.com/orbs/registry/orb/fujiwara/ecspresso">https://circleci.com/orbs/registry/orb/fujiwara/ecspresso</a></p>
+      <pre><code>version: 2.1
+orbs:
+  ecspresso: fujiwara/ecspresso@2.0.4
+jobs:
+  install:
+    steps:
+      - checkout
+      - ecspresso/install:
+          version: v2.5.0 # or latest
+          # version-file: .ecspresso-version
+          os: linux # or windows or darwin
+          arch: amd64 # or arm64
+      - run:
+          command: |
+            ecspresso version</code></pre>
+      
+      <p><code>version: latest</code> installs different versions of ecspresso for each Orb version:</p>
+      <ul>
+        <li>fujiwara/ecspresso@0.0.15 - The latest release version (v2 and later)</li>
+        <li>fujiwara/ecspresso@1.0.0 - The latest version of v1.x</li>
+        <li>fujiwara/ecspresso@2.0.3 - The latest version of v2.x</li>
+      </ul>
+      
+      <p>Note: <code>version: latest</code> is not recommended as it may cause unexpected behavior when a new version of ecspresso is released.</p>
+      
+      <h3>GitHub Actions</h3>
+      <p>Action kayac/ecspresso@v2 installs an ecspresso binary for Linux(x86_64) into /usr/local/bin.</p>
+      <pre><code>jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: kayac/ecspresso@v2
+        with:
+          version: v2.5.0 # or latest
+          # version-file: .ecspresso-version
+      - run: |
+          ecspresso deploy --config ecspresso.yml</code></pre>
+    </div>
+  </div>
+  
+  <footer class="footer">
+    <p>© KAYAC Inc. - <a href="https://github.com/kayac/ecspresso">GitHub Repository</a></p>
+  </footer>
+</body>
+</html>

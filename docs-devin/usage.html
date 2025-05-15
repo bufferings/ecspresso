@@ -32,6 +32,7 @@
       <h2>使い方</h2>
       
       <h3>基本的な使い方</h3>
+      <p>ecspressoのCLIインターフェースは<code>cli.go</code>で実装されており、<code>kingpin</code>ライブラリを使用してコマンドライン引数を解析しています。内部的には<code>CLI</code>関数がエントリーポイントとなり、コマンドとフラグを処理します。</p>
       <pre><code>Usage: ecspresso &lt;command&gt;
 
 Flags:
@@ -105,6 +106,18 @@ Commands:
     バージョンを表示します</code></pre>
       
       <p>サブコマンドのより詳細なオプションについては、<code>ecspresso sub-command --help</code>を参照してください。</p>
+      
+      <h3>内部コマンド構造</h3>
+      <p>ecspressoのコマンド構造は<code>cli.go</code>で定義されており、各コマンドは対応するGoファイルで実装されています：</p>
+      <ul>
+        <li><strong>deploy</strong>: <code>deploy.go</code>の<code>App.Deploy</code>メソッドで実装。タスク定義の登録とサービスの更新を行います。</li>
+        <li><strong>diff</strong>: <code>diff.go</code>の<code>App.Diff</code>メソッドで実装。ローカル定義と実際のリソースを比較します。</li>
+        <li><strong>verify</strong>: <code>verify.go</code>の<code>App.Verify</code>メソッドで実装。リソースの存在と権限を検証します。</li>
+        <li><strong>run</strong>: <code>run.go</code>の<code>App.Run</code>メソッドで実装。一時的なタスクを実行します。</li>
+        <li><strong>exec</strong>: <code>exec.go</code>の<code>App.Exec</code>メソッドで実装。実行中のタスクでコマンドを実行します。</li>
+        <li><strong>rollback</strong>: <code>rollback.go</code>の<code>App.Rollback</code>メソッドで実装。サービスを以前のバージョンに戻します。</li>
+      </ul>
+      <p>各コマンドは<code>App</code>構造体のメソッドとして実装され、<code>CLI</code>関数がコマンドライン引数を解析して適切なメソッドを呼び出します。</p>
       
       <h3>クイックスタート</h3>
       <p>ecspressoを使用すると、既存/実行中のECSサービスをコードで簡単に管理できます。</p>

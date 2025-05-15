@@ -31,8 +31,24 @@
     <div class="content">
       <h2>コマンド</h2>
       
-      <h3>Deploy</h3>
-      <p><code>deploy</code>コマンドは設定ファイルに基づいてECSサービスをデプロイします。</p>
+      <h3>Deploy (deploy.go)</h3>
+      <p><code>deploy</code>コマンドは<code>deploy.go</code>で実装されており、コンフィグレーションに基づいてECSサービスをデプロイします。</p>
+      <p>デプロイプロセスの内部動作：</p>
+      <ol>
+        <li>タスク定義ファイルからタスク定義を登録（<code>--skip-task-definition</code>が指定されていない場合）</li>
+        <li>サービス定義を更新（<code>--no-update-service</code>が指定されていない場合）</li>
+        <li>サービスが安定状態になるまで待機</li>
+      </ol>
+      
+      <p>ブルー/グリーンデプロイメントの場合（<code>deploymentController.type</code>が<code>CODE_DEPLOY</code>の場合）、以下のステップが実行されます：</p>
+      <ol>
+        <li>タスク定義を登録</li>
+        <li>AppSpecファイルを生成</li>
+        <li>CodeDeployアプリケーションとデプロイメントグループが存在することを確認</li>
+        <li>CodeDeployデプロイメントを作成</li>
+        <li>デプロイメントが完了するまで待機</li>
+      </ol>
+      
       <p>ローリングデプロイメントの場合：</p>
       <pre><code>$ ecspresso deploy --config ecspresso.yml
 2017/11/09 23:20:13 myService/default Starting deploy
@@ -68,8 +84,20 @@ Events:
         <li><code>--force-new-deployment</code>: サービス定義とタスク定義が変更されていなくても、新しいデプロイメントを強制</li>
       </ul>
       
-      <h3>Diff</h3>
-      <p>ローカルのタスク/サービス定義とリモート（ECS上）の定義の差分を表示します。</p>
+      <h3>Diff (diff.go)</h3>
+      <p><code>diff</code>コマンドは<code>diff.go</code>で実装されており、ローカルの定義と実際にデプロイされているリソースを比較します：</p>
+      <ul>
+        <li>タスク定義の差分</li>
+        <li>サービス定義の差分</li>
+        <li>IAMロールなどの関連リソースの差分</li>
+      </ul>
+      <p>差分表示はGitスタイルの統一差分形式で表示され、差分結果は<code>ServiceForDiff</code>構造体と<code>NormalizeService</code>メソッドを使用して比較前に正規化されます。内部的には<code>App.Diff</code>メソッドが以下のステップを実行します：</p>
+      <ol>
+        <li>現在のサービスとタスク定義を取得</li>
+        <li>ローカルの定義を読み込み</li>
+        <li>比較のために両方を正規化</li>
+        <li>差分を計算して表示</li>
+      </ol>
       <pre><code>$ ecspresso diff
 --- arn:aws:ecs:ap-northeast-1:123456789012:service/ecspresso-test/nginx-local
 +++ ecs-service-def.json
@@ -96,37 +124,68 @@ Events:
          "logDriver": "awslogs",
          "options": {</code></pre>
       
-      <h3>Verify</h3>
-      <p>サービス/タスク定義に関連するリソースを検証します。</p>
-      <p>例えば、以下を確認します：</p>
+      <h3>Verify (verify.go)</h3>
+      <p><code>verify</code>コマンドは<code>verify.go</code>で実装されており、サービス定義とタスク定義に関連するリソースが正しく構成されていることを検証します。内部的には<code>App.Verify</code>メソッドが<code>verifier</code>構造体を使用して検証を実行します。</p>
+      <p>検証プロセスは以下のステップで行われます：</p>
+      <ol>
+        <li>検証状態の初期化（<code>verifyState</code>構造体）</li>
+        <li>各リソースタイプごとの検証関数の実行</li>
+        <li>検証結果のキャッシュと再利用（パフォーマンス向上のため）</li>
+      </ol>
+      <p>例えば、以下のリソースを検証します：</p>
       <ul>
-        <li>ECSクラスターが存在するか。</li>
-        <li>サービス定義内のターゲットグループが、定義内のコンテナ名とポートと一致するか。</li>
-        <li>タスクロールとタスク実行ロールが存在し、ecs-tasks.amazonaws.comによって引き受けられるか。</li>
-        <li>タスク定義で定義されたURLにコンテナイメージが存在するか。（ECRまたはDockerHub公開イメージのみチェック。）</li>
-        <li>タスク定義内のシークレットが存在し、読み取り可能か。</li>
-        <li>指定されたCloudWatchロググループストリームにログストリームを作成し、メッセージを送信できるか。</li>
+        <li>ECSクラスターが存在するか（<code>verifyCluster</code>メソッド）</li>
+        <li>サービス定義内のターゲットグループが、定義内のコンテナ名とポートと一致するか（<code>verifyTargetGroups</code>メソッド）</li>
+        <li>タスクロールとタスク実行ロールが存在し、ecs-tasks.amazonaws.comによって引き受けられるか（<code>verifyIAMRole</code>メソッド）</li>
+        <li>タスク定義で定義されたURLにコンテナイメージが存在するか（<code>verifyContainerImage</code>メソッド）</li>
+        <li>タスク定義内のシークレットが存在し、読み取り可能か（<code>verifySecrets</code>メソッド）</li>
+        <li>指定されたCloudWatchロググループストリームにログストリームを作成し、メッセージを送信できるか（<code>verifyLogConfiguration</code>メソッド）</li>
       </ul>
       
-      <h3>Run</h3>
-      <p>タスク定義を使用して一時的なタスクを実行します。</p>
-      <pre><code>$ ecspresso run --config ecspresso.yml --task-def=db-migrate.json</code></pre>
-      <p><code>--task-def</code>が設定されていない場合、ecspressoはサービスに含まれるタスク定義を使用します。</p>
+      <h3>Run (run.go)</h3>
+      <p><code>run</code>コマンドは<code>run.go</code>で実装されており、指定されたタスク定義を使用して一時的なタスクを実行します。内部的には<code>App.Run</code>メソッドが以下のステップを実行します：</p>
+      <ol>
+        <li>タスク定義の解決（<code>--task-def</code>が指定されていない場合はサービスのタスク定義を使用）</li>
+        <li>タスク定義の登録（<code>--register-task-definition</code>が指定されている場合）</li>
+        <li>起動タイプとネットワーク設定の決定（EC2、Fargate、または外部）</li>
+        <li>RunTaskリクエストの構築と送信</li>
+        <li>タスクの起動と状態の監視（<code>--wait</code>が指定されている場合）</li>
+      </ol>
+      <p>コマンド例：</p>
+      <pre><code>$ ecspresso run --config ecspresso.yml --task-def=db-migrate.json --overrides='{"containerOverrides":[{"name":"app","command":["bundle","exec","rake","db:migrate"]}]}'</code></pre>
+      <p><code>--task-def</code>が設定されていない場合、ecspressoはサービスに含まれるタスク定義を使用します。<code>--overrides</code>オプションを使用すると、コンテナの環境変数やコマンドなどを上書きできます。</p>
       
-      <h3>Scale</h3>
-      <p>サービスの希望するカウント数を変更します。</p>
-      <pre><code>$ ecspresso scale --tasks 10</code></pre>
-      <p><code>scale</code>コマンドは<code>deploy --skip-task-definition --no-update-service</code>と同等です。</p>
+      <h3>Scale (deploy.go)</h3>
+      <p>サービスの希望するカウント数を変更します。内部的には<code>deploy.go</code>の<code>App.Deploy</code>メソッドを特定のオプションで呼び出します。</p>
+      <pre><code>$ ecspresso scale --tasks 10 --auto-scaling-min 5 --auto-scaling-max 20</code></pre>
+      <p><code>scale</code>コマンドは<code>deploy --skip-task-definition --no-update-service</code>と同等です。<code>--auto-scaling-min</code>と<code>--auto-scaling-max</code>オプションを使用すると、Application Auto Scalingの設定も更新できます。</p>
       
-      <h3>Tasks</h3>
-      <p>サービスによって実行されるタスク、またはタスク定義と同じファミリーを持つタスクを一覧表示します。</p>
-      <pre><code>$ ECSPRESSO_FILTER_COMMAND=peco ecspresso tasks --find</code></pre>
+      <h3>Tasks (tasks.go)</h3>
+      <p><code>tasks</code>コマンドは<code>tasks.go</code>で実装されており、サービスによって実行されるタスク、またはタスク定義と同じファミリーを持つタスクを一覧表示します。内部的には<code>App.Tasks</code>メソッドが以下のステップを実行します：</p>
+      <ol>
+        <li>サービスまたはタスク定義ファミリーに関連するタスクを検索</li>
+        <li>タスクの詳細情報（ステータス、起動時間、IPアドレスなど）を取得</li>
+        <li>フィルターコマンド（<code>ECSPRESSO_FILTER_COMMAND</code>環境変数で指定）を使用してタスクを選択</li>
+        <li>選択されたタスクに対して操作（停止、情報表示など）を実行</li>
+      </ol>
+      <p>コマンド例：</p>
+      <pre><code>$ ECSPRESSO_FILTER_COMMAND=peco ecspresso tasks --find --stop</code></pre>
+      <p><code>--find</code>オプションを使用すると、フィルターコマンドを使用してタスクを選択できます。<code>--stop</code>オプションを追加すると、選択したタスクを停止できます。</p>
       
-      <h3>Exec</h3>
-      <p>タスク上でコマンドを実行します。</p>
-      <pre><code>$ ecspresso exec --port-forward --port 80 --local-port 8080</code></pre>
+      <h3>Exec (exec.go)</h3>
+      <p><code>exec</code>コマンドは<code>exec.go</code>で実装されており、実行中のタスクにSSMセッションマネージャーを通じて接続し、コマンドを実行できます。内部的には<code>App.Exec</code>メソッドが以下のステップを実行します：</p>
+      <ol>
+        <li>タスクの選択（<code>--task</code>が指定されていない場合、フィルターコマンドを使用してタスクを選択）</li>
+        <li>SSMセッションドキュメントの構築</li>
+        <li>SSMセッションの開始</li>
+        <li>必要に応じてポートフォワーディングの設定</li>
+        <li>コマンド実行またはインタラクティブシェルの提供</li>
+      </ol>
+      <p>コマンド例：</p>
+      <pre><code>$ ecspresso exec --port-forward --port 80 --local-port 8080 --container app</code></pre>
+      <p><code>--port-forward</code>オプションを使用すると、コンテナのポートをローカルポートにフォワードできます。<code>--container</code>オプションを使用すると、複数コンテナのタスクで特定のコンテナを指定できます。</p>
       
-      <p>各コマンドの詳細については、<code>ecspresso command --help</code>を参照してください。</p>
+      <p>各コマンドの詳細については、<code>ecspresso command --help</code>を参照してください。内部実装の詳細は<a href="https://github.com/kayac/ecspresso">GitHubリポジトリ</a>のソースコードを参照してください。</p>
     </div>
   </div>
   

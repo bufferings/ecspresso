@@ -1,5 +1,5 @@
 name: test action
-# on:
+on:
 #   push:
 #     branches:
 #       - v2

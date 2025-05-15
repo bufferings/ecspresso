@@ -14,11 +14,21 @@ jobs:
     steps:
       - name: Send prompt via Incoming Webhook
         run: |
+          SLACK_TEXT=""
+
+          SLACK_TEXT+="<@U08PYJ5B9LK>会話は日本語でお願いします。\n"
+          SLACK_TEXT+="bufferings/ecspresso のブランチ ${{ github.ref_name }} が対象です。\n"
+          SLACK_TEXT+="対象ブランチのリポジトリ内にあるGoのソースコードの実装詳細に基づいた技術的な日本語ドキュメントをHTMLで作成してください。"
+          SLACK_TEXT+="README.mdとdocs-devinに既存のドキュメントは参考にせずに無視してください。"
+          SLACK_TEXT+="Mermaid.js（CDN版）を使用してアーキテクチャ図やデータフロー図を作成してください。"
+          SLACK_TEXT+="目次の例です：1.0 Overview 1.1 Installation and Getting Started 1.2 Architecture Overview 1.3 Workflow and CI/CD Integration 2.0 Command Line Interface 2.1 CLI Commands Reference 2.2 Deployment Commands 2.3 Task Management Commands 2.4 Utility Commands 3.0 Core Functionality 3.1 Deployment Management 3.2 Task Definition Management 3.3 Resource Verification 3.4 Resource Diffing 4.0 Configuration Management 4.1 Configuration File Format 4.2 Task and Service Definitions 4.3 Plugin System 4.4 Jsonnet Integration 5.0 Development and Contribution 5.1 Building and Testing 5.2 Release Process 5.3 Codebase Structure 5.4 Logging and Error Handling"
+          SLACK_TEXT+="ドキュメントが作成できたら、docs-devin フォルダ内のドキュメントを削除して、作成したドキュメントに入れ替えてください。"
+          SLACK_TEXT+="そして、プルリクエストを出してください。"
+          SLACK_TEXT+="プルリクエストを出したら、セッションをアーカイブしてください。"
+          
+          payload="{\"text\":\"${SLACK_TEXT//\"/\\\"}\"}"
+
           curl -X POST -H 'Content-Type: application/json' \
-               --data '{
-                 "text": "<@U08PYJ5B9LK> Slackの返事は日本語でお願いします。\n`bufferings/ecspresso` のブランチ `'"${{ github.ref_name }}"'` の最新のソースコードから日本語ドキュメントをHTMLで作成して `docs-devin` フォルダ内のドキュメントを最新のドキュメントに更新してください。\nプルリクエストを出してください。\nプルリクエストを出したらセッションをExitして終了してください。"
-               }' \
+               --data "$payload" \
                "${{ secrets.SLACK_DEVIN_CALLER_WEBHOOK_URL }}"
-
-
 

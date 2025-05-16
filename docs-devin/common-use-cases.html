@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>よくあるユースケース - ecspresso</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'default',
+        securityLevel: 'loose'
+      });
+    });
+  </script>
+</head>
+<body>
+  <header>
+    <h1>ecspresso</h1>
+    <p>Amazon ECS 用デプロイメントツール</p>
+    <p><em>(「エスプレッソ」と同じ発音です ☕)</em></p>
+  </header>
+  
+  <div class="container">
+    <div class="sidebar">
+      <nav>
+        <ul>
+          <li><a href="index.html">1.0 はじめに</a></li>
+          <li><a href="about.html">1.1 ecspressoとは</a></li>
+          <li><a href="installation.html">1.2 インストール方法</a></li>
+          <li><a href="quickstart.html">2.0 クイックスタート</a></li>
+          <li><a href="basic-usage.html">2.1 基本的な使い方</a></li>
+          <li><a href="common-use-cases.html">2.2 よくあるユースケース</a></li>
+          <li><a href="command-reference.html">3.0 コマンドリファレンス</a></li>
+          <li><a href="deployment-commands.html">3.1 デプロイ関連コマンド</a></li>
+          <li><a href="task-commands.html">3.2 タスク関連コマンド</a></li>
+          <li><a href="config-commands.html">3.3 設定・検証コマンド</a></li>
+          <li><a href="practical-guide.html">4.0 実践ガイド</a></li>
+          <li><a href="cicd-integration.html">4.1 CI/CDパイプラインとの統合</a></li>
+          <li><a href="multi-env.html">4.2 複数環境での運用</a></li>
+          <li><a href="large-scale.html">4.3 大規模サービスの管理</a></li>
+          <li><a href="troubleshooting.html">5.0 トラブルシューティング</a></li>
+        </ul>
+      </nav>
+    </div>
+    
+    <div class="content">
+      <h1>2.2 よくあるユースケース</h1>
+      
+      <div class="toc">
+        <div class="toc-title">目次</div>
+        <ul>
+          <li><a href="#new-service">新しいサービスのデプロイ</a></li>
+          <li><a href="#update-service">既存サービスの更新</a></li>
+          <li><a href="#rollback">デプロイのロールバック</a></li>
+          <li><a href="#one-time-task">一時的なタスクの実行</a></li>
+          <li><a href="#exec-command">コンテナ内でのコマンド実行</a></li>
+        </ul>
+      </div>
+      
+      <section id="new-service" class="section">
+        <h2>新しいサービスのデプロイ</h2>
+        <p>新しいECSサービスをデプロイする手順は以下の通りです：</p>
+        
+        <ol>
+          <li>
+            <p>設定ファイルの初期化：</p>
+            <pre><code>$ ecspresso init --region ap-northeast-1 --cluster my-cluster --service my-service</code></pre>
+          </li>
+          <li>
+            <p>生成されたタスク定義とサービス定義を編集します。</p>
+          </li>
+          <li>
+            <p>リソースを検証します：</p>
+            <pre><code>$ ecspresso verify</code></pre>
+          </li>
+          <li>
+            <p>サービスをデプロイします：</p>
+            <pre><code>$ ecspresso deploy</code></pre>
+          </li>
+        </ol>
+        
+        <div class="note">
+          <p><strong>ヒント</strong>: 初めてのデプロイ前に <code>--dry-run</code> オプションを使用して、実際の変更を確認することをお勧めします。</p>
+        </div>
+      </section>
+      
+      <section id="update-service" class="section">
+        <h2>既存サービスの更新</h2>
+        <p>既存のECSサービスを更新する手順は以下の通りです：</p>
+        
+        <ol>
+          <li>
+            <p>タスク定義またはサービス定義を編集します。</p>
+          </li>
+          <li>
+            <p>変更内容を確認します：</p>
+            <pre><code>$ ecspresso diff</code></pre>
+          </li>
+          <li>
+            <p>リソースを検証します：</p>
+            <pre><code>$ ecspresso verify</code></pre>
+          </li>
+          <li>
+            <p>サービスを更新します：</p>
+            <pre><code>$ ecspresso deploy</code></pre>
+          </li>
+        </ol>
+        
+        <div class="note">
+          <p><strong>注意</strong>: タスク定義のみを更新する場合は、<code>--skip-service-update</code> オプションを使用できます。</p>
+        </div>
+      </section>
+      
+      <section id="rollback" class="section">
+        <h2>デプロイのロールバック</h2>
+        <p>問題が発生した場合に、以前のバージョンにロールバックする手順は以下の通りです：</p>
+        
+        <ol>
+          <li>
+            <p>現在のサービスの状態を確認します：</p>
+            <pre><code>$ ecspresso status</code></pre>
+          </li>
+          <li>
+            <p>ロールバックを実行します：</p>
+            <pre><code>$ ecspresso rollback</code></pre>
+          </li>
+          <li>
+            <p>サービスが安定するまで待機します：</p>
+            <pre><code>$ ecspresso wait</code></pre>
+          </li>
+        </ol>
+        
+        <div class="note">
+          <p><strong>ヒント</strong>: <code>--deregister</code> オプションを使用すると、ロールバック後に現在のタスク定義を登録解除できます。</p>
+        </div>
+      </section>
+      
+      <section id="one-time-task" class="section">
+        <h2>一時的なタスクの実行</h2>
+        <p>データベースマイグレーションやバッチ処理などの一時的なタスクを実行する手順は以下の通りです：</p>
+        
+        <ol>
+          <li>
+            <p>タスクを実行します：</p>
+            <pre><code>$ ecspresso run</code></pre>
+          </li>
+          <li>
+            <p>特定のコマンドを実行する場合は、オーバーライドを使用します：</p>
+            <pre><code>$ ecspresso run --overrides '{"containerOverrides":[{"name":"app","command":["rails","db:migrate"]}]}'</code></pre>
+          </li>
+          <li>
+            <p>タスクの実行状況を確認します：</p>
+            <pre><code>$ ecspresso tasks</code></pre>
+          </li>
+        </ol>
+        
+        <div class="note">
+          <p><strong>ヒント</strong>: <code>--watch</code> オプションを使用すると、タスクの完了を待機し、ログを表示できます。</p>
+        </div>
+      </section>
+      
+      <section id="exec-command" class="section">
+        <h2>コンテナ内でのコマンド実行</h2>
+        <p>実行中のコンテナ内でコマンドを実行する手順は以下の通りです：</p>
+        
+        <ol>
+          <li>
+            <p>実行中のタスクを確認します：</p>
+            <pre><code>$ ecspresso tasks</code></pre>
+          </li>
+          <li>
+            <p>コンテナ内でコマンドを実行します：</p>
+            <pre><code>$ ecspresso exec --id TASK_ID --container app -- /bin/bash</code></pre>
+          </li>
+        </ol>
+        
+        <div class="note">
+          <p><strong>注意</strong>: <code>exec</code> コマンドを使用するには、タスクロールに <code>ssmmessages:CreateControlChannel</code> などの権限が必要です。</p>
+        </div>
+        
+        <p>インタラクティブシェルを使用する例：</p>
+        <pre><code>$ ecspresso exec --interactive -- /bin/bash</code></pre>
+        
+        <p>ポートフォワーディングを使用する例：</p>
+        <pre><code>$ ecspresso exec --port-forward 8080:80 -- /bin/bash</code></pre>
+      </section>
+    </div>
+  </div>
+  
+  <footer class="footer">
+    <p>© KAYAC Inc. - <a href="https://github.com/kayac/ecspresso">GitHub リポジトリ</a></p>
+  </footer>
+</body>
+</html>

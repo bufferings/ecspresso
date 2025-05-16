@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>実践ガイド - ecspresso</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'default',
+        securityLevel: 'loose'
+      });
+    });
+  </script>
+</head>
+<body>
+  <header>
+    <h1>ecspresso</h1>
+    <p>Amazon ECS 用デプロイメントツール</p>
+    <p><em>(「エスプレッソ」と同じ発音です ☕)</em></p>
+  </header>
+  
+  <div class="container">
+    <div class="sidebar">
+      <nav>
+        <ul>
+          <li><a href="index.html">1.0 はじめに</a></li>
+          <li><a href="about.html">1.1 ecspressoとは</a></li>
+          <li><a href="installation.html">1.2 インストール方法</a></li>
+          <li><a href="quickstart.html">2.0 クイックスタート</a></li>
+          <li><a href="basic-usage.html">2.1 基本的な使い方</a></li>
+          <li><a href="common-use-cases.html">2.2 よくあるユースケース</a></li>
+          <li><a href="command-reference.html">3.0 コマンドリファレンス</a></li>
+          <li><a href="deployment-commands.html">3.1 デプロイ関連コマンド</a></li>
+          <li><a href="task-commands.html">3.2 タスク関連コマンド</a></li>
+          <li><a href="config-commands.html">3.3 設定・検証コマンド</a></li>
+          <li><a href="practical-guide.html">4.0 実践ガイド</a></li>
+          <li><a href="cicd-integration.html">4.1 CI/CDパイプラインとの統合</a></li>
+          <li><a href="multi-env.html">4.2 複数環境での運用</a></li>
+          <li><a href="large-scale.html">4.3 大規模サービスの管理</a></li>
+          <li><a href="troubleshooting.html">5.0 トラブルシューティング</a></li>
+        </ul>
+      </nav>
+    </div>
+    
+    <div class="content">
+      <h1>4.0 実践ガイド</h1>
+      
+      <div class="toc">
+        <div class="toc-title">目次</div>
+        <ul>
+          <li><a href="#overview">概要</a></li>
+          <li><a href="#sections">セクション紹介</a></li>
+          <li><a href="#best-practices">一般的なベストプラクティス</a></li>
+        </ul>
+      </div>
+      
+      <section id="overview" class="section">
+        <h2>概要</h2>
+        <p>このセクションでは、ecspressoを実際の開発・運用環境で効果的に活用するための実践的なガイドを提供します。CI/CDパイプラインとの統合方法、複数環境での運用テクニック、大規模サービスの管理方法など、実際のユースケースに基づいた内容を解説します。</p>
+        
+        <p>ecspressoは単なるデプロイツールではなく、ECSサービスのライフサイクル全体を管理するための強力なツールです。このセクションでは、その機能を最大限に活用するための実践的なアプローチを紹介します。</p>
+      </section>
+      
+      <section id="sections" class="section">
+        <h2>セクション紹介</h2>
+        
+        <h3>CI/CDパイプラインとの統合</h3>
+        <p><a href="cicd-integration.html">CI/CDパイプラインとの統合</a>セクションでは、GitHub Actions、GitLab CI、CircleCIなどの一般的なCI/CDツールとecspressoを統合する方法を解説します。自動テスト、検証、デプロイのワークフローを構築し、継続的デリバリーを実現する方法を学びます。</p>
+        
+        <h3>複数環境での運用</h3>
+        <p><a href="multi-env.html">複数環境での運用</a>セクションでは、開発、ステージング、本番などの複数環境でecspressoを効果的に使用する方法を解説します。環境ごとの設定管理、変数の扱い方、環境間での一貫したデプロイを実現するテクニックを紹介します。</p>
+        
+        <h3>大規模サービスの管理</h3>
+        <p><a href="large-scale.html">大規模サービスの管理</a>セクションでは、多数のECSサービスやタスクを効率的に管理するための方法を解説します。マイクロサービスアーキテクチャでの活用方法、スケーリング戦略、リソース管理のベストプラクティスを紹介します。</p>
+      </section>
+      
+      <section id="best-practices" class="section">
+        <h2>一般的なベストプラクティス</h2>
+        
+        <h3>設定ファイルの管理</h3>
+        <ul>
+          <li><strong>バージョン管理</strong>: ecspressoの設定ファイルはGitなどのバージョン管理システムで管理しましょう。</li>
+          <li><strong>環境変数の活用</strong>: 環境固有の値は環境変数を使用して外部化しましょう。</li>
+          <li><strong>テンプレート関数の活用</strong>: <code>env</code>や<code>must_env</code>などのテンプレート関数を活用して、柔軟な設定を実現しましょう。</li>
+        </ul>
+        
+        <h3>デプロイメントプロセス</h3>
+        <ul>
+          <li><strong>検証の自動化</strong>: <code>verify</code>コマンドをデプロイ前に自動実行して、問題を早期に検出しましょう。</li>
+          <li><strong>差分確認の習慣化</strong>: <code>diff</code>コマンドを使用して、デプロイ前に変更内容を確認する習慣をつけましょう。</li>
+          <li><strong>ロールバック計画</strong>: 問題が発生した場合のロールバック手順を事前に計画しておきましょう。</li>
+        </ul>
+        
+        <h3>モニタリングと運用</h3>
+        <ul>
+          <li><strong>ログの活用</strong>: CloudWatch Logsとの統合を活用して、デプロイとタスク実行のログを監視しましょう。</li>
+          <li><strong>メトリクスの監視</strong>: ECSサービスのメトリクスを監視して、パフォーマンスと健全性を確認しましょう。</li>
+          <li><strong>自動スケーリング</strong>: Application Auto Scalingを設定して、負荷に応じた自動スケーリングを実現しましょう。</li>
+        </ul>
+      </section>
+      
+      <section id="next-steps" class="section">
+        <h2>次のステップ</h2>
+        <p>各サブセクションでは、それぞれのトピックについてより詳細な情報と実践的な例を提供しています。以下のリンクから詳細を確認してください：</p>
+        
+        <ul>
+          <li><a href="cicd-integration.html">CI/CDパイプラインとの統合</a></li>
+          <li><a href="multi-env.html">複数環境での運用</a></li>
+          <li><a href="large-scale.html">大規模サービスの管理</a></li>
+        </ul>
+      </section>
+    </div>
+  </div>
+  
+  <footer class="footer">
+    <p>© KAYAC Inc. - <a href="https://github.com/kayac/ecspresso">GitHub リポジトリ</a></p>
+  </footer>
+</body>
+</html>

@@ -5,82 +5,166 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>高度な機能 - ecspresso</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'default',
+        securityLevel: 'loose'
+      });
+    });
+  </script>
 </head>
 <body>
   <header>
     <h1>ecspresso</h1>
     <p>Amazon ECS 用デプロイメントツール</p>
+    <p><em>(「エスプレッソ」と同じ発音です ☕)</em></p>
   </header>
   
   <div class="container">
     <div class="sidebar">
       <nav>
         <ul>
-          <li><a href="index.html">概要</a></li>
-          <li><a href="installation.html">インストール</a></li>
-          <li><a href="usage.html">使い方</a></li>
-          <li><a href="configuration.html">設定</a></li>
-          <li><a href="commands.html">コマンド</a></li>
-          <li><a href="advanced.html">高度な機能</a></li>
-          <li><a href="plugins.html">プラグイン</a></li>
-          <li><a href="changes.html">変更履歴</a></li>
+          <li><a href="index.html">1.0 概要</a></li>
+          <li><a href="installation.html">1.1 インストールと開始方法</a></li>
+          <li><a href="architecture.html">1.2 アーキテクチャ概要</a></li>
+          <li><a href="workflow.html">1.3 ワークフローとCI/CD統合</a></li>
+          <li><a href="commands.html">2.0 コマンドラインインターフェース</a></li>
+          <li><a href="commands-reference.html">2.1 CLIコマンドリファレンス</a></li>
+          <li><a href="deployment-commands.html">2.2 デプロイメントコマンド</a></li>
+          <li><a href="task-commands.html">2.3 タスク管理コマンド</a></li>
+          <li><a href="utility-commands.html">2.4 ユーティリティコマンド</a></li>
+          <li><a href="core.html">3.0 コア機能</a></li>
+          <li><a href="deployment.html">3.1 デプロイメント管理</a></li>
+          <li><a href="task-definition.html">3.2 タスク定義管理</a></li>
+          <li><a href="verification.html">3.3 リソース検証</a></li>
+          <li><a href="diffing.html">3.4 リソース差分</a></li>
+          <li><a href="configuration.html">4.0 設定管理</a></li>
+          <li><a href="config-format.html">4.1 設定ファイル形式</a></li>
+          <li><a href="definitions.html">4.2 タスクとサービス定義</a></li>
+          <li><a href="plugins.html">4.3 プラグインシステム</a></li>
+          <li><a href="jsonnet.html">4.4 Jsonnet統合</a></li>
+          <li><a href="development.html">5.0 開発と貢献</a></li>
+          <li><a href="building.html">5.1 ビルドとテスト</a></li>
+          <li><a href="release.html">5.2 リリースプロセス</a></li>
+          <li><a href="codebase.html">5.3 コードベース構造</a></li>
+          <li><a href="logging.html">5.4 ログとエラー処理</a></li>
         </ul>
       </nav>
     </div>
     
     <div class="content">
-      <h2>高度な機能</h2>
+      <h1>高度な機能</h1>
       
-      <h3>バージョン制約</h3>
-      <p>設定ファイル内の<code>required_version</code>は、ecspressoのバージョンを固定するためのものです。この機能は<code>config.go</code>の<code>Config</code>構造体で実装されています。</p>
-      <pre><code>required_version: "&gt;= 2.0.0, &lt; 3"</code></pre>
-      <p>これにより、バージョンが2.0.0以上かつ3未満の場合にのみecspressoが実行できるようになります。バージョンがこの範囲内にない場合、実行は失敗します。</p>
-      <p>内部的には<a href="https://github.com/hashicorp/go-version">go-version</a>ライブラリを使用して、バージョン制約を解析し、現在のバージョンが制約を満たしているかどうかを確認します。<code>App.CheckVersion</code>メソッドが実際の検証を行います。</p>
+      <div class="toc">
+        <div class="toc-title">目次</div>
+        <ul>
+          <li><a href="#version-constraints">バージョン制約</a></li>
+          <li><a href="#auto-scaling">Application Auto Scalingの管理</a></li>
+          <li><a href="#jsonnet">JSONとYAMLの代わりにJsonnetを使用する</a></li>
+          <li><a href="#jsonnet-functions">Jsonnet関数</a></li>
+          <li><a href="#fargate">Fargateへのデプロイ</a></li>
+          <li><a href="#service-connect">ECS Service Connectのサポート</a></li>
+          <li><a href="#ebs-volumes">EBSボリュームのサポート</a></li>
+          <li><a href="#vpc-lattice">VPC Latticeのサポート</a></li>
+        </ul>
+      </div>
       
-      <h3>Application Auto Scalingの管理</h3>
-      <p>Application Auto Scalingを使用するECSサービスの場合、<code>ecspresso scale</code>コマンドを使用して自動スケーリングの最小値と最大値の設定を調整することが簡単にできます。この機能は<code>deploy.go</code>の<code>App.Deploy</code>メソッドと<code>AutoScalingTargetResource</code>構造体で実装されています。</p>
-      <pre><code>$ ecspresso scale --tasks 5 --auto-scaling-min 5 --auto-scaling-max 20</code></pre>
+      <section id="version-constraints" class="section">
+        <h2>バージョン制約</h2>
+        <p>設定ファイル内の<code>required_version</code>は、ecspressoのバージョンを固定するためのものです。この機能は<code>config.go</code>の<code>Config</code>構造体で実装されています。</p>
+        <pre><code>required_version: "&gt;= 2.0.0, &lt; 3"</code></pre>
+        <p>これにより、バージョンが2.0.0以上かつ3未満の場合にのみecspressoが実行できるようになります。バージョンがこの範囲内にない場合、実行は失敗します。</p>
+        <p>内部的には<a href="https://github.com/hashicorp/go-version">go-version</a>ライブラリを使用して、バージョン制約を解析し、現在のバージョンが制約を満たしているかどうかを確認します。<code>App.CheckVersion</code>メソッドが実際の検証を行います。</p>
+        
+        <div class="mermaid">
+          flowchart LR
+            Config[設定ファイル] --> |required_version| Check[バージョン検証]
+            Check --> |一致| Execute[実行継続]
+            Check --> |不一致| Error[エラー終了]
+        </div>
+      </section>
       
-      <p>内部的には、以下のステップで処理されます：</p>
-      <ol>
-        <li>サービスのスケーラブルターゲットを特定（<code>findScalableTarget</code>メソッド）</li>
-        <li>最小・最大キャパシティの設定（<code>RegisterScalableTarget</code> API）</li>
-        <li>必要に応じて一時停止状態の更新</li>
-      </ol>
+      <section id="auto-scaling" class="section">
+        <h2>Application Auto Scalingの管理</h2>
+        <p>Application Auto Scalingを使用するECSサービスの場合、<code>ecspresso scale</code>コマンドを使用して自動スケーリングの最小値と最大値の設定を調整することが簡単にできます。この機能は<code>deploy.go</code>の<code>App.Deploy</code>メソッドと<code>AutoScalingTargetResource</code>構造体で実装されています。</p>
+        <pre><code>$ ecspresso scale --tasks 5 --auto-scaling-min 5 --auto-scaling-max 20</code></pre>
+        
+        <p>内部的には、以下のステップで処理されます：</p>
+        <ol>
+          <li>サービスのスケーラブルターゲットを特定（<code>findScalableTarget</code>メソッド）</li>
+          <li>最小・最大キャパシティの設定（<code>RegisterScalableTarget</code> API）</li>
+          <li>必要に応じて一時停止状態の更新</li>
+        </ol>
+        
+        <div class="mermaid">
+          sequenceDiagram
+            participant User as ユーザー
+            participant App as ecspresso
+            participant AWS as AWS API
+            
+            User->>App: ecspresso scale
+            App->>AWS: DescribeScalableTargets
+            AWS-->>App: スケーラブルターゲット情報
+            App->>AWS: RegisterScalableTarget
+            AWS-->>App: 登録結果
+            opt 一時停止/再開が指定された場合
+              App->>AWS: UpdateScalableTargetSuspendedState
+              AWS-->>App: 更新結果
+            end
+            App-->>User: 完了メッセージ
+        </div>
+        
+        <p><code>ecspresso deploy</code>と<code>scale</code>はアプリケーションの自動スケーリングを一時停止および再開できます：</p>
+        <ul>
+          <li><code>--suspend-auto-scaling</code>は一時停止状態をtrueに設定します（<code>SuspendedState</code>構造体）</li>
+          <li><code>--resume-auto-scaling</code>は一時停止状態をfalseに設定します（<code>SuspendedState</code>構造体）</li>
+        </ul>
+      </section>
       
-      <p><code>ecspresso deploy</code>と<code>scale</code>はアプリケーションの自動スケーリングを一時停止および再開できます：</p>
-      <ul>
-        <li><code>--suspend-auto-scaling</code>は一時停止状態をtrueに設定します（<code>SuspendedState</code>構造体）</li>
-        <li><code>--resume-auto-scaling</code>は一時停止状態をfalseに設定します（<code>SuspendedState</code>構造体）</li>
-      </ul>
+      <section id="jsonnet" class="section">
+        <h2>JSONとYAMLの代わりにJsonnetを使用する</h2>
+        <p>ecspressoは<a href="https://jsonnet.org/">Jsonnet</a>ファイル形式をサポートしています。この機能は<code>config.go</code>の<code>newLoader</code>関数と<code>jsonnetLoader</code>構造体で実装されています。</p>
+        <ul>
+          <li>v1.7以降：サービスとタスク定義のJsonnetサポート</li>
+          <li>v2.0以降：設定ファイルのJsonnetサポート</li>
+          <li>v2.4以降：Jsonnet関数をサポート（<code>jsonnet.go</code>で実装）</li>
+        </ul>
+        
+        <div class="mermaid">
+          flowchart TD
+            File[ファイル] --> Extension{拡張子は.jsonnet?}
+            Extension -->|Yes| Jsonnet[Jsonnetとして処理]
+            Extension -->|No| Normal[通常のJSONまたはYAML]
+            Jsonnet --> Convert[JSONに変換]
+            Convert --> Template[テンプレート構文評価]
+            Normal --> Template
+            Template --> Result[最終結果]
+        </div>
+        
+        <p>ファイルの拡張子が<code>.jsonnet</code>の場合、ecspressoは以下の順序で処理します：</p>
+        <ol>
+          <li>Jsonnetとして処理（<code>github.com/google/go-jsonnet</code>ライブラリを使用）</li>
+          <li>JSONに変換（<code>jsonnetLoader.Load</code>メソッド）</li>
+          <li>テンプレート構文の評価でロード（<code>github.com/kayac/go-config</code>ライブラリを使用）</li>
+        </ol>
+      </section>
       
-      <h3>JSONとYAMLの代わりにJsonnetを使用する</h3>
-      <p>ecspressoは<a href="https://jsonnet.org/">Jsonnet</a>ファイル形式をサポートしています。この機能は<code>config.go</code>の<code>newLoader</code>関数と<code>jsonnetLoader</code>構造体で実装されています。</p>
-      <ul>
-        <li>v1.7以降：サービスとタスク定義のJsonnetサポート</li>
-        <li>v2.0以降：設定ファイルのJsonnetサポート</li>
-        <li>v2.4以降：Jsonnet関数をサポート（<code>jsonnet.go</code>で実装）</li>
-      </ul>
-      
-      <p>ファイルの拡張子が<code>.jsonnet</code>の場合、ecspressoは以下の順序で処理します：</p>
-      <ol>
-        <li>Jsonnetとして処理（<code>github.com/google/go-jsonnet</code>ライブラリを使用）</li>
-        <li>JSONに変換（<code>jsonnetLoader.Load</code>メソッド）</li>
-        <li>テンプレート構文の評価でロード（<code>github.com/kayac/go-config</code>ライブラリを使用）</li>
-      </ol>
-      
-      <h3>Jsonnet関数</h3>
-      <p>v2.4以降はJsonnetファイル内でJsonnetネイティブ関数をサポートしています。この機能は<code>jsonnet.go</code>の<code>registerNativeFuncs</code>関数で実装されています。</p>
-      <p>.jsonnetファイル内で：</p>
-      <ol>
-        <li><code>local func = std.native('func');</code>を定義</li>
-        <li><code>func()</code>を使用</li>
-      </ol>
-      
-      <p>Jsonnet関数はJsonnetファイルのレンダリング時に評価され、テンプレート構文との競合を回避するのに役立ちます。内部的には、<code>jsonnet.VM</code>オブジェクトに関数が登録され、Jsonnetの評価時に呼び出されます。</p>
-      
-      <h4><code>env</code>、<code>must_env</code></h4>
-      <pre><code>local env = std.native('env');
+      <section id="jsonnet-functions" class="section">
+        <h2>Jsonnet関数</h2>
+        <p>v2.4以降はJsonnetファイル内でJsonnetネイティブ関数をサポートしています。この機能は<code>jsonnet.go</code>の<code>registerNativeFuncs</code>関数で実装されています。</p>
+        <p>.jsonnetファイル内で：</p>
+        <ol>
+          <li><code>local func = std.native('func');</code>を定義</li>
+          <li><code>func()</code>を使用</li>
+        </ol>
+        
+        <p>Jsonnet関数はJsonnetファイルのレンダリング時に評価され、テンプレート構文との競合を回避するのに役立ちます。内部的には、<code>jsonnet.VM</code>オブジェクトに関数が登録され、Jsonnetの評価時に呼び出されます。</p>
+        
+        <h3><code>env</code>、<code>must_env</code></h3>
+        <pre><code>local env = std.native('env');
 local must_env = std.native('must_env');
 {
   foo: env('FOO', 'default value'),
@@ -88,40 +172,86 @@ local must_env = std.native('must_env');
   bazNumber: std.parseInt(env('BAZ_NUMBER', '0')),
   booBool: std.parseJson(env('BOO_BOOL', 'false')),
 }</code></pre>
+        
+        <p>これらの関数は<code>jsonnet.go</code>の<code>envFunc</code>と<code>mustEnvFunc</code>関数として実装されており、環境変数の値を取得するために使用されます。<code>must_env</code>は環境変数が存在しない場合にエラーを発生させます。</p>
+      </section>
       
-      <p>これらの関数は<code>jsonnet.go</code>の<code>envFunc</code>と<code>mustEnvFunc</code>関数として実装されており、環境変数の値を取得するために使用されます。<code>must_env</code>は環境変数が存在しない場合にエラーを発生させます。</p>
+      <section id="fargate" class="section">
+        <h2>Fargateへのデプロイ</h2>
+        <p>Fargateにサービスをデプロイする場合、タスク定義とサービス定義の両方に特定の設定が必要です。この機能は<code>deploy.go</code>の<code>App.Deploy</code>メソッドと<code>run.go</code>の<code>App.Run</code>メソッドで実装されています。</p>
+        
+        <div class="mermaid">
+          classDiagram
+            class TaskDefinition {
+              +requiresCompatibilities: ["FARGATE"]
+              +networkMode: "awsvpc"
+              +cpu: string
+              +memory: string
+              +executionRoleArn: string
+            }
+            class Service {
+              +launchType: "FARGATE"
+              +networkConfiguration: object
+            }
+            TaskDefinition --> Service : デプロイ時に使用
+        </div>
+        
+        <p>タスク定義の場合：</p>
+        <ul>
+          <li>requiresCompatibilities（「FARGATE」が必要）- <code>TaskDefinition</code>構造体で検証</li>
+          <li>networkMode（「awsvpc」が必要）- <code>TaskDefinition</code>構造体で検証</li>
+          <li>cpu（必須）- <code>TaskDefinition</code>構造体で検証</li>
+          <li>memory（必須）- <code>TaskDefinition</code>構造体で検証</li>
+          <li>executionRoleArn（オプション）- <code>TaskDefinition</code>構造体で検証</li>
+        </ul>
+        
+        <p>サービス定義の場合：</p>
+        <ul>
+          <li>launchType（「FARGATE」が必要）- <code>Service</code>構造体で検証</li>
+          <li>networkConfiguration（「awsvpcConfiguration」が必要）- <code>Service</code>構造体で検証</li>
+        </ul>
+        
+        <p>内部的には、<code>verify.go</code>の<code>verifyTaskDefinition</code>メソッドと<code>verifyService</code>メソッドが、Fargateの要件を満たしているかどうかを検証します。要件が満たされていない場合、デプロイ前に検証エラーが発生します。</p>
+      </section>
       
-      <h3>Fargateへのデプロイ</h3>
-      <p>Fargateにサービスをデプロイする場合、タスク定義とサービス定義の両方に特定の設定が必要です。この機能は<code>deploy.go</code>の<code>App.Deploy</code>メソッドと<code>run.go</code>の<code>App.Run</code>メソッドで実装されています。</p>
+      <section id="service-connect" class="section">
+        <h2>ECS Service Connectのサポート</h2>
+        <p>ecspressoは<a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect.html">ECS Service Connect</a>をサポートしています。この機能は<code>deploy.go</code>の<code>App.Deploy</code>メソッドと<code>Service</code>構造体で実装されています。</p>
+        <p>設定するには、サービス定義に<code>serviceConnectConfiguration</code>を、タスク定義に<code>portMappings</code>を定義します。内部的には、<code>verify.go</code>の<code>verifyServiceConnectConfiguration</code>メソッドが設定を検証します。</p>
+        
+        <div class="mermaid">
+          flowchart TD
+            TaskDef[タスク定義] --> |portMappings| Verify[検証]
+            Service[サービス定義] --> |serviceConnectConfiguration| Verify
+            Verify --> Deploy[デプロイ]
+        </div>
+      </section>
       
-      <p>タスク定義の場合：</p>
-      <ul>
-        <li>requiresCompatibilities（「FARGATE」が必要）- <code>TaskDefinition</code>構造体で検証</li>
-        <li>networkMode（「awsvpc」が必要）- <code>TaskDefinition</code>構造体で検証</li>
-        <li>cpu（必須）- <code>TaskDefinition</code>構造体で検証</li>
-        <li>memory（必須）- <code>TaskDefinition</code>構造体で検証</li>
-        <li>executionRoleArn（オプション）- <code>TaskDefinition</code>構造体で検証</li>
-      </ul>
+      <section id="ebs-volumes" class="section">
+        <h2>EBSボリュームのサポート</h2>
+        <p>ecspressoは<a href="https://docs.aws.amazon.com/ja_jp/AmazonECS/latest/developerguide/ebs-volumes.html">Amazon EBSボリューム</a>をサポートしています。この機能は<code>deploy.go</code>の<code>App.Deploy</code>メソッドと<code>Service</code>構造体で実装されています。</p>
+        <p>設定するには、サービス定義に<code>volumeConfigurations</code>を、タスク定義に<code>mountPoints</code>と<code>volumes</code>を定義します。内部的には、<code>verify.go</code>の<code>verifyVolumeConfigurations</code>メソッドが設定を検証します。</p>
+        
+        <div class="mermaid">
+          flowchart TD
+            TaskDef[タスク定義] --> |mountPoints, volumes| Verify[検証]
+            Service[サービス定義] --> |volumeConfigurations| Verify
+            Verify --> Deploy[デプロイ]
+        </div>
+      </section>
       
-      <p>サービス定義の場合：</p>
-      <ul>
-        <li>launchType（「FARGATE」が必要）- <code>Service</code>構造体で検証</li>
-        <li>networkConfiguration（「awsvpcConfiguration」が必要）- <code>Service</code>構造体で検証</li>
-      </ul>
-      
-      <p>内部的には、<code>verify.go</code>の<code>verifyTaskDefinition</code>メソッドと<code>verifyService</code>メソッドが、Fargateの要件を満たしているかどうかを検証します。要件が満たされていない場合、デプロイ前に検証エラーが発生します。</p>
-      
-      <h3>ECS Service Connectのサポート</h3>
-      <p>ecspressoは<a href="https://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-connect.html">ECS Service Connect</a>をサポートしています。この機能は<code>deploy.go</code>の<code>App.Deploy</code>メソッドと<code>Service</code>構造体で実装されています。</p>
-      <p>設定するには、サービス定義に<code>serviceConnectConfiguration</code>を、タスク定義に<code>portMappings</code>を定義します。内部的には、<code>verify.go</code>の<code>verifyServiceConnectConfiguration</code>メソッドが設定を検証します。</p>
-      
-      <h3>EBSボリュームのサポート</h3>
-      <p>ecspressoは<a href="https://docs.aws.amazon.com/ja_jp/AmazonECS/latest/developerguide/ebs-volumes.html">Amazon EBSボリューム</a>をサポートしています。この機能は<code>deploy.go</code>の<code>App.Deploy</code>メソッドと<code>Service</code>構造体で実装されています。</p>
-      <p>設定するには、サービス定義に<code>volumeConfigurations</code>を、タスク定義に<code>mountPoints</code>と<code>volumes</code>を定義します。内部的には、<code>verify.go</code>の<code>verifyVolumeConfigurations</code>メソッドが設定を検証します。</p>
-      
-      <h3>VPC Latticeのサポート</h3>
-      <p>ecspressoは<a href="https://aws.amazon.com/vpc/lattice/">VPC Lattice</a>統合をサポートしています。この機能は<code>deploy.go</code>の<code>App.Deploy</code>メソッドと<code>Service</code>構造体で実装されています。</p>
-      <p>タスク定義に<code>portMappings</code>を、サービス定義に<code>vpcLatticeConfigurations</code>を定義します。内部的には、<code>verify.go</code>の<code>verifyVPCLatticeConfigurations</code>メソッドが設定を検証します。</p>
+      <section id="vpc-lattice" class="section">
+        <h2>VPC Latticeのサポート</h2>
+        <p>ecspressoは<a href="https://aws.amazon.com/vpc/lattice/">VPC Lattice</a>統合をサポートしています。この機能は<code>deploy.go</code>の<code>App.Deploy</code>メソッドと<code>Service</code>構造体で実装されています。</p>
+        <p>タスク定義に<code>portMappings</code>を、サービス定義に<code>vpcLatticeConfigurations</code>を定義します。内部的には、<code>verify.go</code>の<code>verifyVPCLatticeConfigurations</code>メソッドが設定を検証します。</p>
+        
+        <div class="mermaid">
+          flowchart TD
+            TaskDef[タスク定義] --> |portMappings| Verify[検証]
+            Service[サービス定義] --> |vpcLatticeConfigurations| Verify
+            Verify --> Deploy[デプロイ]
+        </div>
+      </section>
     </div>
   </div>
   

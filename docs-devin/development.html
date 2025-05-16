@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>開発と貢献 - ecspresso</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'default',
+        securityLevel: 'loose'
+      });
+    });
+  </script>
+</head>
+<body>
+  <header>
+    <h1>ecspresso</h1>
+    <p>Amazon ECS 用デプロイメントツール</p>
+    <p><em>(「エスプレッソ」と同じ発音です ☕)</em></p>
+  </header>
+  
+  <div class="container">
+    <div class="sidebar">
+      <nav>
+        <ul>
+          <li><a href="index.html">1.0 概要</a></li>
+          <li><a href="installation.html">1.1 インストールと開始方法</a></li>
+          <li><a href="architecture.html">1.2 アーキテクチャ概要</a></li>
+          <li><a href="workflow.html">1.3 ワークフローとCI/CD統合</a></li>
+          <li><a href="commands.html">2.0 コマンドラインインターフェース</a></li>
+          <li><a href="commands-reference.html">2.1 CLIコマンドリファレンス</a></li>
+          <li><a href="deployment-commands.html">2.2 デプロイメントコマンド</a></li>
+          <li><a href="task-commands.html">2.3 タスク管理コマンド</a></li>
+          <li><a href="utility-commands.html">2.4 ユーティリティコマンド</a></li>
+          <li><a href="core.html">3.0 コア機能</a></li>
+          <li><a href="deployment.html">3.1 デプロイメント管理</a></li>
+          <li><a href="task-definition.html">3.2 タスク定義管理</a></li>
+          <li><a href="verification.html">3.3 リソース検証</a></li>
+          <li><a href="diffing.html">3.4 リソース差分</a></li>
+          <li><a href="configuration.html">4.0 設定管理</a></li>
+          <li><a href="config-format.html">4.1 設定ファイル形式</a></li>
+          <li><a href="definitions.html">4.2 タスクとサービス定義</a></li>
+          <li><a href="plugins.html">4.3 プラグインシステム</a></li>
+          <li><a href="jsonnet.html">4.4 Jsonnet統合</a></li>
+          <li><a href="development.html">5.0 開発と貢献</a></li>
+          <li><a href="building.html">5.1 ビルドとテスト</a></li>
+          <li><a href="release.html">5.2 リリースプロセス</a></li>
+          <li><a href="codebase.html">5.3 コードベース構造</a></li>
+          <li><a href="logging.html">5.4 ログとエラー処理</a></li>
+        </ul>
+      </nav>
+    </div>
+    
+    <div class="content">
+      <h1>5.0 開発と貢献</h1>
+      
+      <div class="toc">
+        <div class="toc-title">目次</div>
+        <ul>
+          <li><a href="#development-overview">開発概要</a></li>
+          <li><a href="#development-environment">開発環境</a></li>
+          <li><a href="#contribution-workflow">貢献ワークフロー</a></li>
+          <li><a href="#coding-guidelines">コーディングガイドライン</a></li>
+          <li><a href="#documentation">ドキュメント</a></li>
+        </ul>
+      </div>
+      
+      <section id="development-overview" class="section">
+        <h2>開発概要</h2>
+        <p>ecspressoは、Go言語で開発されたオープンソースプロジェクトです。このセクションでは、ecspressoの開発に貢献するための情報を提供します。</p>
+        
+        <div class="mermaid">
+          graph TD
+            A[開発プロセス] --> B[環境設定]
+            A --> C[コード変更]
+            A --> D[テスト]
+            A --> E[プルリクエスト]
+            A --> F[レビュー]
+            A --> G[マージ]
+            
+            B --> B1[Goのインストール]
+            B --> B2[依存関係のインストール]
+            B --> B3[リポジトリのクローン]
+            
+            C --> C1[機能追加]
+            C --> C2[バグ修正]
+            C --> C3[リファクタリング]
+            
+            D --> D1[ユニットテスト]
+            D --> D2[統合テスト]
+            D --> D3[リントチェック]
+            
+            E --> E1[ブランチ作成]
+            E --> E2[コミット]
+            E --> E3[プッシュ]
+            E --> E4[PRの作成]
+            
+            F --> F1[コードレビュー]
+            F --> F2[CI/CDチェック]
+            F --> F3[フィードバック対応]
+            
+            G --> G1[マージ]
+            G --> G2[リリース]
+        </div>
+        
+        <p>ecspressoの開発に貢献するには、以下の手順に従います：</p>
+        <ol>
+          <li>GitHubリポジトリをフォークする</li>
+          <li>ローカル環境を設定する</li>
+          <li>機能追加やバグ修正を行う</li>
+          <li>テストを実行する</li>
+          <li>プルリクエストを作成する</li>
+          <li>レビューとフィードバックに対応する</li>
+        </ol>
+      </section>
+      
+      <section id="development-environment" class="section">
+        <h2>開発環境</h2>
+        <p>ecspressoの開発環境を設定するには、以下の手順に従います：</p>
+        
+        <h3>前提条件</h3>
+        <ul>
+          <li>Go 1.16以上</li>
+          <li>Git</li>
+          <li>AWS CLI（テスト用）</li>
+          <li>Docker（テスト用）</li>
+        </ul>
+        
+        <h3>リポジトリのクローン</h3>
+        <pre><code>git clone https://github.com/kayac/ecspresso.git
+cd ecspresso</code></pre>
+        
+        <h3>依存関係のインストール</h3>
+        <pre><code>go mod download</code></pre>
+        
+        <h3>ビルド</h3>
+        <pre><code>make build</code></pre>
+        
+        <h3>テスト</h3>
+        <pre><code>make test</code></pre>
+        
+        <h3>リントチェック</h3>
+        <pre><code>make lint</code></pre>
+        
+        <h3>開発用バイナリの実行</h3>
+        <pre><code>./bin/ecspresso --help</code></pre>
+      </section>
+      
+      <section id="contribution-workflow" class="section">
+        <h2>貢献ワークフロー</h2>
+        <p>ecspressoに貢献するための一般的なワークフローは以下の通りです：</p>
+        
+        <div class="mermaid">
+          sequenceDiagram
+            participant Dev as 開発者
+            participant Fork as フォークリポジトリ
+            participant Origin as 本家リポジトリ
+            participant CI as CI/CD
+            
+            Dev->>Origin: フォーク
+            Dev->>Fork: クローン
+            Dev->>Fork: ブランチ作成
+            Dev->>Fork: コード変更
+            Dev->>Fork: テスト実行
+            Dev->>Fork: コミット
+            Dev->>Fork: プッシュ
+            Dev->>Origin: プルリクエスト作成
+            Origin->>CI: CI/CD実行
+            CI-->>Origin: 結果報告
+            Origin->>Dev: レビューとフィードバック
+            Dev->>Fork: フィードバック対応
+            Dev->>Fork: 変更プッシュ
+            Origin->>Origin: マージ
+        </div>
+        
+        <h3>ブランチ作成</h3>
+        <p>新しい機能やバグ修正を行う場合は、新しいブランチを作成します：</p>
+        <pre><code>git checkout -b feature/new-feature</code></pre>
+        
+        <h3>コード変更</h3>
+        <p>コードを変更し、テストを追加または更新します。変更は小さく、焦点を絞ったものにすることをお勧めします。</p>
+        
+        <h3>テスト実行</h3>
+        <p>変更がテストに合格することを確認します：</p>
+        <pre><code>make test</code></pre>
+        
+        <h3>コミット</h3>
+        <p>変更をコミットします。コミットメッセージは明確で説明的なものにしてください：</p>
+        <pre><code>git add .
+git commit -m "Add new feature: description of the feature"</code></pre>
+        
+        <h3>プッシュ</h3>
+        <p>変更をフォークリポジトリにプッシュします：</p>
+        <pre><code>git push origin feature/new-feature</code></pre>
+        
+        <h3>プルリクエスト作成</h3>
+        <p>GitHubでプルリクエストを作成します。プルリクエストの説明には、以下の情報を含めてください：</p>
+        <ul>
+          <li>変更の目的</li>
+          <li>変更の概要</li>
+          <li>テスト方法</li>
+          <li>関連する問題（ある場合）</li>
+        </ul>
+        
+        <h3>レビューとフィードバック</h3>
+        <p>プルリクエストがレビューされ、フィードバックが提供されます。フィードバックに基づいて変更を行い、同じブランチにプッシュします。</p>
+        
+        <h3>マージ</h3>
+        <p>プルリクエストが承認されると、メンテナによってマージされます。</p>
+      </section>
+      
+      <section id="coding-guidelines" class="section">
+        <h2>コーディングガイドライン</h2>
+        <p>ecspressoのコードベースに貢献する際は、以下のガイドラインに従ってください：</p>
+        
+        <h3>コードスタイル</h3>
+        <ul>
+          <li>Go標準のコードスタイルに従う</li>
+          <li><code>gofmt</code>を使用してコードをフォーマットする</li>
+          <li><code>golint</code>と<code>go vet</code>のエラーを修正する</li>
+          <li>エラー処理を適切に行う</li>
+          <li>コメントを追加して、複雑なロジックを説明する</li>
+        </ul>
+        
+        <h3>テスト</h3>
+        <ul>
+          <li>新しい機能には単体テストを追加する</li>
+          <li>バグ修正には、バグを再現するテストを追加する</li>
+          <li>テストカバレッジを維持または向上させる</li>
+          <li>モックを使用して外部依存関係をテストする</li>
+        </ul>
+        
+        <h3>ドキュメント</h3>
+        <ul>
+          <li>新しい機能にはドキュメントを追加する</li>
+          <li>既存のドキュメントを更新して、変更を反映する</li>
+          <li>コードにはGoDocコメントを追加する</li>
+        </ul>
+        
+        <h3>コミットメッセージ</h3>
+        <ul>
+          <li>明確で説明的なコミットメッセージを書く</li>
+          <li>コミットメッセージの最初の行は50文字以内にする</li>
+          <li>必要に応じて、詳細な説明を追加する</li>
+          <li>関連する問題番号を含める（例：「Fix #123」）</li>
+        </ul>
+      </section>
+      
+      <section id="documentation" class="section">
+        <h2>ドキュメント</h2>
+        <p>ecspressoのドキュメントは、以下の場所にあります：</p>
+        
+        <ul>
+          <li><strong>README.md</strong>: プロジェクトの概要と基本的な使用方法</li>
+          <li><strong>docs-devin/</strong>: 詳細なドキュメント</li>
+          <li><strong>GoDoc</strong>: コードのドキュメント</li>
+        </ul>
+        
+        <p>ドキュメントを更新する場合は、以下のガイドラインに従ってください：</p>
+        
+        <ul>
+          <li>明確で簡潔な言葉を使用する</li>
+          <li>例を提供して、概念を説明する</li>
+          <li>スクリーンショットや図を使用して、視覚的に説明する</li>
+          <li>ドキュメントの構造を維持する</li>
+          <li>リンク切れや古い情報を修正する</li>
+        </ul>
+        
+        <p>ドキュメントの変更も、コード変更と同じプロセスでプルリクエストを作成してください。</p>
+      </section>
+    </div>
+  </div>
+  
+  <footer class="footer">
+    <p>© KAYAC Inc. - <a href="https://github.com/kayac/ecspresso">GitHub リポジトリ</a></p>
+  </footer>
+</body>
+</html>

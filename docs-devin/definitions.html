@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>タスクとサービス定義 - ecspresso</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'default',
+        securityLevel: 'loose'
+      });
+    });
+  </script>
+</head>
+<body>
+  <header>
+    <h1>ecspresso</h1>
+    <p>Amazon ECS 用デプロイメントツール</p>
+    <p><em>(「エスプレッソ」と同じ発音です ☕)</em></p>
+  </header>
+  
+  <div class="container">
+    <div class="sidebar">
+      <nav>
+        <ul>
+          <li><a href="index.html">1.0 概要</a></li>
+          <li><a href="installation.html">1.1 インストールと開始方法</a></li>
+          <li><a href="architecture.html">1.2 アーキテクチャ概要</a></li>
+          <li><a href="workflow.html">1.3 ワークフローとCI/CD統合</a></li>
+          <li><a href="commands.html">2.0 コマンドラインインターフェース</a></li>
+          <li><a href="commands-reference.html">2.1 CLIコマンドリファレンス</a></li>
+          <li><a href="deployment-commands.html">2.2 デプロイメントコマンド</a></li>
+          <li><a href="task-commands.html">2.3 タスク管理コマンド</a></li>
+          <li><a href="utility-commands.html">2.4 ユーティリティコマンド</a></li>
+          <li><a href="core.html">3.0 コア機能</a></li>
+          <li><a href="deployment.html">3.1 デプロイメント管理</a></li>
+          <li><a href="task-definition.html">3.2 タスク定義管理</a></li>
+          <li><a href="verification.html">3.3 リソース検証</a></li>
+          <li><a href="diffing.html">3.4 リソース差分</a></li>
+          <li><a href="configuration.html">4.0 設定管理</a></li>
+          <li><a href="config-format.html">4.1 設定ファイル形式</a></li>
+          <li><a href="definitions.html">4.2 タスクとサービス定義</a></li>
+          <li><a href="plugins.html">4.3 プラグインシステム</a></li>
+          <li><a href="jsonnet.html">4.4 Jsonnet統合</a></li>
+          <li><a href="development.html">5.0 開発と貢献</a></li>
+          <li><a href="building.html">5.1 ビルドとテスト</a></li>
+          <li><a href="release.html">5.2 リリースプロセス</a></li>
+          <li><a href="codebase.html">5.3 コードベース構造</a></li>
+          <li><a href="logging.html">5.4 ログとエラー処理</a></li>
+        </ul>
+      </nav>
+    </div>
+    
+    <div class="content">
+      <h1>4.2 タスクとサービス定義</h1>
+      
+      <div class="toc">
+        <div class="toc-title">目次</div>
+        <ul>
+          <li><a href="#definitions-overview">定義ファイル概要</a></li>
+          <li><a href="#task-definition-file">タスク定義ファイル</a></li>
+          <li><a href="#service-definition-file">サービス定義ファイル</a></li>
+          <li><a href="#template-functions">テンプレート関数の使用</a></li>
+          <li><a href="#definition-examples">定義例</a></li>
+        </ul>
+      </div>
+      
+      <section id="definitions-overview" class="section">
+        <h2>定義ファイル概要</h2>
+        <p>ecspressoでは、タスク定義とサービス定義を別々のJSONまたはYAMLファイルで管理します。これらのファイルは、<code>ecspresso.yml</code>の<code>task_definition</code>と<code>service_definition</code>パラメータで指定します。</p>
+        
+        <div class="mermaid">
+          graph TD
+            A[ecspresso.yml] --> B[task_definition]
+            A --> C[service_definition]
+            
+            B --> D[タスク定義ファイル]
+            C --> E[サービス定義ファイル]
+            
+            D --> F[コンテナ定義]
+            D --> G[タスクロール]
+            D --> H[実行ロール]
+            D --> I[ネットワークモード]
+            
+            E --> J[クラスター]
+            E --> K[サービス名]
+            E --> L[タスク定義]
+            E --> M[デプロイ設定]
+            E --> N[ネットワーク設定]
+            E --> O[ロードバランサー設定]
+        </div>
+        
+        <p>定義ファイルは、以下のような目的で使用されます：</p>
+        <ul>
+          <li>ECSタスク定義とサービス定義を宣言的に管理する</li>
+          <li>バージョン管理システムで変更履歴を追跡する</li>
+          <li>環境間で設定を共有する</li>
+          <li>CI/CDパイプラインで自動デプロイを行う</li>
+        </ul>
+      </section>
+      
+      <section id="task-definition-file" class="section">
+        <h2>タスク定義ファイル</h2>
+        <p>タスク定義ファイルは、ECSタスクの実行方法を定義するJSONまたはYAMLファイルです。このファイルは、AWS ECSのタスク定義と互換性があり、以下のような主要なフィールドを持っています：</p>
+        
+        <pre><code>{
+  "family": "string",
+  "taskRoleArn": "string",
+  "executionRoleArn": "string",
+  "networkMode": "string",
+  "containerDefinitions": [
+    {
+      "name": "string",
+      "image": "string",
+      "essential": boolean,
+      "command": ["string", ...],
+      "entryPoint": ["string", ...],
+      "environment": [
+        {
+          "name": "string",
+          "value": "string"
+        },
+        ...
+      ],
+      "secrets": [
+        {
+          "name": "string",
+          "valueFrom": "string"
+        },
+        ...
+      ],
+      "logConfiguration": {
+        "logDriver": "string",
+        "options": {
+          "string": "string",
+          ...
+        }
+      },
+      "portMappings": [
+        {
+          "containerPort": number,
+          "hostPort": number,
+          "protocol": "string"
+        },
+        ...
+      ],
+      "healthCheck": {
+        "command": ["string", ...],
+        "interval": number,
+        "timeout": number,
+        "retries": number,
+        "startPeriod": number
+      },
+      "cpu": number,
+      "memory": number,
+      "memoryReservation": number
+    },
+    ...
+  ],
+  "volumes": [
+    {
+      "name": "string",
+      "host": {
+        "sourcePath": "string"
+      },
+      "dockerVolumeConfiguration": {
+        "scope": "string",
+        "autoprovision": boolean,
+        "driver": "string",
+        "driverOpts": {
+          "string": "string",
+          ...
+        },
+        "labels": {
+          "string": "string",
+          ...
+        }
+      },
+      "efsVolumeConfiguration": {
+        "fileSystemId": "string",
+        "rootDirectory": "string",
+        "transitEncryption": "string",
+        "transitEncryptionPort": number,
+        "authorizationConfig": {
+          "accessPointId": "string",
+          "iam": "string"
+        }
+      }
+    },
+    ...
+  ],
+  "placementConstraints": [
+    {
+      "type": "string",
+      "expression": "string"
+    },
+    ...
+  ],
+  "requiresCompatibilities": ["string", ...],
+  "cpu": "string",
+  "memory": "string",
+  "tags": [
+    {
+      "key": "string",
+      "value": "string"
+    },
+    ...
+  ]
+}</code></pre>
+        
+        <p>主要なフィールドの説明：</p>
+        <ul>
+          <li><strong>family</strong>: タスク定義のファミリー名</li>
+          <li><strong>taskRoleArn</strong>: タスクに割り当てるIAMロールのARN</li>
+          <li><strong>executionRoleArn</strong>: タスク実行に使用するIAMロールのARN</li>
+          <li><strong>networkMode</strong>: ネットワークモード（awsvpc, bridge, host, none）</li>
+          <li><strong>containerDefinitions</strong>: コンテナの定義のリスト</li>
+          <li><strong>volumes</strong>: ボリュームの定義のリスト</li>
+          <li><strong>placementConstraints</strong>: タスクのプレースメント制約のリスト</li>
+          <li><strong>requiresCompatibilities</strong>: タスクの互換性要件（EC2, FARGATE）</li>
+          <li><strong>cpu</strong>: タスクに割り当てるCPUユニット</li>
+          <li><strong>memory</strong>: タスクに割り当てるメモリ（MB）</li>
+          <li><strong>tags</strong>: タスク定義に付けるタグのリスト</li>
+        </ul>
+        
+        <p>コンテナ定義の主要なフィールドの説明：</p>
+        <ul>
+          <li><strong>name</strong>: コンテナ名</li>
+          <li><strong>image</strong>: コンテナイメージ</li>
+          <li><strong>essential</strong>: 必須コンテナかどうか</li>
+          <li><strong>command</strong>: コンテナで実行するコマンド</li>
+          <li><strong>entryPoint</strong>: コンテナのエントリーポイント</li>
+          <li><strong>environment</strong>: 環境変数のリスト</li>
+          <li><strong>secrets</strong>: シークレットのリスト</li>
+          <li><strong>logConfiguration</strong>: ログ設定</li>
+          <li><strong>portMappings</strong>: ポートマッピングのリスト</li>
+          <li><strong>healthCheck</strong>: ヘルスチェック設定</li>
+          <li><strong>cpu</strong>: コンテナに割り当てるCPUユニット</li>
+          <li><strong>memory</strong>: コンテナに割り当てるメモリ（MB）</li>
+          <li><strong>memoryReservation</strong>: コンテナに予約するメモリ（MB）</li>
+        </ul>
+      </section>
+      
+      <section id="service-definition-file" class="section">
+        <h2>サービス定義ファイル</h2>
+        <p>サービス定義ファイルは、ECSサービスの実行方法を定義するJSONまたはYAMLファイルです。このファイルは、AWS ECSのサービス定義と互換性があり、以下のような主要なフィールドを持っています：</p>
+        
+        <pre><code>{
+  "cluster": "string",
+  "serviceName": "string",
+  "taskDefinition": "string",
+  "loadBalancers": [
+    {
+      "targetGroupArn": "string",
+      "containerName": "string",
+      "containerPort": number
+    },
+    ...
+  ],
+  "serviceRegistries": [
+    {
+      "registryArn": "string",
+      "port": number,
+      "containerName": "string",
+      "containerPort": number
+    },
+    ...
+  ],
+  "desiredCount": number,
+  "launchType": "string",
+  "platformVersion": "string",
+  "deploymentConfiguration": {
+    "deploymentCircuitBreaker": {
+      "enable": boolean,
+      "rollback": boolean
+    },
+    "maximumPercent": number,
+    "minimumHealthyPercent": number
+  },
+  "placementConstraints": [
+    {
+      "type": "string",
+      "expression": "string"
+    },
+    ...
+  ],
+  "placementStrategy": [
+    {
+      "type": "string",
+      "field": "string"
+    },
+    ...
+  ],
+  "networkConfiguration": {
+    "awsvpcConfiguration": {
+      "subnets": ["string", ...],
+      "securityGroups": ["string", ...],
+      "assignPublicIp": "string"
+    }
+  },
+  "healthCheckGracePeriodSeconds": number,
+  "schedulingStrategy": "string",
+  "deploymentController": {
+    "type": "string"
+  },
+  "tags": [
+    {
+      "key": "string",
+      "value": "string"
+    },
+    ...
+  ],
+  "enableECSManagedTags": boolean,
+  "propagateTags": "string",
+  "enableExecuteCommand": boolean
+}</code></pre>
+        
+        <p>主要なフィールドの説明：</p>
+        <ul>
+          <li><strong>cluster</strong>: ECSクラスター名</li>
+          <li><strong>serviceName</strong>: サービス名</li>
+          <li><strong>taskDefinition</strong>: タスク定義のARNまたはファミリー名:リビジョン</li>
+          <li><strong>loadBalancers</strong>: ロードバランサーの設定のリスト</li>
+          <li><strong>serviceRegistries</strong>: サービスレジストリの設定のリスト</li>
+          <li><strong>desiredCount</strong>: 希望するタスク数</li>
+          <li><strong>launchType</strong>: 起動タイプ（EC2, FARGATE）</li>
+          <li><strong>platformVersion</strong>: プラットフォームバージョン</li>
+          <li><strong>deploymentConfiguration</strong>: デプロイ設定</li>
+          <li><strong>placementConstraints</strong>: タスクのプレースメント制約のリスト</li>
+          <li><strong>placementStrategy</strong>: タスクのプレースメント戦略のリスト</li>
+          <li><strong>networkConfiguration</strong>: ネットワーク設定</li>
+          <li><strong>healthCheckGracePeriodSeconds</strong>: ヘルスチェックの猶予期間（秒）</li>
+          <li><strong>schedulingStrategy</strong>: スケジューリング戦略（REPLICA, DAEMON）</li>
+          <li><strong>deploymentController</strong>: デプロイコントローラーの設定</li>
+          <li><strong>tags</strong>: サービスに付けるタグのリスト</li>
+          <li><strong>enableECSManagedTags</strong>: ECS管理タグを有効にするかどうか</li>
+          <li><strong>propagateTags</strong>: タグの伝播方法（TASK_DEFINITION, SERVICE, NONE）</li>
+          <li><strong>enableExecuteCommand</strong>: ECS Execを有効にするかどうか</li>
+        </ul>
+      </section>
+      
+      <section id="template-functions" class="section">
+        <h2>テンプレート関数の使用</h2>
+        <p>ecspressoでは、タスク定義ファイルとサービス定義ファイル内でテンプレート関数を使用することができます。これにより、環境変数やプラグインが提供する値を参照できます。</p>
+        
+        <div class="mermaid">
+          graph TD
+            A[テンプレート関数] --> B[環境変数関数]
+            A --> C[プラグイン関数]
+            A --> D[ユーティリティ関数]
+            
+            B --> E[env]
+            B --> F[must_env]
+            
+            C --> G[tfstate]
+            C --> H[cfn_output]
+            C --> I[ssm]
+            C --> J[secretsmanager_arn]
+            
+            D --> K[json]
+            D --> L[yaml]
+            D --> M[base64]
+        </div>
+        
+        <h3>環境変数関数の使用例</h3>
+        <pre><code>{
+  "family": "{{ env "APP_NAME" }}",
+  "taskRoleArn": "{{ env "TASK_ROLE_ARN" }}",
+  "executionRoleArn": "{{ env "EXECUTION_ROLE_ARN" }}",
+  "networkMode": "awsvpc",
+  "containerDefinitions": [
+    {
+      "name": "web",
+      "image": "{{ env "ECR_REPOSITORY" }}:{{ env "IMAGE_TAG" }}",
+      "essential": true,
+      "environment": [
+        {
+          "name": "NODE_ENV",
+          "value": "{{ env "NODE_ENV" }}"
+        }
+      ]
+    }
+  ]
+}</code></pre>
+        
+        <h3>プラグイン関数の使用例</h3>
+        <pre><code>{
+  "family": "my-app",
+  "taskRoleArn": "{{ tfstate "aws_iam_role.ecs_task_role.arn" }}",
+  "executionRoleArn": "{{ tfstate "aws_iam_role.ecs_task_execution_role.arn" }}",
+  "networkMode": "awsvpc",
+  "containerDefinitions": [
+    {
+      "name": "web",
+      "image": "{{ env "ECR_REPOSITORY" }}:{{ env "IMAGE_TAG" }}",
+      "essential": true,
+      "secrets": [
+        {
+          "name": "DATABASE_URL",
+          "valueFrom": "{{ secretsmanager_arn "my-app/database-url" }}"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "{{ cfn_output "MyStack" "LogGroupName" }}",
+          "awslogs-region": "{{ env "AWS_REGION" }}",
+          "awslogs-stream-prefix": "web"
+        }
+      }
+    }
+  ]
+}</code></pre>
+      </section>
+      
+      <section id="definition-examples" class="section">
+        <h2>定義例</h2>
+        <p>以下は、ecspressoで使用できるタスク定義とサービス定義の例です：</p>
+        
+        <h3>基本的なタスク定義</h3>
+        <pre><code>{
+  "family": "my-app",
+  "executionRoleArn": "arn:aws:iam::123456789012:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::123456789012:role/ecsTaskRole",
+  "networkMode": "awsvpc",
+  "containerDefinitions": [
+    {
+      "name": "web",
+      "image": "123456789012.dkr.ecr.ap-northeast-1.amazonaws.com/my-app:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "hostPort": 80,
+          "protocol": "tcp"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/my-app",
+          "awslogs-region": "ap-northeast-1",
+          "awslogs-stream-prefix": "web"
+        }
+      },
+      "environment": [
+        {
+          "name": "NODE_ENV",
+          "value": "production"
+        }
+      ],
+      "cpu": 256,
+      "memory": 512
+    }
+  ],
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "256",
+  "memory": "512"
+}</code></pre>
+        
+        <h3>基本的なサービス定義</h3>
+        <pre><code>{
+  "cluster": "my-cluster",
+  "serviceName": "my-service",
+  "taskDefinition": "my-app",
+  "desiredCount": 2,
+  "launchType": "FARGATE",
+  "platformVersion": "LATEST",
+  "deploymentConfiguration": {
+    "deploymentCircuitBreaker": {
+      "enable": true,
+      "rollback": true
+    },
+    "maximumPercent": 200,
+    "minimumHealthyPercent": 100
+  },
+  "networkConfiguration": {
+    "awsvpcConfiguration": {
+      "subnets": [
+        "subnet-12345678",
+        "subnet-87654321"
+      ],
+      "securityGroups": [
+        "sg-12345678"
+      ],
+      "assignPublicIp": "ENABLED"
+    }
+  },
+  "loadBalancers": [
+    {
+      "targetGroupArn": "arn:aws:elasticloadbalancing:ap-northeast-1:123456789012:targetgroup/my-target-group/1234567890123456",
+      "containerName": "web",
+      "containerPort": 80
+    }
+  ],
+  "healthCheckGracePeriodSeconds": 60,
+  "schedulingStrategy": "REPLICA",
+  "deploymentController": {
+    "type": "ECS"
+  },
+  "enableECSManagedTags": true,
+  "propagateTags": "SERVICE",
+  "enableExecuteCommand": true
+}</code></pre>
+        
+        <h3>テンプレート関数を使用したタスク定義</h3>
+        <pre><code>{
+  "family": "{{ env "APP_NAME" }}",
+  "executionRoleArn": "{{ tfstate "aws_iam_role.ecs_task_execution_role.arn" }}",
+  "taskRoleArn": "{{ tfstate "aws_iam_role.ecs_task_role.arn" }}",
+  "networkMode": "awsvpc",
+  "containerDefinitions": [
+    {
+      "name": "web",
+      "image": "{{ env "ECR_REPOSITORY" }}:{{ env "IMAGE_TAG" }}",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 80,
+          "hostPort": 80,
+          "protocol": "tcp"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/{{ env "APP_NAME" }}",
+          "awslogs-region": "{{ env "AWS_REGION" }}",
+          "awslogs-stream-prefix": "web"
+        }
+      },
+      "environment": [
+        {
+          "name": "NODE_ENV",
+          "value": "{{ env "NODE_ENV" }}"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "DATABASE_URL",
+          "valueFrom": "{{ secretsmanager_arn "my-app/database-url" }}"
+        }
+      ],
+      "cpu": 256,
+      "memory": 512
+    }
+  ],
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "{{ env "TASK_CPU" }}",
+  "memory": "{{ env "TASK_MEMORY" }}"
+}</code></pre>
+        
+        <h3>テンプレート関数を使用したサービス定義</h3>
+        <pre><code>{
+  "cluster": "{{ env "ECS_CLUSTER" }}",
+  "serviceName": "{{ env "APP_NAME" }}",
+  "taskDefinition": "{{ env "APP_NAME" }}",
+  "desiredCount": {{ env "DESIRED_COUNT" }},
+  "launchType": "FARGATE",
+  "platformVersion": "LATEST",
+  "deploymentConfiguration": {
+    "deploymentCircuitBreaker": {
+      "enable": true,
+      "rollback": true
+    },
+    "maximumPercent": 200,
+    "minimumHealthyPercent": 100
+  },
+  "networkConfiguration": {
+    "awsvpcConfiguration": {
+      "subnets": [
+        "{{ tfstate "aws_subnet.private_a.id" }}",
+        "{{ tfstate "aws_subnet.private_c.id" }}"
+      ],
+      "securityGroups": [
+        "{{ tfstate "aws_security_group.app.id" }}"
+      ],
+      "assignPublicIp": "DISABLED"
+    }
+  },
+  "loadBalancers": [
+    {
+      "targetGroupArn": "{{ tfstate "aws_lb_target_group.app.arn" }}",
+      "containerName": "web",
+      "containerPort": 80
+    }
+  ],
+  "healthCheckGracePeriodSeconds": 60,
+  "schedulingStrategy": "REPLICA",
+  "deploymentController": {
+    "type": "{{ env "DEPLOYMENT_CONTROLLER_TYPE" }}"
+  },
+  "enableECSManagedTags": true,
+  "propagateTags": "SERVICE",
+  "enableExecuteCommand": {{ env "ENABLE_EXECUTE_COMMAND" }}
+}</code></pre>
+        
+        <h3>CodeDeployを使用したサービス定義</h3>
+        <pre><code>{
+  "cluster": "my-cluster",
+  "serviceName": "my-service",
+  "taskDefinition": "my-app",
+  "desiredCount": 2,
+  "launchType": "FARGATE",
+  "platformVersion": "LATEST",
+  "deploymentConfiguration": {
+    "maximumPercent": 200,
+    "minimumHealthyPercent": 100
+  },
+  "networkConfiguration": {
+    "awsvpcConfiguration": {
+      "subnets": [
+        "subnet-12345678",
+        "subnet-87654321"
+      ],
+      "securityGroups": [
+        "sg-12345678"
+      ],
+      "assignPublicIp": "DISABLED"
+    }
+  },
+  "loadBalancers": [
+    {
+      "targetGroupArn": "arn:aws:elasticloadbalancing:ap-northeast-1:123456789012:targetgroup/blue/1234567890123456",
+      "containerName": "web",
+      "containerPort": 80
+    }
+  ],
+  "healthCheckGracePeriodSeconds": 60,
+  "schedulingStrategy": "REPLICA",
+  "deploymentController": {
+    "type": "CODE_DEPLOY"
+  },
+  "enableECSManagedTags": true,
+  "propagateTags": "SERVICE"
+}</code></pre>
+      </section>
+    </div>
+  </div>
+  
+  <footer class="footer">
+    <p>© KAYAC Inc. - <a href="https://github.com/kayac/ecspresso">GitHub リポジトリ</a></p>
+  </footer>
+</body>
+</html>

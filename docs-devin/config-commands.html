@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>設定・検証コマンド - ecspresso</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'default',
+        securityLevel: 'loose'
+      });
+    });
+  </script>
+</head>
+<body>
+  <header>
+    <h1>ecspresso</h1>
+    <p>Amazon ECS 用デプロイメントツール</p>
+    <p><em>(「エスプレッソ」と同じ発音です ☕)</em></p>
+  </header>
+  
+  <div class="container">
+    <div class="sidebar">
+      <nav>
+        <ul>
+          <li><a href="index.html">1.0 はじめに</a></li>
+          <li><a href="about.html">1.1 ecspressoとは</a></li>
+          <li><a href="installation.html">1.2 インストール方法</a></li>
+          <li><a href="quickstart.html">2.0 クイックスタート</a></li>
+          <li><a href="basic-usage.html">2.1 基本的な使い方</a></li>
+          <li><a href="common-use-cases.html">2.2 よくあるユースケース</a></li>
+          <li><a href="command-reference.html">3.0 コマンドリファレンス</a></li>
+          <li><a href="deployment-commands.html">3.1 デプロイ関連コマンド</a></li>
+          <li><a href="task-commands.html">3.2 タスク関連コマンド</a></li>
+          <li><a href="config-commands.html">3.3 設定・検証コマンド</a></li>
+          <li><a href="practical-guide.html">4.0 実践ガイド</a></li>
+          <li><a href="cicd-integration.html">4.1 CI/CDパイプラインとの統合</a></li>
+          <li><a href="multi-env.html">4.2 複数環境での運用</a></li>
+          <li><a href="large-scale.html">4.3 大規模サービスの管理</a></li>
+          <li><a href="troubleshooting.html">5.0 トラブルシューティング</a></li>
+        </ul>
+      </nav>
+    </div>
+    
+    <div class="content">
+      <h1>3.3 設定・検証コマンド</h1>
+      
+      <div class="toc">
+        <div class="toc-title">目次</div>
+        <ul>
+          <li><a href="#init">initコマンド</a></li>
+          <li><a href="#verify">verifyコマンド</a></li>
+          <li><a href="#diff">diffコマンド</a></li>
+          <li><a href="#render">renderコマンド</a></li>
+          <li><a href="#status">statusコマンド</a></li>
+        </ul>
+      </div>
+      
+      <section id="init" class="section">
+        <h2>initコマンド</h2>
+        <p>ecspressoの設定ファイルを初期化します。既存のECSサービスからecspresso用の設定ファイルを生成するために使用します。</p>
+        
+        <h3>基本的な使い方</h3>
+        <pre><code>$ ecspresso init [オプション]</code></pre>
+        
+        <h3>主なオプション</h3>
+        <ul>
+          <li><code>--region REGION</code>: AWSリージョンを指定します。</li>
+          <li><code>--cluster CLUSTER</code>: ECSクラスター名を指定します。</li>
+          <li><code>--service SERVICE</code>: ECSサービス名を指定します。</li>
+          <li><code>--config FILE</code>: 設定ファイル名を指定します（デフォルト: ecspresso.yml）。</li>
+          <li><code>--task-definition ARN</code>: 特定のタスク定義ARNを指定します。</li>
+          <li><code>--no-service</code>: サービスなしでタスク定義のみを初期化します。</li>
+        </ul>
+        
+        <h3>使用例</h3>
+        <pre><code>$ ecspresso init --region ap-northeast-1 --cluster my-cluster --service my-service</code></pre>
+        <p>指定したクラスターとサービスに基づいて設定ファイルを初期化します。これにより、以下のファイルが生成されます：</p>
+        <ul>
+          <li><code>ecspresso.yml</code>: ecspressoの設定ファイル</li>
+          <li><code>ecs-service-def.json</code>: ECSサービス定義</li>
+          <li><code>ecs-task-def.json</code>: ECSタスク定義</li>
+        </ul>
+      </section>
+      
+      <section id="verify" class="section">
+        <h2>verifyコマンド</h2>
+        <p>デプロイ前にリソースの設定が正しいか検証します。タスク定義やサービス定義で参照されているリソース（IAMロール、ログ設定、シークレットなど）が実際に存在するかを確認します。</p>
+        
+        <h3>基本的な使い方</h3>
+        <pre><code>$ ecspresso verify [オプション]</code></pre>
+        
+        <h3>主なオプション</h3>
+        <ul>
+          <li><code>--task-definition FILE</code>: 検証するタスク定義ファイルを指定します。</li>
+          <li><code>--no-cache</code>: 検証キャッシュを使用しません。</li>
+          <li><code>--secrets</code>: シークレットの存在も検証します。</li>
+          <li><code>--only-task-definition</code>: タスク定義のみを検証します。</li>
+          <li><code>--only-service-definition</code>: サービス定義のみを検証します。</li>
+        </ul>
+        
+        <h3>検証項目</h3>
+        <ul>
+          <li>IAMロール（タスク実行ロール、タスクロール）</li>
+          <li>CloudWatch Logsのロググループ</li>
+          <li>Secrets ManagerやSSMのシークレット（--secretsオプション使用時）</li>
+          <li>ロードバランサーのターゲットグループ</li>
+          <li>セキュリティグループ</li>
+          <li>サブネット</li>
+        </ul>
+        
+        <h3>使用例</h3>
+        <pre><code>$ ecspresso verify --secrets</code></pre>
+        <p>シークレットの存在も含めてリソースを検証します。問題がなければ成功メッセージが表示され、問題があれば詳細なエラーメッセージが表示されます。</p>
+      </section>
+      
+      <section id="diff" class="section">
+        <h2>diffコマンド</h2>
+        <p>ローカルの設定とAWS上の設定の差分を表示します。タスク定義やサービス定義の変更点を確認するのに役立ちます。</p>
+        
+        <h3>基本的な使い方</h3>
+        <pre><code>$ ecspresso diff [オプション]</code></pre>
+        
+        <h3>主なオプション</h3>
+        <ul>
+          <li><code>--no-unified</code>: 統一差分形式を使用しません。</li>
+          <li><code>--external COMMAND</code>: 差分表示に外部コマンドを使用します。</li>
+          <li><code>--only-task-definition</code>: タスク定義の差分のみを表示します。</li>
+          <li><code>--only-service-definition</code>: サービス定義の差分のみを表示します。</li>
+        </ul>
+        
+        <h3>使用例</h3>
+        <pre><code>$ ecspresso diff --external "colordiff -u"</code></pre>
+        <p>colordiffを使用して差分を色付きで表示します。</p>
+        
+        <pre><code>$ ecspresso diff --only-task-definition</code></pre>
+        <p>タスク定義の差分のみを表示します。</p>
+      </section>
+      
+      <section id="render" class="section">
+        <h2>renderコマンド</h2>
+        <p>タスク定義やサービス定義をレンダリングして表示します。テンプレート関数やプラグインが適用された後の最終的な定義を確認できます。</p>
+        
+        <h3>基本的な使い方</h3>
+        <pre><code>$ ecspresso render [オプション]</code></pre>
+        
+        <h3>主なオプション</h3>
+        <ul>
+          <li><code>--task-definition</code>: タスク定義をレンダリングします。</li>
+          <li><code>--service-definition</code>: サービス定義をレンダリングします。</li>
+          <li><code>--appspec</code>: CodeDeployのAppSpecをレンダリングします。</li>
+        </ul>
+        
+        <h3>使用例</h3>
+        <pre><code>$ ecspresso render --task-definition > rendered-task-def.json</code></pre>
+        <p>タスク定義をレンダリングしてファイルに保存します。</p>
+        
+        <pre><code>$ ecspresso render --service-definition | jq</code></pre>
+        <p>サービス定義をレンダリングしてjqで整形表示します。</p>
+      </section>
+      
+      <section id="status" class="section">
+        <h2>statusコマンド</h2>
+        <p>ECSサービスの現在の状態を表示します。デプロイ状況の確認やトラブルシューティングに役立ちます。</p>
+        
+        <h3>基本的な使い方</h3>
+        <pre><code>$ ecspresso status [オプション]</code></pre>
+        
+        <h3>主なオプション</h3>
+        <ul>
+          <li><code>--events N</code>: 表示するイベント数を指定します（デフォルト: 10）。</li>
+          <li><code>--tasks</code>: タスクの状態も表示します。</li>
+          <li><code>--output FORMAT</code>: 出力形式を指定します（json, yaml, table）。</li>
+        </ul>
+        
+        <h3>表示される情報</h3>
+        <ul>
+          <li>サービス名、クラスター名</li>
+          <li>タスク定義ARN</li>
+          <li>実行中のタスク数、希望するタスク数</li>
+          <li>デプロイメント状態（PRIMARY, ACTIVE）</li>
+          <li>最近のサービスイベント</li>
+          <li>タスクの状態（--tasksオプション使用時）</li>
+        </ul>
+        
+        <h3>使用例</h3>
+        <pre><code>$ ecspresso status --events 10 --tasks</code></pre>
+        <p>サービスの状態と直近10件のイベント、およびタスクの状態を表示します。</p>
+      </section>
+      
+      <section id="best-practices" class="section">
+        <h2>ベストプラクティス</h2>
+        <ul>
+          <li><strong>デプロイ前の検証</strong>: デプロイ前に必ず<code>verify</code>コマンドを実行して、リソースの設定が正しいことを確認しましょう。</li>
+          <li><strong>差分確認</strong>: デプロイ前に<code>diff</code>コマンドで変更内容を確認しましょう。</li>
+          <li><strong>CI/CDパイプラインでの活用</strong>: <code>verify</code>と<code>diff</code>コマンドをCI/CDパイプラインに組み込むことで、問題のある変更を早期に検出できます。</li>
+          <li><strong>レンダリング結果の確認</strong>: 複雑なテンプレート関数やプラグインを使用している場合は、<code>render</code>コマンドで最終的な定義を確認しましょう。</li>
+        </ul>
+      </section>
+    </div>
+  </div>
+  
+  <footer class="footer">
+    <p>© KAYAC Inc. - <a href="https://github.com/kayac/ecspresso">GitHub リポジトリ</a></p>
+  </footer>
+</body>
+</html>

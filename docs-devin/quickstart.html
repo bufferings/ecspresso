@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>クイックスタート - ecspresso</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'default',
+        securityLevel: 'loose'
+      });
+    });
+  </script>
+</head>
+<body>
+  <header>
+    <h1>ecspresso</h1>
+    <p>Amazon ECS 用デプロイメントツール</p>
+    <p><em>(「エスプレッソ」と同じ発音です ☕)</em></p>
+  </header>
+  
+  <div class="container">
+    <div class="sidebar">
+      <nav>
+        <ul>
+          <li><a href="index.html">1.0 はじめに</a></li>
+          <li><a href="about.html">1.1 ecspressoとは</a></li>
+          <li><a href="installation.html">1.2 インストール方法</a></li>
+          <li><a href="quickstart.html">2.0 クイックスタート</a></li>
+          <li><a href="basic-usage.html">2.1 基本的な使い方</a></li>
+          <li><a href="common-use-cases.html">2.2 よくあるユースケース</a></li>
+          <li><a href="command-reference.html">3.0 コマンドリファレンス</a></li>
+          <li><a href="deployment-commands.html">3.1 デプロイ関連コマンド</a></li>
+          <li><a href="task-commands.html">3.2 タスク関連コマンド</a></li>
+          <li><a href="config-commands.html">3.3 設定・検証コマンド</a></li>
+          <li><a href="practical-guide.html">4.0 実践ガイド</a></li>
+          <li><a href="cicd-integration.html">4.1 CI/CDパイプラインとの統合</a></li>
+          <li><a href="multi-env.html">4.2 複数環境での運用</a></li>
+          <li><a href="large-scale.html">4.3 大規模サービスの管理</a></li>
+          <li><a href="troubleshooting.html">5.0 トラブルシューティング</a></li>
+        </ul>
+      </nav>
+    </div>
+    
+    <div class="content">
+      <h1>2.0 クイックスタート</h1>
+      
+      <div class="toc">
+        <div class="toc-title">目次</div>
+        <ul>
+          <li><a href="#prerequisites">前提条件</a></li>
+          <li><a href="#init">初期化</a></li>
+          <li><a href="#deploy">デプロイ</a></li>
+          <li><a href="#workflow">基本ワークフロー</a></li>
+        </ul>
+      </div>
+      
+      <section id="prerequisites" class="section">
+        <h2>前提条件</h2>
+        <p>ecspressoを使用するには、以下が必要です：</p>
+        <ul>
+          <li>AWS認証情報（アクセスキーとシークレットキー）</li>
+          <li>ECSクラスターへのアクセス権限</li>
+          <li>ECSサービスとタスク定義を操作する権限</li>
+        </ul>
+        
+        <p>AWS認証情報は、以下のいずれかの方法で設定できます：</p>
+        <ul>
+          <li>環境変数（AWS_ACCESS_KEY_IDとAWS_SECRET_ACCESS_KEY）</li>
+          <li>共有認証情報ファイル（~/.aws/credentials）</li>
+          <li>IAMロール（EC2インスタンスまたはECSタスク）</li>
+        </ul>
+      </section>
+      
+      <section id="init" class="section">
+        <h2>初期化</h2>
+        <p>既存のECSサービスからecspresso設定を初期化するには：</p>
+        
+        <pre><code>$ ecspresso init --region ap-northeast-1 --cluster your-cluster --service your-service</code></pre>
+        
+        <p>これにより、以下のファイルが生成されます：</p>
+        <ul>
+          <li><code>ecspresso.yml</code>: ecspressoの設定ファイル</li>
+          <li><code>ecs-service-def.json</code>: ECSサービス定義</li>
+          <li><code>ecs-task-def.json</code>: ECSタスク定義</li>
+        </ul>
+        
+        <div class="mermaid">
+sequenceDiagram
+  actor User as ユーザー
+  participant Ecspresso as ecspresso
+  participant AWS as AWS API
+  
+  User->>Ecspresso: ecspresso init
+  Ecspresso->>AWS: サービス情報取得
+  AWS-->>Ecspresso: サービス定義
+  Ecspresso->>AWS: タスク定義取得
+  AWS-->>Ecspresso: タスク定義
+  Ecspresso->>Ecspresso: 設定ファイル生成
+  Ecspresso-->>User: 完了メッセージ
+        </div>
+      </section>
+      
+      <section id="deploy" class="section">
+        <h2>デプロイ</h2>
+        <p>サービスをデプロイするには：</p>
+        
+        <pre><code>$ ecspresso deploy --config ecspresso.yml</code></pre>
+        
+        <p>デプロイ前に差分を確認するには：</p>
+        
+        <pre><code>$ ecspresso diff</code></pre>
+        
+        <p>デプロイ前にリソースを検証するには：</p>
+        
+        <pre><code>$ ecspresso verify</code></pre>
+      </section>
+      
+      <section id="workflow" class="section">
+        <h2>基本ワークフロー</h2>
+        
+        <div class="mermaid">
+flowchart TD
+  A[設定ファイル編集] --> B[差分確認]
+  B --> C{差分あり?}
+  C -->|はい| D[リソース検証]
+  C -->|いいえ| H[完了]
+  D --> E{検証成功?}
+  E -->|はい| F[デプロイ]
+  E -->|いいえ| A
+  F --> G[デプロイ待機]
+  G --> H[完了]
+        </div>
+        
+        <p>基本的なワークフローは以下の通りです：</p>
+        <ol>
+          <li>設定ファイル（タスク定義やサービス定義）を編集します。</li>
+          <li><code>ecspresso diff</code>で変更内容を確認します。</li>
+          <li><code>ecspresso verify</code>でリソースを検証します。</li>
+          <li><code>ecspresso deploy</code>でサービスをデプロイします。</li>
+          <li>サービスが安定するまで待機します。</li>
+        </ol>
+      </section>
+    </div>
+  </div>
+  
+  <footer class="footer">
+    <p>© KAYAC Inc. - <a href="https://github.com/kayac/ecspresso">GitHub リポジトリ</a></p>
+  </footer>
+</body>
+</html>

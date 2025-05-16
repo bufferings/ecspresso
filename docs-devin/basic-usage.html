@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>基本的な使い方 - ecspresso</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'default',
+        securityLevel: 'loose'
+      });
+    });
+  </script>
+</head>
+<body>
+  <header>
+    <h1>ecspresso</h1>
+    <p>Amazon ECS 用デプロイメントツール</p>
+    <p><em>(「エスプレッソ」と同じ発音です ☕)</em></p>
+  </header>
+  
+  <div class="container">
+    <div class="sidebar">
+      <nav>
+        <ul>
+          <li><a href="index.html">1.0 はじめに</a></li>
+          <li><a href="about.html">1.1 ecspressoとは</a></li>
+          <li><a href="installation.html">1.2 インストール方法</a></li>
+          <li><a href="quickstart.html">2.0 クイックスタート</a></li>
+          <li><a href="basic-usage.html">2.1 基本的な使い方</a></li>
+          <li><a href="common-use-cases.html">2.2 よくあるユースケース</a></li>
+          <li><a href="command-reference.html">3.0 コマンドリファレンス</a></li>
+          <li><a href="deployment-commands.html">3.1 デプロイ関連コマンド</a></li>
+          <li><a href="task-commands.html">3.2 タスク関連コマンド</a></li>
+          <li><a href="config-commands.html">3.3 設定・検証コマンド</a></li>
+          <li><a href="practical-guide.html">4.0 実践ガイド</a></li>
+          <li><a href="cicd-integration.html">4.1 CI/CDパイプラインとの統合</a></li>
+          <li><a href="multi-env.html">4.2 複数環境での運用</a></li>
+          <li><a href="large-scale.html">4.3 大規模サービスの管理</a></li>
+          <li><a href="troubleshooting.html">5.0 トラブルシューティング</a></li>
+        </ul>
+      </nav>
+    </div>
+    
+    <div class="content">
+      <h1>2.1 基本的な使い方</h1>
+      
+      <div class="toc">
+        <div class="toc-title">目次</div>
+        <ul>
+          <li><a href="#config">設定ファイル</a></li>
+          <li><a href="#task-def">タスク定義</a></li>
+          <li><a href="#service-def">サービス定義</a></li>
+          <li><a href="#basic-commands">基本コマンド</a></li>
+        </ul>
+      </div>
+      
+      <section id="config" class="section">
+        <h2>設定ファイル</h2>
+        <p>ecspressoの設定ファイル（ecspresso.yml）は、ECSサービスとタスク定義の管理に必要な情報を定義します。基本的な設定ファイルの例は以下の通りです：</p>
+        
+        <pre><code>region: ap-northeast-1
+cluster: my-cluster
+service: my-service
+service_definition: ecs-service-def.json
+task_definition: ecs-task-def.json
+timeout: 10m
+plugins:
+  - name: tfstate
+    config:
+      path: terraform.tfstate</code></pre>
+        
+        <p>主な設定項目：</p>
+        <ul>
+          <li><strong>region</strong>: AWSリージョン</li>
+          <li><strong>cluster</strong>: ECSクラスター名</li>
+          <li><strong>service</strong>: ECSサービス名</li>
+          <li><strong>service_definition</strong>: サービス定義ファイルのパス</li>
+          <li><strong>task_definition</strong>: タスク定義ファイルのパス</li>
+          <li><strong>timeout</strong>: 操作のタイムアウト時間</li>
+          <li><strong>plugins</strong>: 使用するプラグインの設定</li>
+        </ul>
+      </section>
+      
+      <section id="task-def" class="section">
+        <h2>タスク定義</h2>
+        <p>タスク定義ファイル（ecs-task-def.json）は、ECSタスクの実行方法を定義します。基本的なタスク定義の例は以下の通りです：</p>
+        
+        <pre><code>{
+  "family": "my-app",
+  "executionRoleArn": "arn:aws:iam::123456789012:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::123456789012:role/ecsTaskRole",
+  "networkMode": "awsvpc",
+  "containerDefinitions": [
+    {
+      "name": "app",
+      "image": "123456789012.dkr.ecr.ap-northeast-1.amazonaws.com/my-app:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "hostPort": 8080,
+          "protocol": "tcp"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/my-app",
+          "awslogs-region": "ap-northeast-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ],
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "256",
+  "memory": "512"
+}</code></pre>
+        
+        <p>タスク定義では、以下の項目を設定できます：</p>
+        <ul>
+          <li>コンテナの定義（イメージ、ポート、環境変数など）</li>
+          <li>タスクのリソース要件（CPU、メモリ）</li>
+          <li>ネットワークモード</li>
+          <li>IAMロール</li>
+          <li>ログ設定</li>
+        </ul>
+      </section>
+      
+      <section id="service-def" class="section">
+        <h2>サービス定義</h2>
+        <p>サービス定義ファイル（ecs-service-def.json）は、ECSサービスの実行方法を定義します。基本的なサービス定義の例は以下の通りです：</p>
+        
+        <pre><code>{
+  "cluster": "my-cluster",
+  "serviceName": "my-service",
+  "desiredCount": 2,
+  "launchType": "FARGATE",
+  "networkConfiguration": {
+    "awsvpcConfiguration": {
+      "subnets": [
+        "subnet-12345678",
+        "subnet-87654321"
+      ],
+      "securityGroups": [
+        "sg-12345678"
+      ],
+      "assignPublicIp": "ENABLED"
+    }
+  },
+  "loadBalancers": [
+    {
+      "targetGroupArn": "arn:aws:elasticloadbalancing:ap-northeast-1:123456789012:targetgroup/my-tg/1234567890123456",
+      "containerName": "app",
+      "containerPort": 8080
+    }
+  ]
+}</code></pre>
+        
+        <p>サービス定義では、以下の項目を設定できます：</p>
+        <ul>
+          <li>デプロイ設定（タスク数、デプロイ方法）</li>
+          <li>ネットワーク設定（サブネット、セキュリティグループ）</li>
+          <li>ロードバランサー設定</li>
+          <li>Auto Scaling設定</li>
+        </ul>
+      </section>
+      
+      <section id="basic-commands" class="section">
+        <h2>基本コマンド</h2>
+        <p>ecspressoの基本的なコマンドは以下の通りです：</p>
+        
+        <h3>設定の初期化</h3>
+        <pre><code>$ ecspresso init --region ap-northeast-1 --cluster my-cluster --service my-service</code></pre>
+        
+        <h3>サービスのデプロイ</h3>
+        <pre><code>$ ecspresso deploy</code></pre>
+        
+        <h3>サービスの状態確認</h3>
+        <pre><code>$ ecspresso status</code></pre>
+        
+        <h3>設定の差分確認</h3>
+        <pre><code>$ ecspresso diff</code></pre>
+        
+        <h3>リソースの検証</h3>
+        <pre><code>$ ecspresso verify</code></pre>
+        
+        <h3>タスクの実行</h3>
+        <pre><code>$ ecspresso run</code></pre>
+        
+        <h3>サービスのスケーリング</h3>
+        <pre><code>$ ecspresso scale --tasks 5</code></pre>
+        
+        <div class="note">
+          <p><strong>注意</strong>: コマンドの詳細なオプションについては、<a href="command-reference.html">コマンドリファレンス</a>を参照してください。</p>
+        </div>
+      </section>
+    </div>
+  </div>
+  
+  <footer class="footer">
+    <p>© KAYAC Inc. - <a href="https://github.com/kayac/ecspresso">GitHub リポジトリ</a></p>
+  </footer>
+</body>
+</html>

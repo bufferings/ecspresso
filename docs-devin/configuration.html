@@ -27,20 +27,36 @@
     <div class="sidebar">
       <nav>
         <ul>
-          <li><a href="index.html">概要</a></li>
-          <li><a href="installation.html">インストール</a></li>
-          <li><a href="usage.html">使い方</a></li>
-          <li><a href="configuration.html">設定</a></li>
-          <li><a href="commands.html">コマンド</a></li>
-          <li><a href="advanced.html">高度な機能</a></li>
-          <li><a href="plugins.html">プラグイン</a></li>
-          <li><a href="changes.html">変更履歴</a></li>
+          <li><a href="index.html">1.0 概要</a></li>
+          <li><a href="installation.html">1.1 インストールと開始方法</a></li>
+          <li><a href="architecture.html">1.2 アーキテクチャ概要</a></li>
+          <li><a href="workflow.html">1.3 ワークフローとCI/CD統合</a></li>
+          <li><a href="commands.html">2.0 コマンドラインインターフェース</a></li>
+          <li><a href="commands-reference.html">2.1 CLIコマンドリファレンス</a></li>
+          <li><a href="deployment-commands.html">2.2 デプロイメントコマンド</a></li>
+          <li><a href="task-commands.html">2.3 タスク管理コマンド</a></li>
+          <li><a href="utility-commands.html">2.4 ユーティリティコマンド</a></li>
+          <li><a href="core.html">3.0 コア機能</a></li>
+          <li><a href="deployment.html">3.1 デプロイメント管理</a></li>
+          <li><a href="task-definition.html">3.2 タスク定義管理</a></li>
+          <li><a href="verification.html">3.3 リソース検証</a></li>
+          <li><a href="diffing.html">3.4 リソース差分</a></li>
+          <li><a href="configuration.html">4.0 設定管理</a></li>
+          <li><a href="config-format.html">4.1 設定ファイル形式</a></li>
+          <li><a href="definitions.html">4.2 タスクとサービス定義</a></li>
+          <li><a href="plugins.html">4.3 プラグインシステム</a></li>
+          <li><a href="jsonnet.html">4.4 Jsonnet統合</a></li>
+          <li><a href="development.html">5.0 開発と貢献</a></li>
+          <li><a href="building.html">5.1 ビルドとテスト</a></li>
+          <li><a href="release.html">5.2 リリースプロセス</a></li>
+          <li><a href="codebase.html">5.3 コードベース構造</a></li>
+          <li><a href="logging.html">5.4 ログとエラー処理</a></li>
         </ul>
       </nav>
     </div>
     
     <div class="content">
-      <h2>4.0 設定管理</h2>
+      <h1>4.0 設定管理</h1>
       
       <div class="toc">
         <div class="toc-title">目次</div>
@@ -54,7 +70,7 @@
       </div>
       
       <section id="config-file" class="section">
-        <h3>設定ファイル構造</h3>
+        <h2>設定ファイル構造</h2>
         <p>ecspresso 用の設定ファイル（YAML、JSON、または Jsonnet 形式）は<code>config.go</code>で定義されており、<code>Config</code>構造体として実装されています：</p>
         
         <pre><code>region: ap-northeast-1 # または AWS_REGION 環境変数
@@ -80,7 +96,7 @@ ignore:
       </section>
       
       <section id="config-implementation" class="section">
-        <h3>内部実装</h3>
+        <h2>内部実装</h2>
         <p><code>Config</code>構造体には以下の主要なフィールドがあります：</p>
         
         <div class="mermaid">
@@ -130,7 +146,7 @@ ignore:
       </section>
       
       <section id="config-loading" class="section">
-        <h3>設定読み込みプロセス</h3>
+        <h2>設定読み込みプロセス</h2>
         <p>設定ファイルの読み込みは<code>config.go</code>の<code>NewConfig</code>関数で実装されています。内部的には以下のステップで処理されます：</p>
         
         <div class="mermaid">
@@ -179,7 +195,7 @@ ignore:
       </section>
       
       <section id="template-syntax" class="section">
-        <h3>テンプレート構文</h3>
+        <h2>テンプレート構文</h2>
         <p>ecspressoはテンプレートファイルをレンダリングするために<a href="https://pkg.go.dev/text/template">Go の text/template 標準パッケージ</a>を使用し、YAMLまたはJSONとして解析します。</p>
         
         <p>Jsonnetを使用する場合、ecspressoはまずJsonnetファイルをレンダリングし、その後text/templateとして解析します。テンプレート関数の構文{{}}はJsonnet構文と競合するため、テンプレート関数は "{{ ... }}" を使用した文字列値のみをレンダリングできます。非文字列値をレンダリングするには、代わりにJsonnet関数の使用を検討してください。</p>
@@ -188,23 +204,23 @@ ignore:
       </section>
       
       <section id="template-functions" class="section">
-        <h3>テンプレート関数</h3>
+        <h2>テンプレート関数</h2>
         <p>デフォルトでは、ecspressoは以下のテンプレート関数を提供します：</p>
         
-        <h4><code>env</code></h4>
+        <h3><code>env</code></h3>
         <pre><code>"{{ env `NAME` `default value` }}"</code></pre>
         <p>このプレースホルダーを環境変数 NAME の値で置き換えます。設定されていない場合は "default value" がデフォルト値になります。</p>
         
-        <h4><code>must_env</code></h4>
+        <h3><code>must_env</code></h3>
         <pre><code>"{{ must_env `NAME` }}"</code></pre>
         <p>このプレースホルダーを環境変数 NAME の値で置き換えます。設定されていない場合、ecspressoはパニックして強制的に停止します。</p>
         <p><code>must_env</code>で重要な値を定義することで、実行前にこれらの値が設定されていることを確認し、意図しないデプロイを防止するのに役立ちます。</p>
         
-        <h4><code>json_escape</code></h4>
+        <h3><code>json_escape</code></h3>
         <pre><code>"{{ must_env `JSON_VALUE` | json_escape }}"</code></pre>
         <p>値をJSON文字列としてエスケープします。これは引用符などのエスケープが必要な文字列として値を埋め込む場合に便利です。</p>
         
-        <h4>プラグインが提供するテンプレート関数</h4>
+        <h3>プラグインが提供するテンプレート関数</h3>
         <p>ecspressoはプラグインを通じていくつかのテンプレート関数も追加します。<a href="plugins.html">プラグイン</a>セクションを参照してください。</p>
         
         <div class="note">

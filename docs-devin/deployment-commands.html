@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>デプロイメントコマンド - ecspresso</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'default',
+        securityLevel: 'loose'
+      });
+    });
+  </script>
+</head>
+<body>
+  <header>
+    <h1>ecspresso</h1>
+    <p>Amazon ECS 用デプロイメントツール</p>
+    <p><em>(「エスプレッソ」と同じ発音です ☕)</em></p>
+  </header>
+  
+  <div class="container">
+    <div class="sidebar">
+      <nav>
+        <ul>
+          <li><a href="index.html">1.0 概要</a></li>
+          <li><a href="installation.html">1.1 インストールと開始方法</a></li>
+          <li><a href="architecture.html">1.2 アーキテクチャ概要</a></li>
+          <li><a href="workflow.html">1.3 ワークフローとCI/CD統合</a></li>
+          <li><a href="commands.html">2.0 コマンドラインインターフェース</a></li>
+          <li><a href="commands-reference.html">2.1 CLIコマンドリファレンス</a></li>
+          <li><a href="deployment-commands.html">2.2 デプロイメントコマンド</a></li>
+          <li><a href="task-commands.html">2.3 タスク管理コマンド</a></li>
+          <li><a href="utility-commands.html">2.4 ユーティリティコマンド</a></li>
+          <li><a href="core.html">3.0 コア機能</a></li>
+          <li><a href="deployment.html">3.1 デプロイメント管理</a></li>
+          <li><a href="task-definition.html">3.2 タスク定義管理</a></li>
+          <li><a href="verification.html">3.3 リソース検証</a></li>
+          <li><a href="diffing.html">3.4 リソース差分</a></li>
+          <li><a href="configuration.html">4.0 設定管理</a></li>
+          <li><a href="config-format.html">4.1 設定ファイル形式</a></li>
+          <li><a href="definitions.html">4.2 タスクとサービス定義</a></li>
+          <li><a href="plugins.html">4.3 プラグインシステム</a></li>
+          <li><a href="jsonnet.html">4.4 Jsonnet統合</a></li>
+          <li><a href="development.html">5.0 開発と貢献</a></li>
+          <li><a href="building.html">5.1 ビルドとテスト</a></li>
+          <li><a href="release.html">5.2 リリースプロセス</a></li>
+          <li><a href="codebase.html">5.3 コードベース構造</a></li>
+          <li><a href="logging.html">5.4 ログとエラー処理</a></li>
+        </ul>
+      </nav>
+    </div>
+    
+    <div class="content">
+      <h1>2.2 デプロイメントコマンド</h1>
+      
+      <div class="toc">
+        <div class="toc-title">目次</div>
+        <ul>
+          <li><a href="#deploy">deployコマンド</a></li>
+          <li><a href="#rollback">rollbackコマンド</a></li>
+          <li><a href="#scale">scaleコマンド</a></li>
+          <li><a href="#wait">waitコマンド</a></li>
+          <li><a href="#deployment-strategies">デプロイ戦略</a></li>
+          <li><a href="#best-practices">ベストプラクティス</a></li>
+        </ul>
+      </div>
+      
+      <section id="deploy" class="section">
+        <h2>deployコマンド</h2>
+        <p>deployコマンドは、ECSサービスをデプロイするために使用します。このコマンドは<code>deploy.go</code>ファイルに実装されています。</p>
+        
+        <h3>基本的な使い方</h3>
+        <pre><code>ecspresso deploy [オプション]</code></pre>
+        
+        <h3>主なオプション</h3>
+        <table>
+          <tr>
+            <th>オプション</th>
+            <th>説明</th>
+            <th>デフォルト値</th>
+          </tr>
+          <tr>
+            <td><code>--dry-run</code></td>
+            <td>実際にデプロイせずに、実行されるアクションを表示する</td>
+            <td>false</td>
+          </tr>
+          <tr>
+            <td><code>--force-new-deployment</code></td>
+            <td>新しいデプロイメントを強制する</td>
+            <td>false</td>
+          </tr>
+          <tr>
+            <td><code>--no-wait-until-stable</code></td>
+            <td>サービスが安定するまで待機しない</td>
+            <td>false</td>
+          </tr>
+          <tr>
+            <td><code>--wait-until</code></td>
+            <td>待機条件（deployed または stable）</td>
+            <td>stable</td>
+          </tr>
+          <tr>
+            <td><code>--suspend-auto-scaling</code></td>
+            <td>デプロイ中にApplication Auto Scalingを一時停止する</td>
+            <td>false</td>
+          </tr>
+          <tr>
+            <td><code>--update-service</code></td>
+            <td>サービスの更新のみを行う（タスク定義は更新しない）</td>
+            <td>false</td>
+          </tr>
+          <tr>
+            <td><code>--skip-task-definition</code></td>
+            <td>タスク定義の登録をスキップする</td>
+            <td>false</td>
+          </tr>
+          <tr>
+            <td><code>--revision</code></td>
+            <td>使用するタスク定義のリビジョン</td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td><code>--latest-task-definition</code></td>
+            <td>最新のタスク定義を使用する</td>
+            <td>false</td>
+          </tr>
+          <tr>
+            <td><code>--rollback-events</code></td>
+            <td>自動ロールバックをトリガーするイベント</td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td><code>--tasks</code></td>
+            <td>デプロイするタスク数</td>
+            <td>-</td>
+          </tr>
+        </table>
+        
+        <h3>デプロイプロセス</h3>
+        <p>deployコマンドの内部処理フロー：</p>
+        
+        <div class="mermaid">
+          sequenceDiagram
+            participant User as ユーザー
+            participant App as ecspresso
+            participant AWS as AWS ECS
+            
+            User->>App: ecspresso deploy
+            App->>App: 設定ファイル読込
+            App->>App: タスク定義準備
+            
+            alt タスク定義の登録をスキップしない場合
+              App->>AWS: RegisterTaskDefinition
+              AWS-->>App: タスク定義ARN
+            end
+            
+            App->>AWS: DescribeService
+            AWS-->>App: サービス情報
+            
+            alt サービスが存在しない場合
+              App->>AWS: CreateService
+            else サービスが存在する場合
+              App->>AWS: UpdateService
+            end
+            
+            AWS-->>App: サービス更新結果
+            
+            alt 安定するまで待機する場合
+              App->>AWS: DescribeServices（繰り返し）
+              AWS-->>App: サービス状態
+            end
+            
+            App-->>User: 完了メッセージ
+        </div>
+        
+        <h3>使用例</h3>
+        <pre><code># 基本的なデプロイ
+ecspresso deploy
+
+# ドライランモード（実際にデプロイしない）
+ecspresso deploy --dry-run
+
+# 新しいデプロイメントを強制する
+ecspresso deploy --force-new-deployment
+
+# サービスが安定するまで待機しない
+ecspresso deploy --no-wait-until-stable
+
+# デプロイ中にApplication Auto Scalingを一時停止する
+ecspresso deploy --suspend-auto-scaling
+
+# 特定のリビジョンのタスク定義を使用する
+ecspresso deploy --revision 10
+
+# 最新のタスク定義を使用する
+ecspresso deploy --latest-task-definition
+
+# タスク数を指定してデプロイする
+ecspresso deploy --tasks 5</code></pre>
+      </section>
+      
+      <section id="rollback" class="section">
+        <h2>rollbackコマンド</h2>
+        <p>rollbackコマンドは、ECSサービスを以前のバージョンにロールバックするために使用します。このコマンドは<code>rollback.go</code>ファイルに実装されています。</p>
+        
+        <h3>基本的な使い方</h3>
+        <pre><code>ecspresso rollback [オプション]</code></pre>
+        
+        <h3>主なオプション</h3>
+        <table>
+          <tr>
+            <th>オプション</th>
+            <th>説明</th>
+            <th>デフォルト値</th>
+          </tr>
+          <tr>
+            <td><code>--dry-run</code></td>
+            <td>実際にロールバックせずに、実行されるアクションを表示する</td>
+            <td>false</td>
+          </tr>
+          <tr>
+            <td><code>--deregister</code></td>
+            <td>ロールバック後に現在のタスク定義を登録解除する</td>
+            <td>false</td>
+          </tr>
+          <tr>
+            <td><code>--no-wait-until-stable</code></td>
+            <td>サービスが安定するまで待機しない</td>
+            <td>false</td>
+          </tr>
+          <tr>
+            <td><code>--revision</code></td>
+            <td>ロールバックするタスク定義のリビジョン</td>
+            <td>-</td>
+          </tr>
+        </table>
+        
+        <h3>ロールバックプロセス</h3>
+        <p>rollbackコマンドの内部処理フロー：</p>
+        
+        <div class="mermaid">
+          flowchart TD
+            A[ロールバック開始] --> B{リビジョン指定?}
+            B -->|Yes| C[指定リビジョンを使用]
+            B -->|No| D[前回のタスク定義を検索]
+            C --> E[サービス更新]
+            D --> E
+            E --> F{安定まで待機?}
+            F -->|Yes| G[サービスが安定するまで待機]
+            F -->|No| H[完了]
+            G --> H
+            H --> I{登録解除?}
+            I -->|Yes| J[現在のタスク定義を登録解除]
+            I -->|No| K[終了]
+            J --> K
+        </div>
+        
+        <h3>使用例</h3>
+        <pre><code># 基本的なロールバック（前回のタスク定義に戻す）
+ecspresso rollback
+
+# ドライランモード（実際にロールバックしない）
+ecspresso rollback --dry-run
+
+# 特定のリビジョンにロールバックする
+ecspresso rollback --revision 15
+
+# ロールバック後に現在のタスク定義を登録解除する
+ecspresso rollback --deregister
+
+# サービスが安定するまで待機しない
+ecspresso rollback --no-wait-until-stable</code></pre>
+      </section>
+      
+      <section id="scale" class="section">
+        <h2>scaleコマンド</h2>
+        <p>scaleコマンドは、ECSサービスのタスク数を変更するために使用します。このコマンドは<code>deploy.go</code>ファイルに実装されています。</p>
+        
+        <h3>基本的な使い方</h3>
+        <pre><code>ecspresso scale --tasks N [オプション]</code></pre>
+        
+        <h3>主なオプション</h3>
+        <table>
+          <tr>
+            <th>オプション</th>
+            <th>説明</th>
+            <th>デフォルト値</th>
+          </tr>
+          <tr>
+            <td><code>--tasks</code></td>
+            <td>設定するタスク数（必須）</td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td><code>--dry-run</code></td>
+            <td>実際にスケールせずに、実行されるアクションを表示する</td>
+            <td>false</td>
+          </tr>
+          <tr>
+            <td><code>--no-wait-until-stable</code></td>
+            <td>サービスが安定するまで待機しない</td>
+            <td>false</td>
+          </tr>
+        </table>
+        
+        <h3>スケーリングプロセス</h3>
+        <p>scaleコマンドの内部処理フロー：</p>
+        
+        <div class="mermaid">
+          sequenceDiagram
+            participant User as ユーザー
+            participant App as ecspresso
+            participant AWS as AWS ECS
+            
+            User->>App: ecspresso scale --tasks N
+            App->>App: 設定ファイル読込
+            App->>AWS: DescribeService
+            AWS-->>App: サービス情報
+            App->>AWS: UpdateService（desiredCount=N）
+            AWS-->>App: サービス更新結果
+            
+            alt 安定するまで待機する場合
+              App->>AWS: DescribeServices（繰り返し）
+              AWS-->>App: サービス状態
+            end
+            
+            App-->>User: 完了メッセージ
+        </div>
+        
+        <h3>使用例</h3>
+        <pre><code># タスク数を5に設定
+ecspresso scale --tasks 5
+
+# ドライランモード（実際にスケールしない）
+ecspresso scale --tasks 10 --dry-run
+
+# タスク数を0に設定（サービスを停止）
+ecspresso scale --tasks 0
+
+# サービスが安定するまで待機しない
+ecspresso scale --tasks 3 --no-wait-until-stable</code></pre>
+      </section>
+      
+      <section id="wait" class="section">
+        <h2>waitコマンド</h2>
+        <p>waitコマンドは、ECSサービスが安定するまで待機するために使用します。このコマンドは<code>wait.go</code>ファイルに実装されています。</p>
+        
+        <h3>基本的な使い方</h3>
+        <pre><code>ecspresso wait [オプション]</code></pre>
+        
+        <h3>主なオプション</h3>
+        <table>
+          <tr>
+            <th>オプション</th>
+            <th>説明</th>
+            <th>デフォルト値</th>
+          </tr>
+          <tr>
+            <td><code>--timeout</code></td>
+            <td>タイムアウト時間（秒）</td>
+            <td>600</td>
+          </tr>
+          <tr>
+            <td><code>--wait-until</code></td>
+            <td>待機条件（deployed または stable）</td>
+            <td>stable</td>
+          </tr>
+        </table>
+        
+        <h3>待機プロセス</h3>
+        <p>waitコマンドの内部処理フロー：</p>
+        
+        <div class="mermaid">
+          flowchart TD
+            A[待機開始] --> B[サービス情報取得]
+            B --> C{待機条件?}
+            C -->|stable| D[サービスが安定するまで待機]
+            C -->|deployed| E[デプロイメントが完了するまで待機]
+            D --> F{安定した?}
+            E --> F
+            F -->|Yes| G[完了]
+            F -->|No| H{タイムアウト?}
+            H -->|Yes| I[エラー終了]
+            H -->|No| B
+        </div>
+        
+        <h3>使用例</h3>
+        <pre><code># サービスが安定するまで待機
+ecspresso wait
+
+# デプロイメントが完了するまで待機
+ecspresso wait --wait-until deployed
+
+# タイムアウト時間を300秒に設定
+ecspresso wait --timeout 300</code></pre>
+      </section>
+      
+      <section id="deployment-strategies" class="section">
+        <h2>デプロイ戦略</h2>
+        <p>ecspressoは以下の2つのデプロイ戦略をサポートしています：</p>
+        
+        <div class="mermaid">
+          graph TD
+            A[デプロイ戦略] --> B[ECSローリングデプロイ]
+            A --> C[CodeDeployブルー/グリーンデプロイ]
+            
+            B --> D[タスクを徐々に置き換え]
+            C --> E[新環境を作成し、トラフィックを移行]
+            
+            D --> F[設定: deploymentConfiguration]
+            E --> G[設定: deploymentController + appspec]
+        </div>
+        
+        <h3>ECSローリングデプロイ</h3>
+        <p>ECSローリングデプロイは、タスクを徐々に置き換えていく戦略です。以下のパラメータで設定できます：</p>
+        
+        <pre><code># ecspresso.yml
+service_definition: ecs-service-def.json
+
+# ecs-service-def.json
+{
+  "deploymentConfiguration": {
+    "maximumPercent": 200,
+    "minimumHealthyPercent": 100,
+    "deploymentCircuitBreaker": {
+      "enable": true,
+      "rollback": true
+    }
+  }
+}</code></pre>
+        
+        <h3>CodeDeployブルー/グリーンデプロイ</h3>
+        <p>CodeDeployブルー/グリーンデプロイは、新しい環境（グリーン）を作成し、トラフィックを徐々に移行する戦略です。以下のパラメータで設定できます：</p>
+        
+        <pre><code># ecspresso.yml
+service_definition: ecs-service-def.json
+appspec: appspec.yaml
+
+# ecs-service-def.json
+{
+  "deploymentController": {
+    "type": "CODE_DEPLOY"
+  }
+}
+
+# appspec.yaml
+version: 0.0
+Resources:
+  - TargetService:
+      Type: AWS::ECS::Service
+      Properties:
+        TaskDefinition: "&lt;TASK_DEFINITION&gt;"
+        LoadBalancerInfo:
+          ContainerName: "web"
+          ContainerPort: 80
+        PlatformVersion: "1.4.0"
+Hooks:
+  - BeforeInstall: "LambdaFunctionToValidateBeforeInstall"
+  - AfterInstall: "LambdaFunctionToValidateAfterInstall"
+  - AfterAllowTestTraffic: "LambdaFunctionToValidateAfterTestTrafficStarts"
+  - BeforeAllowTraffic: "LambdaFunctionToValidateBeforeAllowingProductionTraffic"
+  - AfterAllowTraffic: "LambdaFunctionToValidateAfterAllowingProductionTraffic"</code></pre>
+      </section>
+      
+      <section id="best-practices" class="section">
+        <h2>ベストプラクティス</h2>
+        <p>デプロイメントコマンドを使用する際のベストプラクティス：</p>
+        
+        <ul>
+          <li><strong>デプロイ前の検証</strong>: デプロイ前に<code>ecspresso verify</code>と<code>ecspresso diff</code>を実行して、設定が正しいことを確認します。</li>
+          <li><strong>ドライランの活用</strong>: 本番環境でデプロイする前に<code>--dry-run</code>オプションを使用して、実行されるアクションを確認します。</li>
+          <li><strong>ロールバック計画</strong>: デプロイに問題が発生した場合に備えて、ロールバック手順を準備しておきます。</li>
+          <li><strong>デプロイサーキットブレーカーの使用</strong>: ECSローリングデプロイでは、デプロイサーキットブレーカーを有効にして、問題が発生した場合に自動的にロールバックするようにします。</li>
+          <li><strong>段階的なデプロイ</strong>: 重要な変更を行う場合は、まず一部のタスクにデプロイし、問題がないことを確認してから全体にデプロイします。</li>
+          <li><strong>モニタリングの強化</strong>: デプロイ中は、CloudWatchやX-Rayなどのモニタリングツールを使用して、アプリケーションの状態を監視します。</li>
+          <li><strong>CI/CDパイプラインの統合</strong>: デプロイプロセスをCI/CDパイプラインに統合して、自動化します。</li>
+          <li><strong>環境変数の活用</strong>: 環境ごとに異なる設定を環境変数で管理し、テンプレート関数で参照します。</li>
+        </ul>
+      </section>
+    </div>
+  </div>
+  
+  <footer class="footer">
+    <p>© KAYAC Inc. - <a href="https://github.com/kayac/ecspresso">GitHub リポジトリ</a></p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jsonnet統合 - ecspresso</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      mermaid.initialize({
+        startOnLoad: true,
+        theme: 'default',
+        securityLevel: 'loose'
+      });
+    });
+  </script>
+</head>
+<body>
+  <header>
+    <h1>ecspresso</h1>
+    <p>Amazon ECS 用デプロイメントツール</p>
+    <p><em>(「エスプレッソ」と同じ発音です ☕)</em></p>
+  </header>
+  
+  <div class="container">
+    <div class="sidebar">
+      <nav>
+        <ul>
+          <li><a href="index.html">1.0 概要</a></li>
+          <li><a href="installation.html">1.1 インストールと開始方法</a></li>
+          <li><a href="architecture.html">1.2 アーキテクチャ概要</a></li>
+          <li><a href="workflow.html">1.3 ワークフローとCI/CD統合</a></li>
+          <li><a href="commands.html">2.0 コマンドラインインターフェース</a></li>
+          <li><a href="commands-reference.html">2.1 CLIコマンドリファレンス</a></li>
+          <li><a href="deployment-commands.html">2.2 デプロイメントコマンド</a></li>
+          <li><a href="task-commands.html">2.3 タスク管理コマンド</a></li>
+          <li><a href="utility-commands.html">2.4 ユーティリティコマンド</a></li>
+          <li><a href="core.html">3.0 コア機能</a></li>
+          <li><a href="deployment.html">3.1 デプロイメント管理</a></li>
+          <li><a href="task-definition.html">3.2 タスク定義管理</a></li>
+          <li><a href="verification.html">3.3 リソース検証</a></li>
+          <li><a href="diffing.html">3.4 リソース差分</a></li>
+          <li><a href="configuration.html">4.0 設定管理</a></li>
+          <li><a href="config-format.html">4.1 設定ファイル形式</a></li>
+          <li><a href="definitions.html">4.2 タスクとサービス定義</a></li>
+          <li><a href="plugins.html">4.3 プラグインシステム</a></li>
+          <li><a href="jsonnet.html">4.4 Jsonnet統合</a></li>
+          <li><a href="development.html">5.0 開発と貢献</a></li>
+          <li><a href="building.html">5.1 ビルドとテスト</a></li>
+          <li><a href="release.html">5.2 リリースプロセス</a></li>
+          <li><a href="codebase.html">5.3 コードベース構造</a></li>
+          <li><a href="logging.html">5.4 ログとエラー処理</a></li>
+        </ul>
+      </nav>
+    </div>
+    
+    <div class="content">
+      <h1>4.4 Jsonnet統合</h1>
+      
+      <div class="toc">
+        <div class="toc-title">目次</div>
+        <ul>
+          <li><a href="#jsonnet-overview">Jsonnet概要</a></li>
+          <li><a href="#jsonnet-integration">ecspressoでのJsonnet統合</a></li>
+          <li><a href="#jsonnet-usage">Jsonnetの使用方法</a></li>
+          <li><a href="#jsonnet-native-functions">Jsonnetネイティブ関数</a></li>
+          <li><a href="#jsonnet-examples">Jsonnet例</a></li>
+        </ul>
+      </div>
+      
+      <section id="jsonnet-overview" class="section">
+        <h2>Jsonnet概要</h2>
+        <p>Jsonnetは、JSONのスーパーセットであるデータテンプレート言語です。変数、条件分岐、ループ、関数などのプログラミング機能を提供し、複雑な設定ファイルを簡潔に記述できます。</p>
+        
+        <div class="mermaid">
+          graph TD
+            A[Jsonnet] --> B[変数]
+            A --> C[条件分岐]
+            A --> D[ループ]
+            A --> E[関数]
+            A --> F[インポート]
+            A --> G[継承]
+            
+            B --> H[ローカル変数]
+            B --> I[外部変数]
+            
+            C --> J[if-then-else]
+            
+            D --> K[配列内包表記]
+            D --> L[オブジェクト内包表記]
+            
+            E --> M[ローカル関数]
+            E --> N[標準ライブラリ関数]
+            
+            F --> O[ファイルインポート]
+            F --> P[URLインポート]
+            
+            G --> Q[オブジェクト継承]
+        </div>
+        
+        <p>Jsonnetの主な特徴：</p>
+        <ul>
+          <li>JSONの上位互換性</li>
+          <li>変数と計算式</li>
+          <li>条件分岐とループ</li>
+          <li>関数定義と呼び出し</li>
+          <li>ファイルのインポート</li>
+          <li>オブジェクトの継承と合成</li>
+          <li>テンプレート化と再利用</li>
+        </ul>
+      </section>
+      
+      <section id="jsonnet-integration" class="section">
+        <h2>ecspressoでのJsonnet統合</h2>
+        <p>ecspressoは、設定ファイル、タスク定義ファイル、サービス定義ファイルにJsonnetを使用することをサポートしています。この機能は<code>config.go</code>ファイルに実装されています。</p>
+        
+        <div class="mermaid">
+          graph TD
+            A[ecspresso] --> B[設定ファイル]
+            A --> C[タスク定義ファイル]
+            A --> D[サービス定義ファイル]
+            
+            B --> E[ecspresso.jsonnet]
+            C --> F[task-definition.jsonnet]
+            D --> G[service-definition.jsonnet]
+            
+            E --> H[Jsonnet評価]
+            F --> H
+            G --> H
+            
+            H --> I[JSON変換]
+            I --> J[設定読込]
+        </div>
+        
+        <p>ecspressoでJsonnetを使用するには、以下の方法があります：</p>
+        <ul>
+          <li><code>ecspresso.jsonnet</code>ファイルを作成する</li>
+          <li>タスク定義ファイルとサービス定義ファイルを<code>.jsonnet</code>拡張子で作成する</li>
+          <li><code>--config</code>オプションでJsonnetファイルを指定する</li>
+          <li><code>--task-definition</code>オプションでJsonnetファイルを指定する</li>
+          <li><code>--service-definition</code>オプションでJsonnetファイルを指定する</li>
+        </ul>
+        
+        <p>Jsonnetファイルは、ecspressoによって評価され、JSONに変換されてから読み込まれます。この処理は、<code>config.go</code>ファイルの<code>loadJSONNet</code>関数で行われます：</p>
+        
+        <pre><code>func loadJSONNet(path string, extVars map[string]string) ([]byte, error) {
+    vm := jsonnet.MakeVM()
+    for k, v := range extVars {
+        vm.ExtVar(k, v)
+    }
+    for name, fn := range jsonnetNativeFuncs {
+        vm.NativeFunction(jsonnetNativeFunc(name, fn))
+    }
+    return vm.EvaluateFile(path)
+}</code></pre>
+      </section>
+      
+      <section id="jsonnet-usage" class="section">
+        <h2>Jsonnetの使用方法</h2>
+        <p>ecspressoでJsonnetを使用するには、以下の手順に従います：</p>
+        
+        <h3>設定ファイルでJsonnetを使用する</h3>
+        <ol>
+          <li><code>ecspresso.jsonnet</code>ファイルを作成する</li>
+          <li>Jsonnet構文を使用して設定を記述する</li>
+          <li>ecspressoコマンドを実行する</li>
+        </ol>
+        
+        <h3>タスク定義ファイルでJsonnetを使用する</h3>
+        <ol>
+          <li><code>task-definition.jsonnet</code>ファイルを作成する</li>
+          <li>Jsonnet構文を使用してタスク定義を記述する</li>
+          <li><code>ecspresso.yml</code>ファイルで<code>task_definition</code>パラメータに<code>task-definition.jsonnet</code>を指定する</li>
+          <li>ecspressoコマンドを実行する</li>
+        </ol>
+        
+        <h3>サービス定義ファイルでJsonnetを使用する</h3>
+        <ol>
+          <li><code>service-definition.jsonnet</code>ファイルを作成する</li>
+          <li>Jsonnet構文を使用してサービス定義を記述する</li>
+          <li><code>ecspresso.yml</code>ファイルで<code>service_definition</code>パラメータに<code>service-definition.jsonnet</code>を指定する</li>
+          <li>ecspressoコマンドを実行する</li>
+        </ol>
+        
+        <h3>外部変数の使用</h3>
+        <p>Jsonnetファイルでは、<code>std.extVar</code>関数を使用して外部変数を参照できます。外部変数は、以下の方法で指定できます：</p>
+        <ul>
+          <li><code>--ext-str</code>オプションで指定する</li>
+          <li><code>--ext-code</code>オプションで指定する</li>
+          <li>環境変数で指定する（<code>envs</code>パラメータで指定した環境変数）</li>
+        </ul>
+        
+        <div class="mermaid">
+          sequenceDiagram
+            participant User as ユーザー
+            participant CLI as ecspresso
+            participant Jsonnet as Jsonnet VM
+            participant Config as 設定読込
+            
+            User->>CLI: ecspresso deploy --ext-str env=prod
+            CLI->>Jsonnet: 外部変数設定（env=prod）
+            CLI->>Jsonnet: ecspresso.jsonnet評価
+            Jsonnet-->>CLI: JSON
+            CLI->>Config: JSON読込
+            Config-->>CLI: 設定情報
+            CLI->>User: デプロイ実行
+        </div>
+      </section>
+      
+      <section id="jsonnet-native-functions" class="section">
+        <h2>Jsonnetネイティブ関数</h2>
+        <p>ecspressoは、Jsonnetファイル内で使用できるネイティブ関数を提供しています。これらの関数は、<code>config.go</code>ファイルの<code>jsonnetNativeFuncs</code>マップで定義されています。</p>
+        
+        <div class="mermaid">
+          graph TD
+            A[Jsonnetネイティブ関数] --> B[プラグイン関数]
+            A --> C[ユーティリティ関数]
+            
+            B --> D[tfstate]
+            B --> E[cfn_output]
+            B --> F[ssm]
+            B --> G[secretsmanager_arn]
+            
+            C --> H[env]
+            C --> I[must_env]
+        </div>
+        
+        <h3>プラグイン関数</h3>
+        <ul>
+          <li><strong>tfstate</strong>: Terraformの状態ファイルからリソース情報を取得します。</li>
+          <li><strong>cfn_output</strong>: CloudFormationスタックの出力値を取得します。</li>
+          <li><strong>ssm</strong>: SSM Parameter Storeからパラメータを取得します。</li>
+          <li><strong>secretsmanager_arn</strong>: Secrets Managerのシークレット名からARNを取得します。</li>
+        </ul>
+        
+        <h3>ユーティリティ関数</h3>
+        <ul>
+          <li><strong>env</strong>: 環境変数の値を取得します。環境変数が存在しない場合は空文字列を返します。</li>
+          <li><strong>must_env</strong>: 環境変数の値を取得します。環境変数が存在しない場合はエラーを返します。</li>
+        </ul>
+        
+        <p>これらの関数は、Jsonnetファイル内で以下のように使用できます：</p>
+        
+        <pre><code>local tfstate = std.native('tfstate');
+local env = std.native('env');
+
+{
+  cluster: tfstate('aws_ecs_cluster.main.name'),
+  service: 'my-service-' + env('ENV'),
+  // ...
+}</code></pre>
+      </section>
+      
+      <section id="jsonnet-examples" class="section">
+        <h2>Jsonnet例</h2>
+        <p>以下は、ecspressoでJsonnetを使用する例です：</p>
+        
+        <h3>設定ファイルの例</h3>
+        <pre><code>// ecspresso.jsonnet
+local env = std.extVar('env');
+local region = std.extVar('region');
+
+{
+  region: region,
+  cluster: 'my-cluster',
+  service: 'my-service-' + env,
+  service_definition: 'service-definition-' + env + '.json',
+  task_definition: 'task-definition-' + env + '.json',
+  timeout: '10m',
+  plugins: {
+    tfstate: {
+      path: 'terraform.tfstate'
+    }
+  },
+  envs: [
+    'APP_NAME',
+    'APP_ENV'
+  ],
+  env_file: '.env.' + env
+}</code></pre>
+        
+        <h3>タスク定義ファイルの例</h3>
+        <pre><code>// task-definition.jsonnet
+local env = std.extVar('env');
+local tfstate = std.native('tfstate');
+local env_func = std.native('env');
+
+{
+  family: 'my-app-' + env,
+  executionRoleArn: tfstate('aws_iam_role.ecs_task_execution_role.arn'),
+  taskRoleArn: tfstate('aws_iam_role.ecs_task_role.arn'),
+  networkMode: 'awsvpc',
+  containerDefinitions: [
+    {
+      name: 'web',
+      image: env_func('ECR_REPOSITORY') + ':' + env_func('IMAGE_TAG'),
+      essential: true,
+      portMappings: [
+        {
+          containerPort: 80,
+          hostPort: 80,
+          protocol: 'tcp'
+        }
+      ],
+      logConfiguration: {
+        logDriver: 'awslogs',
+        options: {
+          'awslogs-group': '/ecs/my-app-' + env,
+          'awslogs-region': env_func('AWS_REGION'),
+          'awslogs-stream-prefix': 'web'
+        }
+      },
+      environment: [
+        {
+          name: 'NODE_ENV',
+          value: env
+        }
+      ],
+      cpu: 256,
+      memory: 512
+    }
+  ],
+  requiresCompatibilities: [
+    'FARGATE'
+  ],
+  cpu: '256',
+  memory: '512'
+}</code></pre>
+        
+        <h3>サービス定義ファイルの例</h3>
+        <pre><code>// service-definition.jsonnet
+local env = std.extVar('env');
+local tfstate = std.native('tfstate');
+local env_func = std.native('env');
+
+{
+  cluster: 'my-cluster',
+  serviceName: 'my-service-' + env,
+  taskDefinition: 'my-app-' + env,
+  desiredCount: if env == 'prod' then 2 else 1,
+  launchType: 'FARGATE',
+  platformVersion: 'LATEST',
+  deploymentConfiguration: {
+    deploymentCircuitBreaker: {
+      enable: true,
+      rollback: true
+    },
+    maximumPercent: 200,
+    minimumHealthyPercent: 100
+  },
+  networkConfiguration: {
+    awsvpcConfiguration: {
+      subnets: [
+        tfstate('aws_subnet.private_a.id'),
+        tfstate('aws_subnet.private_c.id')
+      ],
+      securityGroups: [
+        tfstate('aws_security_group.app.id')
+      ],
+      assignPublicIp: 'DISABLED'
+    }
+  },
+  loadBalancers: [
+    {
+      targetGroupArn: tfstate('aws_lb_target_group.app_' + env + '.arn'),
+      containerName: 'web',
+      containerPort: 80
+    }
+  ],
+  healthCheckGracePeriodSeconds: 60,
+  schedulingStrategy: 'REPLICA',
+  deploymentController: {
+    type: 'ECS'
+  },
+  enableECSManagedTags: true,
+  propagateTags: 'SERVICE',
+  enableExecuteCommand: true
+}</code></pre>
+        
+        <h3>複数環境の設定例</h3>
+        <pre><code>// ecspresso.jsonnet
+local env = std.extVar('env');
+local region = std.extVar('region');
+
+local environments = {
+  dev: {
+    desiredCount: 1,
+    cpu: '256',
+    memory: '512',
+    enableExecuteCommand: true
+  },
+  stg: {
+    desiredCount: 1,
+    cpu: '512',
+    memory: '1024',
+    enableExecuteCommand: true
+  },
+  prod: {
+    desiredCount: 2,
+    cpu: '1024',
+    memory: '2048',
+    enableExecuteCommand: false
+  }
+};
+
+local envConfig = environments[env];
+
+{
+  region: region,
+  cluster: 'my-cluster',
+  service: 'my-service-' + env,
+  service_definition: 'service-definition.jsonnet',
+  task_definition: 'task-definition.jsonnet',
+  timeout: '10m',
+  plugins: {
+    tfstate: {
+      path: 'terraform.tfstate'
+    }
+  },
+  envs: [
+    'APP_NAME',
+    'APP_ENV',
+    'ECR_REPOSITORY',
+    'IMAGE_TAG'
+  ],
+  env_file: '.env.' + env,
+  vars: {
+    env: env,
+    desired_count: std.toString(envConfig.desiredCount),
+    cpu: envConfig.cpu,
+    memory: envConfig.memory,
+    enable_execute_command: std.toString(envConfig.enableExecuteCommand)
+  }
+}</code></pre>
+        
+        <h3>コマンド実行例</h3>
+        <pre><code># 開発環境にデプロイ
+ecspresso deploy --config ecspresso.jsonnet --ext-str env=dev --ext-str region=ap-northeast-1
+
+# ステージング環境にデプロイ
+ecspresso deploy --config ecspresso.jsonnet --ext-str env=stg --ext-str region=ap-northeast-1
+
+# 本番環境にデプロイ
+ecspresso deploy --config ecspresso.jsonnet --ext-str env=prod --ext-str region=ap-northeast-1</code></pre>
+      </section>
+    </div>
+  </div>
+  
+  <footer class="footer">
+    <p>© KAYAC Inc. - <a href="https://github.com/kayac/ecspresso">GitHub リポジトリ</a></p>
+  </footer>
+</body>
+</html>

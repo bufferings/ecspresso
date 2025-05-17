@@ -79,7 +79,30 @@
             <li>デプロイ結果を監視する</li>
           </ol>
           
-          <img src="https://mermaid.ink/img/pako:eNp1ksFqwzAMhl_F6LTCesghh1HoYYexS2GwDroVHMVpDHHsYDtbS_ruU5J1Y7TMF1n_J-mPpE5QWU1AoDZmrxptyG-tVA-20Y482VY15MU5ZQzZWe3Ieb21jSa71xtSujNkm1qTr0xryHvlHXlxhuz7oDTZF1WTV6ca8hT8BwJBgoIQQQoxZLBcxZBAGkEap_EyzdIUkjiGNEmyZRatojjLkjiGJIqyVRZl8SJLYkggTZJ4lUXLOF5lEUSQwY8dVYOzylcQIIcK9nAABwH2EKCCIwQ4Qg0BHFTQwAEaCHAADweooQ5X8n9wAwc3cNcQ4AYtBLhDgDvcIcAdArQQ4A53eMAd_qGHMPqHHgL0EP7SCGHUQxj1EEY9hFEPYdRDGPUQRj2EUQ9h9BPg0lpdQKla7TSaT61RNRRgem2hhFbpgzHHUg1QoOudQdmiaaeSH1IbFCjRcK1ly60yyC3PpTZQgh204dlxvuU853k-zV-Uy9nF?type=png" alt="CI/CDパイプラインの統合フロー" />
+          <div class="mermaid">
+          sequenceDiagram
+            actor Dev as 開発者
+            participant Git as Gitリポジトリ
+            participant CI as CI/CDパイプライン
+            participant Ecspresso as ecspresso
+            participant AWS as AWS ECS
+            
+            Dev->>Git: コード変更をプッシュ
+            Git->>CI: CI/CDパイプラインをトリガー
+            CI->>CI: AWS認証情報を設定
+            CI->>Ecspresso: ecspresso verify
+            Ecspresso->>AWS: リソース検証
+            AWS-->>Ecspresso: 検証結果
+            CI->>Ecspresso: ecspresso diff
+            Ecspresso->>AWS: 設定差分確認
+            AWS-->>Ecspresso: 差分結果
+            CI->>Ecspresso: ecspresso deploy
+            Ecspresso->>AWS: デプロイ実行
+            AWS-->>Ecspresso: デプロイ結果
+            CI->>AWS: デプロイ結果を監視
+            AWS-->>CI: サービス状態
+            CI-->>Dev: デプロイ結果通知
+          </div>
         </div>
         
         <div id="github-actions" class="subsection">
@@ -221,7 +244,29 @@ workflows:
           
           <p>完全なCI/CDワークフローの例：</p>
           
-          <img src="https://mermaid.ink/img/pako:eNp1ksFqwzAMhl_F6LTCesghh1HoYYexS2GwDroVHMVpDHHsYDtbS_ruU5J1Y7TMF1n_J-mPpE5QWU1AoDZmrxptyG-tVA-20Y482VY15MU5ZQzZWe3Ieb21jSa71xtSujNkm1qTr0xryHvlHXlxhuz7oDTZF1WTV6ca8hT8BwJBgoIQQQoxZLBcxZBAGkEap_EyzdIUkjiGNEmyZRatojjLkjiGJIqyVRZl8SJLYkggTZJ4lUXLOF5lEUSQwY8dVYOzylcQIIcK9nAABwH2EKCCIwQ4Qg0BHFTQwAEaCHAADweooQ5X8n9wAwc3cNcQ4AYtBLhDgDvcIcAdArQQ4A53eMAd_qGHMPqHHgL0EP7SCGHUQxj1EEY9hFEPYdRDGPUQRj2EUQ9h9BPg0lpdQKla7TSaT61RNRRgem2hhFbpgzHHUg1QoOudQdmiaaeSH1IbFCjRcK1ly60yyC3PpTZQgh204dlxvuU853k-zV-Uy9nF?type=png" alt="完全なCI/CDワークフロー" />
+          <div class="mermaid">
+          flowchart TD
+            A[コード変更] --> B[コミット]
+            B --> C[プッシュ]
+            C --> D[CI/CDパイプライン起動]
+            D --> E[テスト実行]
+            E --> F{テスト成功?}
+            F -->|いいえ| G[通知: 失敗]
+            F -->|はい| H[ecspresso verify]
+            H --> I{検証成功?}
+            I -->|いいえ| G
+            I -->|はい| J[ecspresso diff]
+            J --> K[承認プロセス]
+            K --> L{承認?}
+            L -->|いいえ| M[デプロイ中止]
+            L -->|はい| N[ecspresso deploy]
+            N --> O[デプロイ監視]
+            O --> P{デプロイ成功?}
+            P -->|いいえ| Q[ecspresso rollback]
+            P -->|はい| R[通知: 成功]
+            Q --> S[ロールバック監視]
+            S --> T[通知: ロールバック]
+          </div>
         </div>
       </section>
       

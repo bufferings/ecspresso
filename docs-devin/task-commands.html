@@ -139,36 +139,26 @@
         <h3>タスク実行プロセス</h3>
         <p>runコマンドの内部処理フロー：</p>
         
-        <div class="mermaid">
-          sequenceDiagram
-            participant User as ユーザー
-            participant App as ecspresso
-            participant AWS as AWS ECS
-            
-            User->>App: ecspresso run
-            App->>App: 設定ファイル読込
-            App->>App: タスク定義準備
-            
-            alt タスク定義の登録をスキップしない場合
-              App->>AWS: RegisterTaskDefinition
-              AWS-->>App: タスク定義ARN
-            end
-            
-            App->>AWS: RunTask
-            AWS-->>App: タスク情報
-            
-            alt タスクの完了を待機する場合
-              App->>AWS: DescribeTasks（繰り返し）
-              AWS-->>App: タスク状態
-              
-              opt コンテナログを監視する場合
-                App->>AWS: GetLogEvents
-                AWS-->>App: ログイベント
-              end
-            end
-            
-            App-->>User: 完了メッセージ
-        </div>
+        <h4>runコマンドの処理フロー</h4>
+        <ol class="process-flow">
+          <li>ユーザーが <code>ecspresso run</code> コマンドを実行</li>
+          <li>ecspressoが設定ファイルを読み込む</li>
+          <li>タスク定義を準備する
+            <ul>
+              <li>タスク定義の登録をスキップしない場合、RegisterTaskDefinitionを呼び出し</li>
+              <li>AWS ECSからタスク定義ARNを受け取る</li>
+            </ul>
+          </li>
+          <li>RunTaskを呼び出してタスクを実行</li>
+          <li>AWS ECSからタスク情報を受け取る</li>
+          <li>タスクの完了を待機する場合
+            <ul>
+              <li>DescribeTasksを繰り返し呼び出してタスク状態を確認</li>
+              <li>コンテナログを監視する場合、GetLogEventsを呼び出してログを取得</li>
+            </ul>
+          </li>
+          <li>ユーザーに完了メッセージを表示</li>
+        </ol>
         
         <h3>使用例</h3>
         <pre><code># 基本的なタスク実行
@@ -243,20 +233,22 @@ ecspresso run --wait --watch-container web</code></pre>
         <h3>コマンド実行プロセス</h3>
         <p>execコマンドの内部処理フロー：</p>
         
-        <div class="mermaid">
-          flowchart TD
-            A[exec開始] --> B{タスクID指定?}
-            B -->|Yes| C[指定タスクを使用]
-            B -->|No| D[実行中のタスクを検索]
-            D --> E{タスクが見つかった?}
-            E -->|Yes| F[タスクを選択]
-            E -->|No| G[エラー終了]
-            C --> H[SSMセッション開始]
-            F --> H
-            H --> I[コマンド実行]
-            I --> J[結果表示]
-            J --> K[終了]
-        </div>
+        <h4>execコマンドの処理フロー</h4>
+        <ol class="process-flow">
+          <li>execコマンド開始</li>
+          <li>タスクID指定の確認
+            <ul>
+              <li>指定あり: 指定されたタスクを使用</li>
+              <li>指定なし: 実行中のタスクを検索</li>
+            </ul>
+          </li>
+          <li>タスクが見つからない場合はエラー終了</li>
+          <li>タスクが見つかった場合はタスクを選択</li>
+          <li>SSMセッション開始</li>
+          <li>コマンド実行</li>
+          <li>結果表示</li>
+          <li>終了</li>
+        </ol>
         
         <h3>使用例</h3>
         <pre><code># 実行中のタスクでコマンドを実行
@@ -314,26 +306,20 @@ ecspresso exec --port-forward -- curl localhost:8080</code></pre>
         <h3>タスク管理プロセス</h3>
         <p>tasksコマンドの内部処理フロー：</p>
         
-        <div class="mermaid">
-          sequenceDiagram
-            participant User as ユーザー
-            participant App as ecspresso
-            participant AWS as AWS ECS
-            
-            User->>App: ecspresso tasks
-            App->>App: 設定ファイル読込
-            App->>AWS: ListTasks
-            AWS-->>App: タスク一覧
-            App->>AWS: DescribeTasks
-            AWS-->>App: タスク詳細
-            
-            alt タスクを停止する場合
-              App->>AWS: StopTask
-              AWS-->>App: 停止結果
-            end
-            
-            App-->>User: タスク情報表示
-        </div>
+        <h4>tasksコマンドの処理フロー</h4>
+        <ol class="process-flow">
+          <li>ユーザーが <code>ecspresso tasks</code> コマンドを実行</li>
+          <li>ecspressoが設定ファイルを読み込む</li>
+          <li>AWS ECSのListTasks APIを呼び出してタスク一覧を取得</li>
+          <li>AWS ECSのDescribeTasks APIを呼び出してタスク詳細を取得</li>
+          <li>タスクを停止する場合（<code>--delete</code> オプション指定時）
+            <ul>
+              <li>AWS ECSのStopTask APIを呼び出してタスクを停止</li>
+              <li>停止結果を受け取る</li>
+            </ul>
+          </li>
+          <li>ユーザーにタスク情報を表示</li>
+        </ol>
         
         <h3>使用例</h3>
         <pre><code># 実行中のタスクを一覧表示
@@ -381,18 +367,20 @@ ecspresso tasks --delete --id 12345678-1234-1234-1234-123456789012</code></pre>
         <h3>タスク定義登録プロセス</h3>
         <p>registerコマンドの内部処理フロー：</p>
         
-        <div class="mermaid">
-          flowchart TD
-            A[register開始] --> B[設定ファイル読込]
-            B --> C[タスク定義ファイル読込]
-            C --> D[タスク定義レンダリング]
-            D --> E{ドライラン?}
-            E -->|Yes| F[タスク定義表示]
-            E -->|No| G[RegisterTaskDefinition API呼び出し]
-            G --> H[登録結果表示]
-            F --> I[終了]
-            H --> I
-        </div>
+        <h4>registerコマンドの処理フロー</h4>
+        <ol class="process-flow">
+          <li>registerコマンド開始</li>
+          <li>設定ファイルを読み込む</li>
+          <li>タスク定義ファイルを読み込む</li>
+          <li>タスク定義をレンダリング</li>
+          <li>ドライランモードの確認
+            <ul>
+              <li>ドライランの場合: タスク定義を表示して終了</li>
+              <li>実行モードの場合: RegisterTaskDefinition APIを呼び出し</li>
+            </ul>
+          </li>
+          <li>実行モードの場合、登録結果を表示して終了</li>
+        </ol>
         
         <h3>使用例</h3>
         <pre><code># タスク定義を登録
@@ -455,32 +443,42 @@ ecspresso register --output json</code></pre>
           <li><strong>ポートフォワーディングの活用</strong>: <code>ecspresso exec --port-forward</code>を使用して、ローカルマシンからコンテナ内のサービスにアクセスします。</li>
         </ul>
         
-        <div class="mermaid">
-          graph TD
-            A[タスク管理] --> B[一時的なタスク]
-            A --> C[デバッグ]
-            A --> D[タスク監視]
-            A --> E[タスク定義管理]
-            
-            B --> F[ecspresso run]
-            C --> G[ecspresso exec]
-            D --> H[ecspresso tasks]
-            E --> I[ecspresso register]
-            
-            F --> J[データベースマイグレーション]
-            F --> K[バッチ処理]
-            F --> L[一時的なジョブ]
-            
-            G --> M[シェルアクセス]
-            G --> N[ログ確認]
-            G --> O[設定確認]
-            
-            H --> P[タスク一覧]
-            H --> Q[タスク停止]
-            H --> R[タスク詳細]
-            
-            I --> S[新規タスク定義]
-            I --> T[タスク定義更新]
+        <h4>タスク管理の概要</h4>
+        <div class="task-management-overview">
+          <div class="task-category">
+            <h5>一時的なタスク (<code>ecspresso run</code>)</h5>
+            <ul>
+              <li>データベースマイグレーション</li>
+              <li>バッチ処理</li>
+              <li>一時的なジョブ</li>
+            </ul>
+          </div>
+          
+          <div class="task-category">
+            <h5>デバッグ (<code>ecspresso exec</code>)</h5>
+            <ul>
+              <li>シェルアクセス</li>
+              <li>ログ確認</li>
+              <li>設定確認</li>
+            </ul>
+          </div>
+          
+          <div class="task-category">
+            <h5>タスク監視 (<code>ecspresso tasks</code>)</h5>
+            <ul>
+              <li>タスク一覧</li>
+              <li>タスク停止</li>
+              <li>タスク詳細</li>
+            </ul>
+          </div>
+          
+          <div class="task-category">
+            <h5>タスク定義管理 (<code>ecspresso register</code>)</h5>
+            <ul>
+              <li>新規タスク定義</li>
+              <li>タスク定義更新</li>
+            </ul>
+          </div>
         </div>
       </section>
     </div>

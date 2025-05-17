@@ -91,18 +91,18 @@
         
         <div class="mermaid">
 sequenceDiagram
-  actor User as ユーザー
-  participant Ecspresso as ecspresso
-  participant AWS as AWS API
-  
-  User->>Ecspresso: ecspresso init
-  Ecspresso->>AWS: サービス情報取得
-  AWS-->>Ecspresso: サービス定義
-  Ecspresso->>AWS: タスク定義取得
-  AWS-->>Ecspresso: タスク定義
-  Ecspresso->>Ecspresso: 設定ファイル生成
-  Ecspresso-->>User: 完了メッセージ
-        </div>
+actor User as ユーザー
+participant Ecspresso as ecspresso
+participant AWS as AWS API
+
+User->>Ecspresso: ecspresso init
+Ecspresso->>AWS: サービス情報取得
+AWS-->>Ecspresso: サービス定義
+Ecspresso->>AWS: タスク定義取得
+AWS-->>Ecspresso: タスク定義
+Ecspresso->>Ecspresso: 設定ファイル生成
+Ecspresso-->>User: 完了メッセージ
+</div>
       </section>
       
       <section id="deploy" class="section">
@@ -125,16 +125,16 @@ sequenceDiagram
         
         <div class="mermaid">
 flowchart TD
-  A[設定ファイル編集] --> B[差分確認]
-  B --> C{差分あり?}
-  C -->|はい| D[リソース検証]
-  C -->|いいえ| H[完了]
-  D --> E{検証成功?}
-  E -->|はい| F[デプロイ]
-  E -->|いいえ| A
-  F --> G[デプロイ待機]
-  G --> H[完了]
-        </div>
+A[設定ファイル編集] --> B[差分確認]
+B --> C{差分あり?}
+C -->|はい| D[リソース検証]
+C -->|いいえ| H[完了]
+D --> E{検証成功?}
+E -->|はい| F[デプロイ]
+E -->|いいえ| A
+F --> G[デプロイ待機]
+G --> H[完了]
+</div>
         
         <p>基本的なワークフローは以下の通りです：</p>
         <ol>

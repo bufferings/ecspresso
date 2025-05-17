@@ -154,7 +154,38 @@
         <h2>コマンドカテゴリ</h2>
         <p>ecspressoのコマンドは以下のカテゴリに分類されます：</p>
         
-        <img src="https://mermaid.ink/img/pako:eNptksFqwzAMhl_F6LTCesghh1HoYYexS2GwDroVHMVpDHHsYDtbS_ruU5J1Y7TMF1n_J-mPpE5QWU1AoDZmrxptyG-tVA-20Y482VY15MU5ZQzZWe3Ieb21jSa71xtSujNkm1qTr0xryHvlHXlxhuz7oDTZF1WTV6ca8hT8BwJBgoIQQQoxZLBcxZBAGkEap_EyzdIUkjiGNEmyZRatojjLkjiGJIqyVRZl8SJLYkggTZJ4lUXLOF5lEUSQwY8dVYOzylcQIIcK9nAABwH2EKCCIwQ4Qg0BHFTQwAEaCHAADweooQ5X8n9wAwc3cNcQ4AYtBLhDgDvcIcAdArQQ4A53eMAd_qGHMPqHHgL0EP7SCGHUQxj1EEY9hFEPYdRDGPUQRj2EUQ9h9BPg0lpdQKla7TSaT61RNRRgem2hhFbpgzHHUg1QoOudQdmiaaeSH1IbFCjRcK1ly60yyC3PpTZQgh204dlxvuU853k-zV-Uy9nF?type=png" alt="ecspressoコマンドカテゴリの図" />
+        <h5>ecspressoの主要機能</h5>
+        <ul class="main-features">
+          <li>デプロイ管理</li>
+          <li>タスク実行</li>
+          <li>設定検証</li>
+        </ul>
+        
+        <h4>デプロイ関連コマンド</h4>
+        <ul>
+          <li><code>deploy</code>: サービスをデプロイします</li>
+          <li><code>rollback</code>: 以前のバージョンに戻します</li>
+          <li><code>scale</code>: サービスのタスク数を変更します</li>
+          <li><code>wait</code>: サービスが安定するまで待機します</li>
+        </ul>
+        
+        <h4>タスク関連コマンド</h4>
+        <ul>
+          <li><code>run</code>: 一時的なタスクを実行します</li>
+          <li><code>register</code>: タスク定義を登録します</li>
+          <li><code>tasks</code>: タスクの一覧を表示します</li>
+          <li><code>exec</code>: タスク内でコマンドを実行します</li>
+        </ul>
+        
+        <h4>設定・検証コマンド</h4>
+        <ul>
+          <li><code>init</code>: 設定ファイルを初期化します</li>
+          <li><code>verify</code>: リソースを検証します</li>
+          <li><code>diff</code>: 設定の差分を表示します</li>
+          <li><code>render</code>: テンプレートをレンダリングします</li>
+          <li><code>status</code>: サービスの状態を表示します</li>
+          <li><code>appspec</code>: AppSpecを生成します</li>
+        </ul>
         
         <h3>デプロイ関連コマンド</h3>
         <p>ECSサービスのデプロイ、ロールバック、スケーリングを管理するコマンドです。</p>
@@ -244,7 +275,16 @@
           <h4>処理フロー</h4>
           <p>deployコマンドの基本的な処理フロー：</p>
           
-          <img src="https://mermaid.ink/img/pako:eNp1kU1rwzAMhv-K0GmF9ZBDDmPQww5jl8JgHXQrOIrTGOLYwXa2lvS_z0nWj9EyX2S9j6QnkjpBZTUBgdqYvWq0Ib-1Uj3YRjvyZFvVkBfnlDFkZ7Uj5_XWNprsXm9I6c6QbWpNvjKtIe-Vd-TFGbLvg9JkX1RNXp1qyFPwHwgECQpCBCnEkMFyFUMCaQRpnMbLNFstIYljSJMkW2bRKoqzLIljSKIoW2VRFi-yJIYE0iSJV1m0jONVFkEEGfzYUTU4q3wFDnKoYA8HcOBhDx4qOIKHI9TgwUEFDRygAQ8H8HCAGupwJf8HN3BwA3cNHm7Qgoc7eLjDHTzcwUMLHu5whwfc4R968KN_0IOHHvxfGsGPBvCjB_jRA_zoAX70AD96gB89wI8e4P8EuLRWF1CqVjuN5lNrVA0FmF5bKKFV-mDMsVQDFOh6Z1C2aNqp5LvUBgVKNFxr2XKrDHLLc6kNlGAHbXh2nG85z3meT_MXUvXZxQ?type=png" alt="デプロイコマンドのフロー図" />
+          <h5>デプロイプロセスの流れ</h5>
+          <ol>
+            <li>設定ファイルを読み込む</li>
+            <li>タスク定義ファイルを読み込む</li>
+            <li>サービス定義ファイルを読み込む</li>
+            <li>タスク定義をAWSに登録する</li>
+            <li>サービスを更新する</li>
+            <li>サービスの状態を確認する</li>
+            <li>サービスが安定するまで待機する</li>
+          </ol>
           
           <h4>使用例</h4>
           <pre><code># 基本的なデプロイ
@@ -311,7 +351,16 @@ ecspresso deploy --tasks 5</code></pre>
           <h4>ロールバックプロセス</h4>
           <p>rollbackコマンドの内部処理フロー：</p>
           
-          <img src="https://mermaid.ink/img/pako:eNp1ksFqwzAMhl_F6LTCesghh1HoYYexS2GwDroVHMVpDHHsYDtbS_ruU5J1Y7TMF1n_J-mPpE5QWU1AoDZmrxptyG-tVA-20Y482VY15MU5ZQzZWe3Ieb21jSa71xtSujNkm1qTr0xryHvlHXlxhuz7oDTZF1WTV6ca8hT8BwJBgoIQQQoxZLBcxZBAGkEap_EyzdIUkjiGNEmyZRatojjLkjiGJIqyVRZl8SJLYkggTZJ4lUXLOF5lEUSQwY8dVYOzylcQIIcK9nAABwH2EKCCIwQ4Qg0BHFTQwAEaCHAADweooQ5X8n9wAwc3cNcQ4AYtBLhDgDvcIcAdArQQ4A53eMAd_qGHMPqHHgL0EP7SCGHUQxj1EEY9hFEPYdRDGPUQRj2EUQ9h9BPg0lpdQKla7TSaT61RNRRgem2hhFbpgzHHUg1QoOudQdmiaaeSH1IbFCjRcK1ly60yyC3PpTZQgh204dlxvuU853k-zV-Uy9nF?type=png" alt="ロールバックコマンドのフロー図" />
+          <h5>ロールバックプロセスの流れ</h5>
+          <ol>
+            <li>設定ファイルを読み込む</li>
+            <li>現在のサービス情報を取得する</li>
+            <li>前回のタスク定義を取得する</li>
+            <li>前回のタスク定義でサービスを更新する</li>
+            <li>サービスの状態を確認する</li>
+            <li>サービスが安定するまで待機する</li>
+            <li>（--deregisterオプション指定時）現在のタスク定義を登録解除する</li>
+          </ol>
           
           <h4>使用例</h4>
           <pre><code># 基本的なロールバック（前回のタスク定義に戻す）
@@ -364,7 +413,14 @@ ecspresso rollback --no-wait-until-stable</code></pre>
           <h4>スケーリングプロセス</h4>
           <p>scaleコマンドの内部処理フロー：</p>
           
-          <img src="https://mermaid.ink/img/pako:eNp1ksFqwzAMhl_F6LTCesghh1HoYYexS2GwDroVHMVpDHHsYDtbS_ruU5J1Y7TMF1n_J-mPpE5QWU1AoDZmrxptyG-tVA-20Y482VY15MU5ZQzZWe3Ieb21jSa71xtSujNkm1qTr0xryHvlHXlxhuz7oDTZF1WTV6ca8hT8BwJBgoIQQQoxZLBcxZBAGkEap_EyzdIUkjiGNEmyZRatojjLkjiGJIqyVRZl8SJLYkggTZJ4lUXLOF5lEUSQwY8dVYOzylcQIIcK9nAABwH2EKCCIwQ4Qg0BHFTQwAEaCHAADweooQ5X8n9wAwc3cNcQ4AYtBLhDgDvcIcAdArQQ4A53eMAd_qGHMPqHHgL0EP7SCGHUQxj1EEY9hFEPYdRDGPUQRj2EUQ9h9BPg0lpdQKla7TSaT61RNRRgem2hhFbpgzHHUg1QoOudQdmiaaeSH1IbFCjRcK1ly60yyC3PpTZQgh204dlxvuU853k-zV-Uy9nF?type=png" alt="スケールコマンドのシーケンス図" />
+          <h5>スケーリングプロセスの流れ</h5>
+          <ol>
+            <li>設定ファイルを読み込む</li>
+            <li>現在のサービス情報を取得する</li>
+            <li>タスク数を変更してサービスを更新する</li>
+            <li>サービスの状態を確認する</li>
+            <li>サービスが安定するまで待機する</li>
+          </ol>
           
           <h4>使用例</h4>
           <pre><code># タスク数を5に設定
@@ -409,7 +465,18 @@ ecspresso scale --tasks 3 --no-wait-until-stable</code></pre>
           <h4>待機プロセス</h4>
           <p>waitコマンドの内部処理フロー：</p>
           
-          <img src="https://mermaid.ink/img/pako:eNp1ksFqwzAMhl_F6LTCesghh1HoYYexS2GwDroVHMVpDHHsYDtbS_ruU5J1Y7TMF1n_J-mPpE5QWU1AoDZmrxptyG-tVA-20Y482VY15MU5ZQzZWe3Ieb21jSa71xtSujNkm1qTr0xryHvlHXlxhuz7oDTZF1WTV6ca8hT8BwJBgoIQQQoxZLBcxZBAGkEap_EyzdIUkjiGNEmyZRatojjLkjiGJIqyVRZl8SJLYkggTZJ4lUXLOF5lEUSQwY8dVYOzylcQIIcK9nAABwH2EKCCIwQ4Qg0BHFTQwAEaCHAADweooQ5X8n9wAwc3cNcQ4AYtBLhDgDvcIcAdArQQ4A53eMAd_qGHMPqHHgL0EP7SCGHUQxj1EEY9hFEPYdRDGPUQRj2EUQ9h9BPg0lpdQKla7TSaT61RNRRgem2hhFbpgzHHUg1QoOudQdmiaaeSH1IbFCjRcK1ly60yyC3PpTZQgh204dlxvuU853k-zV-Uy9nF?type=png" alt="待機コマンドのフロー図" />
+          <h5>待機プロセスの流れ</h5>
+          <ol>
+            <li>設定ファイルを読み込む</li>
+            <li>サービスの状態を取得する</li>
+            <li>タイムアウトまで以下を繰り返す：
+              <ul>
+                <li>サービスが安定している場合：待機終了</li>
+                <li>サービスが安定していない場合：一定時間待機して状態を再取得</li>
+              </ul>
+            </li>
+            <li>タイムアウト発生時：エラー終了</li>
+          </ol>
           
           <h4>使用例</h4>
           <pre><code># サービスが安定するまで待機
@@ -426,7 +493,26 @@ ecspresso wait --timeout 300</code></pre>
           <h3>デプロイ戦略</h3>
           <p>ecspressoは以下の2つのデプロイ戦略をサポートしています：</p>
           
-          <img src="https://mermaid.ink/img/pako:eNp1ksFqwzAMhl_F6LTCesghh1HoYYexS2GwDroVHMVpDHHsYDtbS_ruU5J1Y7TMF1n_J-mPpE5QWU1AoDZmrxptyG-tVA-20Y482VY15MU5ZQzZWe3Ieb21jSa71xtSujNkm1qTr0xryHvlHXlxhuz7oDTZF1WTV6ca8hT8BwJBgoIQQQoxZLBcxZBAGkEap_EyzdIUkjiGNEmyZRatojjLkjiGJIqyVRZl8SJLYkggTZJ4lUXLOF5lEUSQwY8dVYOzylcQIIcK9nAABwH2EKCCIwQ4Qg0BHFTQwAEaCHAADweooQ5X8n9wAwc3cNcQ4AYtBLhDgDvcIcAdArQQ4A53eMAd_qGHMPqHHgL0EP7SCGHUQxj1EEY9hFEPYdRDGPUQRj2EUQ9h9BPg0lpdQKla7TSaT61RNRRgem2hhFbpgzHHUg1QoOudQdmiaaeSH1IbFCjRcK1ly60yyC3PpTZQgh204dlxvuU853k-zV-Uy9nF?type=png" alt="デプロイ戦略の図" />
+          <h5>デプロイ戦略の比較</h5>
+          <div class="deployment-strategies">
+            <div class="strategy">
+              <h6>ECSローリングデプロイ</h6>
+              <ul>
+                <li>タスクを徐々に置き換える</li>
+                <li>deploymentConfiguration設定で制御</li>
+                <li>サーキットブレーカー機能あり</li>
+              </ul>
+            </div>
+            <div class="strategy">
+              <h6>CodeDeployブルー/グリーン</h6>
+              <ul>
+                <li>新環境を作成</li>
+                <li>トラフィックを徐々に移行</li>
+                <li>appspec.yaml設定で制御</li>
+                <li>デプロイフック機能あり</li>
+              </ul>
+            </div>
+          </div>
           
           <h4>ECSローリングデプロイ</h4>
           <p>ECSローリングデプロイは、タスクを徐々に置き換えていく戦略です。以下のパラメータで設定できます：</p>

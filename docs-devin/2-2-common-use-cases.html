@@ -87,21 +87,24 @@ Hooks:
       
       <pre><code>$ ecspresso deploy</code></pre>
       
-      <div class="mermaid">
-      flowchart TD
-        Deploy[デプロイ開始] --> CreateTD[新しいタスク定義登録]
-        CreateTD --> CreateDeploy[CodeDeployデプロイメント作成]
-        CreateDeploy --> BeforeInstall[BeforeInstallフック実行]
-        BeforeInstall --> CreateTarget[ターゲットグループ作成]
-        CreateTarget --> DeployTask[新しいタスクデプロイ]
-        DeployTask --> AfterInstall[AfterInstallフック実行]
-        AfterInstall --> TestTraffic[テストトラフィック開始]
-        TestTraffic --> AfterTest[AfterAllowTestTrafficフック実行]
-        AfterTest --> BeforeTraffic[BeforeAllowTrafficフック実行]
-        BeforeTraffic --> SwitchTraffic[本番トラフィック切り替え]
-        SwitchTraffic --> AfterTraffic[AfterAllowTrafficフック実行]
-        AfterTraffic --> Complete[デプロイ完了]
-      </div>
+      <p class="text-center">
+        <strong>Blue/Greenデプロイフロー</strong>
+      </p>
+      <pre class="mermaid">
+graph TD
+  Deploy[デプロイ開始] --> CreateTD[新しいタスク定義登録]
+  CreateTD --> CreateDeploy[CodeDeployデプロイメント作成]
+  CreateDeploy --> BeforeInstall[BeforeInstallフック実行]
+  BeforeInstall --> CreateTarget[ターゲットグループ作成]
+  CreateTarget --> DeployTask[新しいタスクデプロイ]
+  DeployTask --> AfterInstall[AfterInstallフック実行]
+  AfterInstall --> TestTraffic[テストトラフィック開始]
+  TestTraffic --> AfterTest[AfterAllowTestTrafficフック実行]
+  AfterTest --> BeforeTraffic[BeforeAllowTrafficフック実行]
+  BeforeTraffic --> SwitchTraffic[本番トラフィック切り替え]
+  SwitchTraffic --> AfterTraffic[AfterAllowTrafficフック実行]
+  AfterTraffic --> Complete[デプロイ完了]
+      </pre>
       
       <h3>タスクの一覧表示と停止</h3>
       <p>実行中のタスクを一覧表示するには：</p>

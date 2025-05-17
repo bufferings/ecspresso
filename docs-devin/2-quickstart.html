@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ecspresso - クイックスタート</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({ startOnLoad: true });
+  </script>
 </head>
 <body>
   <header>
@@ -36,6 +40,18 @@
       
       <h2>セクション概要</h2>
       <p>このセクションでは、ecspressoを使ってすぐに始められる基本的な使い方と、よく遭遇する実用的なユースケースについて説明します。初めてecspressoを使う方のために、基本的なワークフローと設定ファイルの記述方法を解説します。</p>
+      
+      <p class="text-center">
+        <strong>ecspresso 基本ワークフロー</strong>
+      </p>
+      <pre class="mermaid">
+graph LR
+  A[初期化] --> B[設定編集]
+  B --> C[検証]
+  C --> D[差分確認]
+  D --> E[デプロイ]
+  E --> F[状態確認]
+      </pre>
     </section>
   </main>
   <footer>

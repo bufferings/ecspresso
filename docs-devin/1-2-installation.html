@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ecspresso - インストール方法</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({ startOnLoad: true });
+  </script>
 </head>
 <body>
   <header>
@@ -66,9 +70,51 @@ export AWS_REGION=ap-northeast-1</code></pre>
       <h4>IAMロールの使用（EC2、ECSタスク、Lambda内）</h4>
       <p>AWS環境内で実行する場合は、インスタンスプロファイルやタスクロールを使用できます。この場合、明示的な認証情報設定は不要です。</p>
       
+      <h3>必要なIAM権限</h3>
+      <p>ecspressoを使用するには、以下のAWSサービスへのアクセス権限が必要です：</p>
+      <ul>
+        <li><strong>Amazon ECS</strong>: サービス、タスク定義、タスクの管理</li>
+        <li><strong>AWS CodeDeploy</strong>: Blue/Greenデプロイを使用する場合</li>
+        <li><strong>Amazon CloudWatch Logs</strong>: ログの表示</li>
+        <li><strong>AWS Auto Scaling</strong>: Auto Scalingの設定を管理する場合</li>
+        <li><strong>AWS Systems Manager Parameter Store</strong>: パラメータを参照する場合</li>
+        <li><strong>AWS Secrets Manager</strong>: シークレットを参照する場合</li>
+        <li><strong>Elastic Load Balancing</strong>: ロードバランサーを使用する場合</li>
+        <li><strong>AWS Service Discovery</strong>: サービスディスカバリーを使用する場合</li>
+        <li><strong>VPC Lattice</strong>: VPC Latticeを使用する場合</li>
+      </ul>
+      
       <h3>バージョンの確認</h3>
       <p>インストールが正常に完了したことを確認するには、バージョン情報を表示します。</p>
       <pre><code>$ ecspresso version</code></pre>
+      
+      <h3>初期設定</h3>
+      <p>ecspressoを初めて使用する場合は、以下のコマンドで初期設定ファイルを生成できます：</p>
+      <pre><code>$ ecspresso init --region ap-northeast-1 --service your-service-name --cluster your-cluster-name</code></pre>
+      <p>このコマンドは、カレントディレクトリに<code>ecspresso.yml</code>ファイルを生成します。このファイルを編集して、サービスの設定を行います。</p>
+      
+      <h3>設定ファイルの構造</h3>
+      <p>ecspressoの設定ファイル（ecspresso.yml）には、以下の主要な設定項目があります：</p>
+      <pre><code>region: ap-northeast-1
+cluster: your-cluster-name
+service: your-service-name
+service_definition: ecs-service-def.json
+task_definition: ecs-task-def.json
+timeout: 10m
+plugins:
+  - name: tfstate
+    config:
+      path: terraform.tfstate</code></pre>
+      <p>各項目の説明：</p>
+      <ul>
+        <li><strong>region</strong>: AWSリージョン</li>
+        <li><strong>cluster</strong>: ECSクラスター名</li>
+        <li><strong>service</strong>: ECSサービス名</li>
+        <li><strong>service_definition</strong>: サービス定義ファイルのパス（JSON/YAML）</li>
+        <li><strong>task_definition</strong>: タスク定義ファイルのパス（JSON/YAML）</li>
+        <li><strong>timeout</strong>: 操作のタイムアウト時間</li>
+        <li><strong>plugins</strong>: 使用するプラグインの設定</li>
+      </ul>
     </section>
   </main>
   <footer>

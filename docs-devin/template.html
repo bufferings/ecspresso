@@ -3,56 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>タイトル - ecspresso</title>
+  <title>ecspresso - {{TITLE}}</title>
   <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      mermaid.initialize({
-        startOnLoad: true,
-        theme: 'default',
-        securityLevel: 'loose'
-      });
-    });
+    mermaid.initialize({ startOnLoad: true });
   </script>
 </head>
 <body>
   <header>
-    <h1>ecspresso</h1>
-    <p>Amazon ECS 用デプロイメントツール</p>
-    <p><em>(「エスプレッソ」と同じ発音です ☕)</em></p>
+    <h1>ecspresso - {{TITLE}}</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">ホーム</a></li>
+        <li><a href="1-introduction.html">はじめに</a></li>
+        <li><a href="2-quickstart.html">クイックスタート</a></li>
+        <li><a href="3-command-reference.html">コマンドリファレンス</a></li>
+        <li><a href="4-practical-guide.html">実践ガイド</a></li>
+        <li><a href="5-troubleshooting.html">トラブルシューティング</a></li>
+      </ul>
+    </nav>
   </header>
-  
-  <div class="container">
-    <div class="sidebar">
-      <nav>
-        <ul>
-          <li><a href="index.html">1.0 はじめに</a></li>
-          <li><a href="about.html">1.1 ecspressoとは</a></li>
-          <li><a href="installation.html">1.2 インストール方法</a></li>
-          <li><a href="quickstart.html">2.0 クイックスタート</a></li>
-          <li><a href="basic-usage.html">2.1 基本的な使い方</a></li>
-          <li><a href="common-use-cases.html">2.2 よくあるユースケース</a></li>
-          <li><a href="command-reference.html">3.0 コマンドリファレンス</a></li>
-          <li><a href="deployment-commands.html">3.1 デプロイ関連コマンド</a></li>
-          <li><a href="task-commands.html">3.2 タスク関連コマンド</a></li>
-          <li><a href="config-commands.html">3.3 設定・検証コマンド</a></li>
-          <li><a href="practical-guide.html">4.0 実践ガイド</a></li>
-          <li><a href="cicd-integration.html">4.1 CI/CDパイプラインとの統合</a></li>
-          <li><a href="multi-env.html">4.2 複数環境での運用</a></li>
-          <li><a href="large-scale.html">4.3 大規模サービスの管理</a></li>
-          <li><a href="troubleshooting.html">5.0 トラブルシューティング</a></li>
-        </ul>
-      </nav>
-    </div>
-    
-    <div class="content">
-      <!-- コンテンツがここに入ります -->
-    </div>
-  </div>
-  
-  <footer class="footer">
-    <p>© KAYAC Inc. - <a href="https://github.com/kayac/ecspresso">GitHub リポジトリ</a></p>
+  <main>
+    {{CONTENT}}
+  </main>
+  <footer>
+    <p>&copy; 2023 ecspresso</p>
   </footer>
 </body>
 </html>

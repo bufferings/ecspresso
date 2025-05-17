@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ecspresso - よくあるユースケース</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({ startOnLoad: true });
+  </script>
+</head>
+<body>
+  <header>
+    <h1>ecspresso - よくあるユースケース</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">ホーム</a></li>
+        <li><a href="1-introduction.html">はじめに</a></li>
+        <li><a href="2-quickstart.html">クイックスタート</a></li>
+        <li><a href="3-command-reference.html">コマンドリファレンス</a></li>
+        <li><a href="4-practical-guide.html">実践ガイド</a></li>
+        <li><a href="5-troubleshooting.html">トラブルシューティング</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <section>
+      <h2>2.2 よくあるユースケース</h2>
+      
+      <h3>ワンオフタスクの実行</h3>
+      <p>バッチ処理やデータベースマイグレーションなど、一時的なタスクを実行する場合は<code>run</code>コマンドを使用します。</p>
+      
+      <pre><code>$ ecspresso run --task-def=path/to/task-def.json --comment="データベースマイグレーション"</code></pre>
+      
+      <p>特定のコマンドを実行する場合：</p>
+      
+      <pre><code>$ ecspresso run --task-def=path/to/task-def.json --command='["bin/migrate", "up"]'</code></pre>
+      
+      <h3>コンテナ内でのコマンド実行</h3>
+      <p>実行中のコンテナ内でコマンドを実行するには<code>exec</code>コマンドを使用します。これはデバッグやトラブルシューティングに便利です。</p>
+      
+      <pre><code>$ ecspresso exec --command="/bin/bash"</code></pre>
+      
+      <h3>サービスのロールバック</h3>
+      <p>デプロイに問題がある場合、以前のタスク定義にロールバックできます。</p>
+      
+      <pre><code>$ ecspresso rollback</code></pre>
+      
+      <h3>サービス設定の差分確認</h3>
+      <p>現在のデプロイ済みサービスと、ローカルの設定ファイルの差分を確認します。</p>
+      
+      <pre><code>$ ecspresso diff</code></pre>
+      
+      <h3>Blue/Greenデプロイ</h3>
+      <p>AWS CodeDeployを使用したBlue/Greenデプロイを行うには、<code>ecspresso.yml</code>に<code>deployment_controller</code>を設定します。</p>
+      
+      <pre><code>region: ap-northeast-1
+cluster: your-cluster
+service: your-service
+service_definition: ecs-service-def.json
+task_definition: ecs-task-def.json
+timeout: 10m
+deployment_controller:
+  type: CODE_DEPLOY
+appspec: appspec.yaml</code></pre>
+      
+      <p>そして、<code>appspec.yaml</code>ファイルを作成します：</p>
+      
+      <pre><code>version: 0.0
+Resources:
+  - TargetService:
+      Type: AWS::ECS::Service
+      Properties:
+        TaskDefinition: "&lt;TASK_DEFINITION&gt;"
+        LoadBalancerInfo:
+          ContainerName: "web"
+          ContainerPort: 80
+Hooks:
+  - BeforeInstall: "LambdaFunctionToValidateBeforeInstall"
+  - AfterInstall: "LambdaFunctionToValidateAfterInstall"
+  - AfterAllowTestTraffic: "LambdaFunctionToValidateAfterTestTrafficStarts"
+  - BeforeAllowTraffic: "LambdaFunctionToValidateBeforeAllowingProductionTraffic"
+  - AfterAllowTraffic: "LambdaFunctionToValidateAfterAllowingProductionTraffic"</code></pre>
+      
+      <p>デプロイを実行します：</p>
+      
+      <pre><code>$ ecspresso deploy</code></pre>
+      
+      <div class="mermaid">
+      flowchart TD
+        Deploy[デプロイ開始] --> CreateTD[新しいタスク定義登録]
+        CreateTD --> CreateDeploy[CodeDeployデプロイメント作成]
+        CreateDeploy --> BeforeInstall[BeforeInstallフック実行]
+        BeforeInstall --> CreateTarget[ターゲットグループ作成]
+        CreateTarget --> DeployTask[新しいタスクデプロイ]
+        DeployTask --> AfterInstall[AfterInstallフック実行]
+        AfterInstall --> TestTraffic[テストトラフィック開始]
+        TestTraffic --> AfterTest[AfterAllowTestTrafficフック実行]
+        AfterTest --> BeforeTraffic[BeforeAllowTrafficフック実行]
+        BeforeTraffic --> SwitchTraffic[本番トラフィック切り替え]
+        SwitchTraffic --> AfterTraffic[AfterAllowTrafficフック実行]
+        AfterTraffic --> Complete[デプロイ完了]
+      </div>
+      
+      <h3>タスクの一覧表示と停止</h3>
+      <p>実行中のタスクを一覧表示するには：</p>
+      
+      <pre><code>$ ecspresso tasks</code></pre>
+      
+      <p>特定のタスクを停止するには：</p>
+      
+      <pre><code>$ ecspresso tasks --stop --task-id=arn:aws:ecs:region:account:task/cluster/task-id</code></pre>
+      
+      <h3>環境変数の上書き</h3>
+      <p>タスク実行時に環境変数を上書きするには：</p>
+      
+      <pre><code>$ ecspresso run --env="KEY=VALUE" --env="ANOTHER_KEY=ANOTHER_VALUE"</code></pre>
+      
+      <h3>ポートフォワーディング</h3>
+      <p>コンテナのポートをローカルにフォワードするには：</p>
+      
+      <pre><code>$ ecspresso exec --port-forward=8080:80</code></pre>
+    </section>
+  </main>
+  <footer>
+    <p>&copy; 2023 ecspresso</p>
+  </footer>
+</body>
+</html>

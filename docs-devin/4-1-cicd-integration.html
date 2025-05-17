@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ecspresso - CI/CDパイプラインとの統合</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({ startOnLoad: true });
+  </script>
+</head>
+<body>
+  <header>
+    <h1>ecspresso - CI/CDパイプラインとの統合</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">ホーム</a></li>
+        <li><a href="1-introduction.html">はじめに</a></li>
+        <li><a href="2-quickstart.html">クイックスタート</a></li>
+        <li><a href="3-command-reference.html">コマンドリファレンス</a></li>
+        <li><a href="4-practical-guide.html">実践ガイド</a></li>
+        <li><a href="5-troubleshooting.html">トラブルシューティング</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <section>
+      <h2>4.1 CI/CDパイプラインとの統合</h2>
+      
+      <p>ecspressoは、CI/CDパイプラインと簡単に統合できるように設計されています。このセクションでは、一般的なCI/CDツールでecspressoを使用する方法を説明します。</p>
+      
+      <h3>CI/CDパイプラインの基本フロー</h3>
+      <div class="mermaid">
+      flowchart LR
+        Code[コード変更] --> Build[ビルド]
+        Build --> Test[テスト]
+        Test --> Package[パッケージング]
+        Package --> Verify[検証\necspresso verify]
+        Verify --> Deploy[デプロイ\necspresso deploy]
+        Deploy --> Monitor[モニタリング]
+      </div>
+      
+      <h3>GitHub Actionsでの統合</h3>
+      <p>GitHub Actionsを使用してecspressoをCI/CDパイプラインに統合する例を示します。</p>
+      
+      <pre><code>name: Deploy to ECS
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-1
+      
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      
+      - name: Build, tag, and push image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: my-app
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+      
+      - name: Update task definition
+        run: |
+          # タスク定義内のイメージタグを更新
+          sed -i "s|{{IMAGE_TAG}}|${{ github.sha }}|g" ecs-task-def.json
+      
+      - name: Install ecspresso
+        run: |
+          curl -sL https://github.com/kayac/ecspresso/releases/latest/download/ecspresso-linux-amd64 -o ecspresso
+          chmod +x ecspresso
+          sudo mv ecspresso /usr/local/bin/
+      
+      - name: Verify configuration
+        run: ecspresso verify
+      
+      - name: Deploy to ECS
+        run: ecspresso deploy</code></pre>
+      
+      <h3>CircleCIでの統合</h3>
+      <p>CircleCIを使用してecspressoをCI/CDパイプラインに統合する例を示します。</p>
+      
+      <pre><code>version: 2.1
+orbs:
+  aws-ecr: circleci/aws-ecr@6.15.3
+  aws-cli: circleci/aws-cli@2.0.3
+
+jobs:
+  deploy:
+    docker:
+      - image: cimg/base:2021.04
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 20.10.7
+      - aws-cli/setup:
+          profile-name: default
+      - aws-ecr/build-and-push-image:
+          repo: my-app
+          tag: ${CIRCLE_SHA1}
+      - run:
+          name: Update task definition
+          command: |
+            # タスク定義内のイメージタグを更新
+            sed -i "s|{{IMAGE_TAG}}|${CIRCLE_SHA1}|g" ecs-task-def.json
+      - run:
+          name: Install ecspresso
+          command: |
+            curl -sL https://github.com/kayac/ecspresso/releases/latest/download/ecspresso-linux-amd64 -o ecspresso
+            chmod +x ecspresso
+            sudo mv ecspresso /usr/local/bin/
+      - run:
+          name: Verify configuration
+          command: ecspresso verify
+      - run:
+          name: Deploy to ECS
+          command: ecspresso deploy
+
+workflows:
+  version: 2
+  build-and-deploy:
+    jobs:
+      - deploy:
+          filters:
+            branches:
+              only: main</code></pre>
+      
+      <h3>AWS CodePipelineでの統合</h3>
+      <p>AWS CodePipelineを使用してecspressoをCI/CDパイプラインに統合する例を示します。</p>
+      
+      <pre><code># buildspec.yml
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      docker: 19
+    commands:
+      - curl -sL https://github.com/kayac/ecspresso/releases/latest/download/ecspresso-linux-amd64 -o ecspresso
+      - chmod +x ecspresso
+      - mv ecspresso /usr/local/bin/
+  
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+  
+  build:
+    commands:
+      - echo Building the Docker image...
+      - docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPOSITORY:$CODEBUILD_RESOLVED_SOURCE_VERSION .
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$ECR_REPOSITORY:$CODEBUILD_RESOLVED_SOURCE_VERSION
+      
+      - echo Updating task definition...
+      - sed -i "s|{{IMAGE_TAG}}|$CODEBUILD_RESOLVED_SOURCE_VERSION|g" ecs-task-def.json
+  
+  post_build:
+    commands:
+      - echo Verifying configuration...
+      - ecspresso verify
+      - echo Deploying to ECS...
+      - ecspresso deploy</code></pre>
+      
+      <h3>ベストプラクティス</h3>
+      <h4>1. 環境変数の活用</h4>
+      <p>CI/CD環境では、環境変数を使用して設定を柔軟に変更できます。</p>
+      <pre><code>$ ecspresso --config=config.$ENV.yml deploy</code></pre>
+      
+      <h4>2. ドライランの実施</h4>
+      <p>本番環境へのデプロイ前に、ドライランを実行して変更内容を確認します。</p>
+      <pre><code>$ ecspresso deploy --dry-run</code></pre>
+      
+      <h4>3. 検証ステップの追加</h4>
+      <p>デプロイ前に必ず検証を行い、設定の問題を早期に発見します。</p>
+      <pre><code>$ ecspresso verify || exit 1</code></pre>
+      
+      <h4>4. デプロイ後の確認</h4>
+      <p>デプロイ後にサービスの状態を確認し、問題があればすぐに対応できるようにします。</p>
+      <pre><code>$ ecspresso deploy && ecspresso status</code></pre>
+      
+      <h4>5. ロールバック戦略の準備</h4>
+      <p>デプロイに問題があった場合のロールバック手順を準備しておきます。</p>
+      <pre><code>if ! ecspresso deploy; then
+  echo "Deployment failed, rolling back..."
+  ecspresso rollback
+  exit 1
+fi</code></pre>
+      
+      <h3>セキュリティ考慮事項</h3>
+      <h4>1. AWS認証情報の管理</h4>
+      <p>CI/CD環境では、AWS認証情報をシークレットとして安全に管理します。環境変数として直接スクリプトに記述しないでください。</p>
+      
+      <h4>2. 最小権限の原則</h4>
+      <p>CI/CDパイプラインで使用するIAMロールには、必要最小限の権限のみを付与します。</p>
+      
+      <h4>3. シークレット管理</h4>
+      <p>タスク定義内のシークレットは、AWS Secrets ManagerやSSMパラメータストアを使用して管理します。</p>
+    </section>
+  </main>
+  <footer>
+    <p>&copy; 2023 ecspresso</p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ecspresso - 設定・検証コマンド</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>ecspresso - 設定・検証コマンド</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">ホーム</a></li>
+        <li><a href="1-introduction.html">はじめに</a></li>
+        <li><a href="2-quickstart.html">クイックスタート</a></li>
+        <li><a href="3-command-reference.html">コマンドリファレンス</a></li>
+        <li><a href="4-practical-guide.html">実践ガイド</a></li>
+        <li><a href="5-troubleshooting.html">トラブルシューティング</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <section>
+      <h2>3.3 設定・検証コマンド</h2>
+      
+      <h3>init コマンド</h3>
+      <p>ecspressoプロジェクトを初期化し、設定ファイルとサービス/タスク定義ファイルを生成します。</p>
+      
+      <h4>基本的な使い方</h4>
+      <pre><code>$ ecspresso init [オプション]</code></pre>
+      
+      <h4>主なオプション</h4>
+      <table>
+        <tr>
+          <th>オプション</th>
+          <th>説明</th>
+          <th>デフォルト値</th>
+        </tr>
+        <tr>
+          <td>--region</td>
+          <td>AWSリージョン</td>
+          <td>環境変数またはAWS設定</td>
+        </tr>
+        <tr>
+          <td>--cluster</td>
+          <td>ECSクラスター名</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>--service</td>
+          <td>ECSサービス名</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>--task-definition</td>
+          <td>タスク定義名</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>--config</td>
+          <td>設定ファイル名</td>
+          <td>ecspresso.yml</td>
+        </tr>
+        <tr>
+          <td>--service-definition</td>
+          <td>サービス定義ファイル名</td>
+          <td>ecs-service-def.json</td>
+        </tr>
+        <tr>
+          <td>--task-definition-path</td>
+          <td>タスク定義ファイル名</td>
+          <td>ecs-task-def.json</td>
+        </tr>
+        <tr>
+          <td>--skip-task-definition</td>
+          <td>タスク定義の取得をスキップ</td>
+          <td>false</td>
+        </tr>
+        <tr>
+          <td>--update</td>
+          <td>既存の設定ファイルを更新</td>
+          <td>false</td>
+        </tr>
+        <tr>
+          <td>--format</td>
+          <td>設定ファイルのフォーマット（yaml/json）</td>
+          <td>yaml</td>
+        </tr>
+      </table>
+      
+      <h4>使用例</h4>
+      <pre><code>$ ecspresso init --region ap-northeast-1 --cluster my-cluster --service my-service</code></pre>
+      <p>指定したクラスターとサービスの設定ファイルを生成します。</p>
+      
+      <h3>verify コマンド</h3>
+      <p>設定ファイルとリソースの検証を行います。デプロイ前に問題がないか確認するのに便利です。</p>
+      
+      <h4>基本的な使い方</h4>
+      <pre><code>$ ecspresso verify [オプション]</code></pre>
+      
+      <h4>主なオプション</h4>
+      <table>
+        <tr>
+          <th>オプション</th>
+          <th>説明</th>
+          <th>デフォルト値</th>
+        </tr>
+        <tr>
+          <td>--task-definition</td>
+          <td>検証するタスク定義ファイル</td>
+          <td>設定ファイルの値</td>
+        </tr>
+        <tr>
+          <td>--secrets</td>
+          <td>シークレットの存在を検証</td>
+          <td>true</td>
+        </tr>
+        <tr>
+          <td>--cache</td>
+          <td>検証結果をキャッシュ</td>
+          <td>true</td>
+        </tr>
+        <tr>
+          <td>--save-stopped</td>
+          <td>停止したタスクの情報を保存</td>
+          <td>false</td>
+        </tr>
+      </table>
+      
+      <h4>使用例</h4>
+      <pre><code>$ ecspresso verify --task-definition=custom-task.json</code></pre>
+      <p>カスタムタスク定義ファイルの検証を行います。</p>
+      
+      <h3>diff コマンド</h3>
+      <p>ローカルの設定と実際にデプロイされているリソースの差分を表示します。</p>
+      
+      <h4>基本的な使い方</h4>
+      <pre><code>$ ecspresso diff [オプション]</code></pre>
+      
+      <h4>主なオプション</h4>
+      <table>
+        <tr>
+          <th>オプション</th>
+          <th>説明</th>
+          <th>デフォルト値</th>
+        </tr>
+        <tr>
+          <td>--config-only</td>
+          <td>設定ファイルのみを比較</td>
+          <td>false</td>
+        </tr>
+        <tr>
+          <td>--unified</td>
+          <td>unified形式で差分を表示</td>
+          <td>false</td>
+        </tr>
+        <tr>
+          <td>--color</td>
+          <td>差分の色付け表示</td>
+          <td>auto</td>
+        </tr>
+        <tr>
+          <td>--task-definition</td>
+          <td>比較するタスク定義ファイル</td>
+          <td>設定ファイルの値</td>
+        </tr>
+      </table>
+      
+      <h4>使用例</h4>
+      <pre><code>$ ecspresso diff --unified --color=always</code></pre>
+      <p>unified形式で色付きの差分を表示します。</p>
+      
+      <h3>render コマンド</h3>
+      <p>タスク定義やサービス定義をレンダリングして表示します。プラグインやテンプレート変数が適用された結果を確認できます。</p>
+      
+      <h4>基本的な使い方</h4>
+      <pre><code>$ ecspresso render [オプション]</code></pre>
+      
+      <h4>主なオプション</h4>
+      <table>
+        <tr>
+          <th>オプション</th>
+          <th>説明</th>
+          <th>デフォルト値</th>
+        </tr>
+        <tr>
+          <td>--task-definition</td>
+          <td>レンダリングするタスク定義ファイル</td>
+          <td>設定ファイルの値</td>
+        </tr>
+        <tr>
+          <td>--service-definition</td>
+          <td>レンダリングするサービス定義ファイル</td>
+          <td>設定ファイルの値</td>
+        </tr>
+        <tr>
+          <td>--output</td>
+          <td>出力形式（json/yaml）</td>
+          <td>json</td>
+        </tr>
+      </table>
+      
+      <h4>使用例</h4>
+      <pre><code>$ ecspresso render --output=yaml</code></pre>
+      <p>タスク定義とサービス定義をYAML形式でレンダリングして表示します。</p>
+      
+      <h3>wait コマンド</h3>
+      <p>サービスが安定状態になるまで待機します。</p>
+      
+      <h4>基本的な使い方</h4>
+      <pre><code>$ ecspresso wait [オプション]</code></pre>
+      
+      <h4>主なオプション</h4>
+      <table>
+        <tr>
+          <th>オプション</th>
+          <th>説明</th>
+          <th>デフォルト値</th>
+        </tr>
+        <tr>
+          <td>--timeout</td>
+          <td>タイムアウト時間</td>
+          <td>設定ファイルの値</td>
+        </tr>
+        <tr>
+          <td>--until</td>
+          <td>待機条件（stable/deployed）</td>
+          <td>stable</td>
+        </tr>
+      </table>
+      
+      <h4>使用例</h4>
+      <pre><code>$ ecspresso wait --timeout=5m</code></pre>
+      <p>サービスが安定状態になるまで最大5分間待機します。</p>
+    </section>
+  </main>
+  <footer>
+    <p>&copy; 2023 ecspresso</p>
+  </footer>
+</body>
+</html>

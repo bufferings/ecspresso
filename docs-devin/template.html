@@ -1,34 +1,35 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ecspresso - {{TITLE}}</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-  <script>
-    mermaid.initialize({ startOnLoad: true });
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{TITLE}} - ecspresso ドキュメント</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header>
-    <h1>ecspresso - {{TITLE}}</h1>
-    <nav>
-      <ul>
-        <li><a href="index.html">ホーム</a></li>
-        <li><a href="1-introduction.html">はじめに</a></li>
-        <li><a href="2-quickstart.html">クイックスタート</a></li>
-        <li><a href="3-command-reference.html">コマンドリファレンス</a></li>
-        <li><a href="4-practical-guide.html">実践ガイド</a></li>
-        <li><a href="5-troubleshooting.html">トラブルシューティング</a></li>
-      </ul>
-    </nav>
-  </header>
-  <main>
-    {{CONTENT}}
-  </main>
-  <footer>
-    <p>&copy; 2023 ecspresso</p>
-  </footer>
+    <header>
+        <h1>ecspresso</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">ホーム</a></li>
+                <li><a href="1-introduction.html">はじめに</a></li>
+                <li><a href="2-quickstart.html">クイックスタート</a></li>
+                <li><a href="3-command-reference.html">コマンドリファレンス</a></li>
+                <li><a href="4-practical-guide.html">実践ガイド</a></li>
+                <li><a href="5-troubleshooting.html">トラブルシューティング</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h1>{{TITLE}}</h1>
+        {{CONTENT}}
+    </main>
+    <footer>
+        <p>&copy; ecspresso プロジェクト</p>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true });
+    </script>
 </body>
 </html>

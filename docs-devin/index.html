@@ -1,74 +1,63 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ecspresso - AWS ECS管理ツール</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-  <script>
-    mermaid.initialize({ startOnLoad: true });
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ecspresso ドキュメント</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header>
-    <h1>ecspresso - AWS ECS管理ツール</h1>
-    <nav>
-      <ul>
-        <li><a href="index.html">ホーム</a></li>
-        <li><a href="1-introduction.html">はじめに</a></li>
-        <li><a href="2-quickstart.html">クイックスタート</a></li>
-        <li><a href="3-command-reference.html">コマンドリファレンス</a></li>
-        <li><a href="4-practical-guide.html">実践ガイド</a></li>
-        <li><a href="5-troubleshooting.html">トラブルシューティング</a></li>
-      </ul>
-    </nav>
-  </header>
-  <main>
-    <section>
-      <h2>ecspresso について</h2>
-      <p>ecspressoは、AWS Elastic Container Service (ECS) のコンテナデプロイと管理を簡素化するコマンドラインツールです。宣言的な設定ファイルを使用して、ECSサービスのデプロイ、スケーリング、ロールバックなどの操作を自動化します。</p>
-      
-      <p class="text-center">
-        <strong>ecspresso アーキテクチャ</strong>
-      </p>
-      <pre class="mermaid">
+    <header>
+        <h1>ecspresso</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">ホーム</a></li>
+                <li><a href="1-introduction.html">はじめに</a></li>
+                <li><a href="2-quickstart.html">クイックスタート</a></li>
+                <li><a href="3-command-reference.html">コマンドリファレンス</a></li>
+                <li><a href="4-practical-guide.html">実践ガイド</a></li>
+                <li><a href="5-troubleshooting.html">トラブルシューティング</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h1>ecspresso ドキュメント</h1>
+        
+        <p>ecspressoは、Amazon Elastic Container Service (ECS) へのデプロイを簡素化・自動化するためのコマンドラインツールです。宣言的な設定ファイルを使用して、ECSサービスのデプロイ、スケーリング、ロールバックなどの操作を簡単に行うことができます。</p>
+
+        <pre class="mermaid">
 graph TD
-  A[ユーザー] -->|設定ファイル| B[ecspresso]
-  B -->|API呼び出し| C[AWS SDK]
-  C --> D[Amazon ECS]
-  C --> E[CodeDeploy]
-  C --> F[Auto Scaling]
-  C --> G[CloudWatch Logs]
-  C --> H[IAM]
-  C --> I[ELB v2]
-  C --> J[Service Discovery]
-  C --> K[VPC Lattice]
-      </pre>
-      
-      <h3>主な機能</h3>
-      <ul>
-        <li>ECSサービスとタスク定義の管理（デプロイ、ロールバック、更新）</li>
-        <li>複数のデプロイ戦略（ECSローリングアップデート、CodeDeployによるBlue/Green）</li>
-        <li>ワンオフタスクの実行と管理</li>
-        <li>コンテナ内でのコマンド実行（exec）</li>
-        <li>リソース設定の検証と差分表示</li>
-        <li>Auto Scalingの設定と管理</li>
-        <li>プラグインシステムによる拡張性（Terraform、CloudFormation、SSM、Secrets Manager）</li>
-      </ul>
-      
-      <h3>ドキュメント構成</h3>
-      <ol>
-        <li><a href="1-introduction.html">はじめに</a> - ecspressoの概要とインストール方法</li>
-        <li><a href="2-quickstart.html">クイックスタート</a> - 基本的な使い方とよくあるユースケース</li>
-        <li><a href="3-command-reference.html">コマンドリファレンス</a> - 各コマンドの詳細な説明</li>
-        <li><a href="4-practical-guide.html">実践ガイド</a> - CI/CD統合や大規模サービス管理などの応用例</li>
-        <li><a href="5-troubleshooting.html">トラブルシューティング</a> - 一般的な問題と解決策</li>
-      </ol>
-    </section>
-  </main>
-  <footer>
-    <p>&copy; 2023 ecspresso</p>
-  </footer>
+    A[設定ファイル] --> B[ecspresso]
+    B --> C[AWS ECS]
+    B --> D[AWS CodeDeploy]
+    C --> E[コンテナサービス]
+    D --> F[Blue/Greenデプロイ]
+        </pre>
+
+        <h2>主な機能</h2>
+        <ul>
+            <li>宣言的な設定ファイルによるECSサービスのデプロイ</li>
+            <li>ローカル設定と実際のリソースの差分比較</li>
+            <li>タスクの実行とコンテナ内でのコマンド実行</li>
+            <li>デプロイ前のリソース検証</li>
+            <li>AWS CodeDeployを使用したブルー/グリーンデプロイのサポート</li>
+        </ul>
+
+        <h2>ドキュメント構成</h2>
+        <ul>
+            <li><a href="1-introduction.html">はじめに</a> - ecspressoの概要とインストール方法</li>
+            <li><a href="2-quickstart.html">クイックスタート</a> - 基本的な使い方とよくあるユースケース</li>
+            <li><a href="3-command-reference.html">コマンドリファレンス</a> - 各コマンドの詳細な説明</li>
+            <li><a href="4-practical-guide.html">実践ガイド</a> - CI/CDパイプラインとの統合や複数環境での運用方法</li>
+            <li><a href="5-troubleshooting.html">トラブルシューティング</a> - 一般的な問題と解決方法</li>
+        </ul>
+    </main>
+    <footer>
+        <p>&copy; ecspresso プロジェクト</p>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true });
+    </script>
 </body>
 </html>

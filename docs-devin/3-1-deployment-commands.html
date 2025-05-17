@@ -1,190 +1,254 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ecspresso - デプロイ関連コマンド</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-  <script>
-    mermaid.initialize({ startOnLoad: true });
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>デプロイ関連コマンド - ecspresso ドキュメント</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header>
-    <h1>ecspresso - デプロイ関連コマンド</h1>
-    <nav>
-      <ul>
-        <li><a href="index.html">ホーム</a></li>
-        <li><a href="1-introduction.html">はじめに</a></li>
-        <li><a href="2-quickstart.html">クイックスタート</a></li>
-        <li><a href="3-command-reference.html">コマンドリファレンス</a></li>
-        <li><a href="4-practical-guide.html">実践ガイド</a></li>
-        <li><a href="5-troubleshooting.html">トラブルシューティング</a></li>
-      </ul>
-    </nav>
-  </header>
-  <main>
-    <section>
-      <h2>3.1 デプロイ関連コマンド</h2>
-      
-      <h3>deploy コマンド</h3>
-      <p>ECSサービスをデプロイします。新しいタスク定義を登録し、サービスを更新します。</p>
-      
-      <h4>基本的な使い方</h4>
-      <pre><code>$ ecspresso deploy [オプション]</code></pre>
-      
-      <h4>主なオプション</h4>
-      <table>
-        <tr>
-          <th>オプション</th>
-          <th>説明</th>
-          <th>デフォルト値</th>
-        </tr>
-        <tr>
-          <td>--dry-run</td>
-          <td>実際の変更を行わずに実行内容を表示</td>
-          <td>false</td>
-        </tr>
-        <tr>
-          <td>--tasks</td>
-          <td>タスク数を指定</td>
-          <td>-1（変更なし）</td>
-        </tr>
-        <tr>
-          <td>--skip-task-definition</td>
-          <td>新しいタスク定義の登録をスキップ</td>
-          <td>false</td>
-        </tr>
-        <tr>
-          <td>--revision</td>
-          <td>--skip-task-definitionと共に使用する特定のリビジョン</td>
-          <td>0</td>
-        </tr>
-        <tr>
-          <td>--force-new-deployment</td>
-          <td>強制的に新しいデプロイメントを作成</td>
-          <td>false</td>
-        </tr>
-        <tr>
-          <td>--no-wait</td>
-          <td>サービスの安定を待たない</td>
-          <td>false</td>
-        </tr>
-        <tr>
-          <td>--wait-until</td>
-          <td>待機条件（stable/deployed）</td>
-          <td>stable</td>
-        </tr>
-        <tr>
-          <td>--suspend-auto-scaling</td>
-          <td>Auto Scalingを一時停止</td>
-          <td>-</td>
-        </tr>
-        <tr>
-          <td>--resume-auto-scaling</td>
-          <td>Auto Scalingを再開</td>
-          <td>-</td>
-        </tr>
-        <tr>
-          <td>--rollback-events</td>
-          <td>指定イベント発生時にロールバック（CodeDeployのみ）</td>
-          <td>""</td>
-        </tr>
-        <tr>
-          <td>--no-update-service</td>
-          <td>サービス属性の更新をスキップ</td>
-          <td>false</td>
-        </tr>
-        <tr>
-          <td>--latest-task-definition</td>
-          <td>新しいタスク定義を登録せず最新のものを使用</td>
-          <td>false</td>
-        </tr>
-      </table>
-      
-      <h4>デプロイフロー</h4>
-      <div class="mermaid">
-      flowchart TD
-        Start[開始] --> CheckService{サービスが存在?}
-        CheckService -->|Yes| LoadTD[タスク定義読み込み]
-        CheckService -->|No| CreateService[サービス作成]
-        LoadTD --> SkipTD{タスク定義スキップ?}
-        SkipTD -->|Yes| UseExisting[既存のタスク定義使用]
-        SkipTD -->|No| RegisterTD[新しいタスク定義登録]
-        UseExisting --> UpdateService[サービス更新]
-        RegisterTD --> UpdateService
-        UpdateService --> Wait{待機する?}
-        Wait -->|Yes| WaitStable[安定状態まで待機]
-        Wait -->|No| End[終了]
-        WaitStable --> End
-      </div>
-      
-      <h4>使用例</h4>
-      <pre><code>$ ecspresso deploy --tasks 10 --force-new-deployment</code></pre>
-      <p>タスク数を10に設定し、強制的に新しいデプロイメントを作成します。</p>
-      
-      <h3>status コマンド</h3>
-      <p>ECSサービスの現在の状態を表示します。</p>
-      
-      <h4>基本的な使い方</h4>
-      <pre><code>$ ecspresso status [オプション]</code></pre>
-      
-      <h4>主なオプション</h4>
-      <table>
-        <tr>
-          <th>オプション</th>
-          <th>説明</th>
-          <th>デフォルト値</th>
-        </tr>
-        <tr>
-          <td>--events</td>
-          <td>表示するイベント数</td>
-          <td>10</td>
-        </tr>
-      </table>
-      
-      <h4>使用例</h4>
-      <pre><code>$ ecspresso status --events 20</code></pre>
-      <p>サービスの状態と直近20件のイベントを表示します。</p>
-      
-      <h3>rollback コマンド</h3>
-      <p>以前のタスク定義にロールバックします。</p>
-      
-      <h4>基本的な使い方</h4>
-      <pre><code>$ ecspresso rollback [オプション]</code></pre>
-      
-      <h4>主なオプション</h4>
-      <table>
-        <tr>
-          <th>オプション</th>
-          <th>説明</th>
-          <th>デフォルト値</th>
-        </tr>
-        <tr>
-          <td>--dry-run</td>
-          <td>実際の変更を行わずに実行内容を表示</td>
-          <td>false</td>
-        </tr>
-        <tr>
-          <td>--deregister-task-definition</td>
-          <td>ロールバック後に現在のタスク定義を登録解除</td>
-          <td>false</td>
-        </tr>
-        <tr>
-          <td>--no-wait</td>
-          <td>サービスの安定を待たない</td>
-          <td>false</td>
-        </tr>
-      </table>
-      
-      <h4>使用例</h4>
-      <pre><code>$ ecspresso rollback --deregister-task-definition</code></pre>
-      <p>以前のタスク定義にロールバックし、現在のタスク定義を登録解除します。</p>
-    </section>
-  </main>
-  <footer>
-    <p>&copy; 2023 ecspresso</p>
-  </footer>
+    <header>
+        <h1>ecspresso</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">ホーム</a></li>
+                <li><a href="1-introduction.html">はじめに</a></li>
+                <li><a href="2-quickstart.html">クイックスタート</a></li>
+                <li><a href="3-command-reference.html">コマンドリファレンス</a></li>
+                <li><a href="4-practical-guide.html">実践ガイド</a></li>
+                <li><a href="5-troubleshooting.html">トラブルシューティング</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h1>3.1 デプロイ関連コマンド</h1>
+        
+        <div class="section-nav">
+            <h3>コマンドリファレンス</h3>
+            <ul>
+                <li><a href="3-1-deployment-commands.html">3.1 デプロイ関連コマンド</a></li>
+                <li><a href="3-2-task-commands.html">3.2 タスク関連コマンド</a></li>
+                <li><a href="3-3-config-commands.html">3.3 設定・検証コマンド</a></li>
+            </ul>
+        </div>
+        
+        <h2>deploy</h2>
+        <p>ECSサービスをデプロイします。新しいタスク定義を登録し、サービスを更新します。</p>
+        
+        <h3>オプション</h3>
+        <table>
+            <tr>
+                <th>オプション</th>
+                <th>説明</th>
+                <th>デフォルト値</th>
+            </tr>
+            <tr>
+                <td>--dry-run</td>
+                <td>実際の変更を行わずに実行内容を表示</td>
+                <td>false</td>
+            </tr>
+            <tr>
+                <td>--tasks</td>
+                <td>タスクの希望数</td>
+                <td>-1 (現在の値を維持)</td>
+            </tr>
+            <tr>
+                <td>--skip-task-definition</td>
+                <td>新しいタスク定義の登録をスキップ</td>
+                <td>false</td>
+            </tr>
+            <tr>
+                <td>--revision</td>
+                <td>--skip-task-definitionを使用する場合のタスク定義のリビジョン</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td>--force-new-deployment</td>
+                <td>サービスの強制的な新しいデプロイメントを行う</td>
+                <td>false</td>
+            </tr>
+            <tr>
+                <td>--wait/--no-wait</td>
+                <td>サービスが安定するまで待機するかどうか</td>
+                <td>true</td>
+            </tr>
+            <tr>
+                <td>--wait-until</td>
+                <td>待機する状態（stable/deployed）</td>
+                <td>stable</td>
+            </tr>
+            <tr>
+                <td>--suspend-auto-scaling</td>
+                <td>ECSサービスに関連付けられたアプリケーションのオートスケーリングを一時停止</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>--resume-auto-scaling</td>
+                <td>ECSサービスに関連付けられたアプリケーションのオートスケーリングを再開</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>--auto-scaling-min</td>
+                <td>アプリケーションのオートスケーリングの最小容量を設定</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>--auto-scaling-max</td>
+                <td>アプリケーションのオートスケーリングの最大容量を設定</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>--rollback-events</td>
+                <td>指定されたイベントが発生した場合にロールバックする（CodeDeployのみ）</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>--update-service/--no-update-service</td>
+                <td>サービス定義によってサービス属性を更新するかどうか</td>
+                <td>true</td>
+            </tr>
+            <tr>
+                <td>--latest-task-definition</td>
+                <td>新しいタスク定義を登録せずに最新のタスク定義でデプロイ</td>
+                <td>false</td>
+            </tr>
+        </table>
+        
+        <h3>使用例</h3>
+        <pre><code>$ ecspresso deploy
+$ ecspresso deploy --dry-run
+$ ecspresso deploy --tasks 10
+$ ecspresso deploy --skip-task-definition --force-new-deployment
+$ ecspresso deploy --rollback-events DEPLOYMENT_FAILURE
+</code></pre>
+        
+        <h2>rollback</h2>
+        <p>ECSサービスを以前のタスク定義にロールバックします。</p>
+        
+        <h3>オプション</h3>
+        <table>
+            <tr>
+                <th>オプション</th>
+                <th>説明</th>
+                <th>デフォルト値</th>
+            </tr>
+            <tr>
+                <td>--dry-run</td>
+                <td>実際の変更を行わずに実行内容を表示</td>
+                <td>false</td>
+            </tr>
+            <tr>
+                <td>--deregister</td>
+                <td>ロールバック後に現在のタスク定義を登録解除</td>
+                <td>false</td>
+            </tr>
+            <tr>
+                <td>--revision</td>
+                <td>ロールバックするタスク定義のリビジョン</td>
+                <td>0 (1つ前のリビジョン)</td>
+            </tr>
+            <tr>
+                <td>--wait/--no-wait</td>
+                <td>サービスが安定するまで待機するかどうか</td>
+                <td>true</td>
+            </tr>
+        </table>
+        
+        <h3>使用例</h3>
+        <pre><code>$ ecspresso rollback
+$ ecspresso rollback --revision 123
+$ ecspresso rollback --deregister
+</code></pre>
+        
+        <h2>refresh</h2>
+        <p>ECSサービスをリフレッシュします。タスク定義を更新せずに、すべてのタスクを再起動します。</p>
+        
+        <h3>オプション</h3>
+        <table>
+            <tr>
+                <th>オプション</th>
+                <th>説明</th>
+                <th>デフォルト値</th>
+            </tr>
+            <tr>
+                <td>--dry-run</td>
+                <td>実際の変更を行わずに実行内容を表示</td>
+                <td>false</td>
+            </tr>
+            <tr>
+                <td>--wait/--no-wait</td>
+                <td>サービスが安定するまで待機するかどうか</td>
+                <td>true</td>
+            </tr>
+        </table>
+        
+        <h3>使用例</h3>
+        <pre><code>$ ecspresso refresh
+$ ecspresso refresh --dry-run
+$ ecspresso refresh --no-wait
+</code></pre>
+        
+        <h2>scale</h2>
+        <p>ECSサービスのタスク数を変更します。</p>
+        
+        <h3>オプション</h3>
+        <table>
+            <tr>
+                <th>オプション</th>
+                <th>説明</th>
+                <th>デフォルト値</th>
+            </tr>
+            <tr>
+                <td>--dry-run</td>
+                <td>実際の変更を行わずに実行内容を表示</td>
+                <td>false</td>
+            </tr>
+            <tr>
+                <td>--tasks</td>
+                <td>タスクの希望数</td>
+                <td>-1 (現在の値を維持)</td>
+            </tr>
+            <tr>
+                <td>--wait/--no-wait</td>
+                <td>サービスが安定するまで待機するかどうか</td>
+                <td>true</td>
+            </tr>
+        </table>
+        
+        <h3>使用例</h3>
+        <pre><code>$ ecspresso scale --tasks 10
+$ ecspresso scale --tasks 0 --dry-run
+</code></pre>
+        
+        <h2>delete</h2>
+        <p>ECSサービスを削除します。</p>
+        
+        <h3>オプション</h3>
+        <table>
+            <tr>
+                <th>オプション</th>
+                <th>説明</th>
+                <th>デフォルト値</th>
+            </tr>
+            <tr>
+                <td>--dry-run</td>
+                <td>実際の変更を行わずに実行内容を表示</td>
+                <td>false</td>
+            </tr>
+            <tr>
+                <td>--force</td>
+                <td>確認なしで削除を実行</td>
+                <td>false</td>
+            </tr>
+        </table>
+        
+        <h3>使用例</h3>
+        <pre><code>$ ecspresso delete --force
+$ ecspresso delete --dry-run
+</code></pre>
+    </main>
+    <footer>
+        <p>&copy; ecspresso プロジェクト</p>
+    </footer>
 </body>
 </html>

@@ -247,25 +247,25 @@ workflows:
         <p>以下は、ecspressoを使用した完全なCI/CDワークフローの例です：</p>
         
         <div class="mermaid">
-        graph TD
-          A[コード変更] --> B[自動テスト]
-          B --> C{テスト成功?}
-          C -->|Yes| D[ecspresso verify]
-          C -->|No| E[修正]
-          E --> B
-          D --> F{検証成功?}
-          F -->|Yes| G[ecspresso diff]
-          F -->|No| E
-          G --> H[レビュー]
-          H --> I{承認?}
-          I -->|Yes| J[ecspresso deploy]
-          I -->|No| E
-          J --> K[デプロイ監視]
-          K --> L{問題あり?}
-          L -->|Yes| M[ecspresso rollback]
-          L -->|No| N[完了]
-          M --> N
-        </div>
+graph TD
+A[コード変更] --> B[自動テスト]
+B --> C{テスト成功?}
+C -->|Yes| D[ecspresso verify]
+C -->|No| E[修正]
+E --> B
+D --> F{検証成功?}
+F -->|Yes| G[ecspresso diff]
+F -->|No| E
+G --> H[レビュー]
+H --> I{承認?}
+I -->|Yes| J[ecspresso deploy]
+I -->|No| E
+J --> K[デプロイ監視]
+K --> L{問題あり?}
+L -->|Yes| M[ecspresso rollback]
+L -->|No| N[完了]
+M --> N
+</div>
 
         
         <p>このワークフローでは、コード変更からデプロイ、そして問題が発生した場合のロールバックまでの一連の流れを自動化しています。各ステップでの検証と承認プロセスにより、安全で信頼性の高いデプロイを実現します。</p>

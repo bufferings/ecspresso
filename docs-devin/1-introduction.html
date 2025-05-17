@@ -68,14 +68,14 @@
           <p>ecspressoは、Amazon Elastic Container Service (ECS) 向けのデプロイメントツールです。AWS ECSサービスとタスク定義の管理を簡素化し、デプロイメントプロセスを自動化することを目的としています。コマンドラインインターフェースを通じて、ECSリソースの作成、更新、削除、検証などの操作を行うことができます。</p>
           
           <div class="mermaid">
-          flowchart LR
-            A[開発者] --> B[ecspresso CLI]
-            B --> C[AWS SDK]
-            C --> D[AWS ECS]
-            C --> E[AWS IAM]
-            C --> F[AWS CloudWatch]
-            C --> G[その他AWSサービス]
-          </div>
+flowchart LR
+A[開発者] --> B[ecspresso CLI]
+B --> C[AWS SDK]
+C --> D[AWS ECS]
+C --> E[AWS IAM]
+C --> F[AWS CloudWatch]
+C --> G[その他AWSサービス]
+</div>
         </div>
         
         <div id="key-features" class="subsection">
@@ -102,19 +102,17 @@
           </ul>
           
           <div class="mermaid">
-          flowchart TD
-            A[問題点] --> B[複雑なECSデプロイ]
-            A --> C[環境間の一貫性]
-            A --> D[運用効率]
-            
-            E[解決策: ecspresso] --> F[宣言的設定]
-            E --> G[自動化]
-            E --> H[簡単な運用]
-            
-            F -.-> B
-            G -.-> C
-            H -.-> D
-          </div>
+flowchart TD
+A[問題点] --> B[複雑なECSデプロイ]
+A --> C[環境間の一貫性]
+A --> D[運用効率]
+E[解決策: ecspresso] --> F[宣言的設定]
+E --> G[自動化]
+E --> H[簡単な運用]
+F -.-> B
+G -.-> C
+H -.-> D
+</div>
         </div>
       </section>
       
@@ -280,17 +278,17 @@ $ ecspresso [コマンド] --help</code></pre>
           </div>
           
           <div class="mermaid">
-          flowchart TD
-            A[設定ファイル編集] --> B[差分確認]
-            B --> C{差分あり?}
-            C -->|はい| D[リソース検証]
-            C -->|いいえ| H[完了]
-            D --> E{検証成功?}
-            E -->|はい| F[デプロイ]
-            E -->|いいえ| A
-            F --> G[デプロイ待機]
-            G --> H[完了]
-          </div>
+flowchart TD
+A[設定ファイル編集] --> B[差分確認]
+B --> C{差分あり?}
+C -->|はい| D[リソース検証]
+C -->|いいえ| H[完了]
+D --> E{検証成功?}
+E -->|はい| F[デプロイ]
+E -->|いいえ| A
+F --> G[デプロイ待機]
+G --> H[完了]
+</div>
           
           <p>これらの基本的なコマンドを使用して、ecspressoの機能を試してみてください。</p>
         </div>

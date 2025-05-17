@@ -137,10 +137,10 @@
         
         <div class="mermaid">
 flowchart TD
-  A[Deploy Command] --> B[Load Config]
-  B --> C[Register Task]
-  C --> D[Update Service]
-  D --> E[Wait for Stability]
+A[Deploy Command] --> B[Load Config]
+B --> C[Register Task]
+C --> D[Update Service]
+D --> E[Wait for Stability]
 </div>
 
         
@@ -211,11 +211,11 @@ ecspresso deploy --tasks 5</code></pre>
         
         <div class="mermaid">
 flowchart TD
-  A[ロールバック開始] --> B[設定読み込み]
-  B --> C[現在のサービス取得]
-  C --> D[以前のタスク定義取得]
-  D --> E[サービス更新]
-  E --> F[安定性確認]
+A[ロールバック開始] --> B[設定読み込み]
+B --> C[現在のサービス取得]
+C --> D[以前のタスク定義取得]
+D --> E[サービス更新]
+E --> F[安定性確認]
 </div>
 
         
@@ -272,10 +272,10 @@ ecspresso rollback --no-wait-until-stable</code></pre>
         
         <div class="mermaid">
 flowchart TD
-  A[スケール開始] --> B[設定読み込み]
-  B --> C[現在のサービス取得]
-  C --> D[タスク数更新]
-  D --> E[安定性確認]
+A[スケール開始] --> B[設定読み込み]
+B --> C[現在のサービス取得]
+C --> D[タスク数更新]
+D --> E[安定性確認]
 </div>
 
         
@@ -324,13 +324,13 @@ ecspresso scale --tasks 3 --no-wait-until-stable</code></pre>
         
         <div class="mermaid">
 flowchart TD
-  A[Wait開始] --> B[サービス状態取得]
-  B --> C{安定している?}
-  C -->|はい| D[完了]
-  C -->|いいえ| E[待機]
-  E --> F{タイムアウト?}
-  F -->|はい| G[エラー]
-  F -->|いいえ| B
+A[Wait開始] --> B[サービス状態取得]
+B --> C{安定している?}
+C -->|はい| D[完了]
+C -->|いいえ| E[待機]
+E --> F{タイムアウト?}
+F -->|はい| G[エラー]
+F -->|いいえ| B
 </div>
 
         
@@ -351,19 +351,16 @@ ecspresso wait --timeout 300</code></pre>
         
         <div class="mermaid">
 flowchart TD
-  A[デプロイ戦略] --> B[ECSローリングデプロイ]
-  A --> C[CodeDeployブルー/グリーン]
-  
-  B --> D[タスクを徐々に置き換え]
-  C --> E[新環境を作成し徐々に移行]
-  
-  D --> F[maximumPercent]
-  D --> G[minimumHealthyPercent]
-  D --> H[deploymentCircuitBreaker]
-  
-  E --> I[トラフィック分割]
-  E --> J[デプロイフック]
-  E --> K[ロールバック容易]
+A[デプロイ戦略] --> B[ECSローリングデプロイ]
+A --> C[CodeDeployブルー/グリーン]
+B --> D[タスクを徐々に置き換え]
+C --> E[新環境を作成し徐々に移行]
+D --> F[maximumPercent]
+D --> G[minimumHealthyPercent]
+D --> H[deploymentCircuitBreaker]
+E --> I[トラフィック分割]
+E --> J[デプロイフック]
+E --> K[ロールバック容易]
 </div>
 
         

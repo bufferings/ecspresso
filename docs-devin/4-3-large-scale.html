@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ecspresso - 大規模サービスの管理</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({ startOnLoad: true });
+  </script>
+</head>
+<body>
+  <header>
+    <h1>ecspresso - 大規模サービスの管理</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">ホーム</a></li>
+        <li><a href="1-introduction.html">はじめに</a></li>
+        <li><a href="2-quickstart.html">クイックスタート</a></li>
+        <li><a href="3-command-reference.html">コマンドリファレンス</a></li>
+        <li><a href="4-practical-guide.html">実践ガイド</a></li>
+        <li><a href="5-troubleshooting.html">トラブルシューティング</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <section>
+      <h2>4.3 大規模サービスの管理</h2>
+      
+      <p>大規模なサービスでは、多数のECSサービスやタスク定義を管理する必要があります。このセクションでは、ecspressoを使用して大規模サービスを効率的に管理する方法を説明します。</p>
+      
+      <h3>マイクロサービスアーキテクチャでの管理</h3>
+      <div class="mermaid">
+      flowchart TD
+        subgraph "マイクロサービスアーキテクチャ"
+          Service1[サービス1\necspresso.service1.yml] 
+          Service2[サービス2\necspresso.service2.yml]
+          Service3[サービス3\necspresso.service3.yml]
+          Service4[サービス4\necspresso.service4.yml]
+        end
+        
+        subgraph "共通インフラ"
+          VPC[VPC]
+          ECS[ECSクラスター]
+          ECR[ECRリポジトリ]
+        end
+        
+        Service1 --> ECS
+        Service2 --> ECS
+        Service3 --> ECS
+        Service4 --> ECS
+      </div>
+      
+      <h4>1. サービスごとの設定ファイル</h4>
+      <p>マイクロサービスアーキテクチャでは、各サービスごとに別々の設定ファイルを作成します。</p>
+      
+      <pre><code># ecspresso.service1.yml
+region: ap-northeast-1
+cluster: microservices-cluster
+service: auth-service
+service_definition: auth-service-def.json
+task_definition: auth-service-task-def.json
+timeout: 10m
+
+# ecspresso.service2.yml
+region: ap-northeast-1
+cluster: microservices-cluster
+service: user-service
+service_definition: user-service-def.json
+task_definition: user-service-task-def.json
+timeout: 10m</code></pre>
+      
+      <h4>2. デプロイスクリプトの作成</h4>
+      <p>複数のサービスを一括でデプロイするスクリプトを作成します。</p>
+      
+      <pre><code>#!/bin/bash
+# 全サービスをデプロイするスクリプト
+
+SERVICES=("auth" "user" "payment" "notification")
+
+for service in "${SERVICES[@]}"; do
+  echo "Deploying $service service..."
+  ecspresso --config=ecspresso.$service.yml deploy --no-wait
+done
+
+# すべてのサービスが安定するまで待機
+for service in "${SERVICES[@]}"; do
+  echo "Waiting for $service service to stabilize..."
+  ecspresso --config=ecspresso.$service.yml wait
+done
+
+echo "All services deployed successfully!"</code></pre>
+      
+      <h3>リソース管理の最適化</h3>
+      
+      <h4>1. タスク定義の最適化</h4>
+      <p>大規模サービスでは、タスク定義を最適化して、リソース使用率を向上させることが重要です。</p>
+      
+      <ul>
+        <li><strong>コンテナのサイジング</strong>: 各コンテナに適切なCPUとメモリを割り当てます。</li>
+        <li><strong>リソース予約</strong>: 適切なリソース予約を設定して、オーバーコミットを防ぎます。</li>
+        <li><strong>ヘルスチェック</strong>: 適切なヘルスチェックを設定して、問題のあるタスクを早期に検出します。</li>
+      </ul>
+      
+      <pre><code>{
+  "containerDefinitions": [
+    {
+      "name": "web",
+      "image": "web-service:latest",
+      "cpu": 256,
+      "memory": 512,
+      "essential": true,
+      "healthCheck": {
+        "command": ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 60
+      }
+    }
+  ]
+}</code></pre>
+      
+      <h4>2. Auto Scalingの設定</h4>
+      <p>大規模サービスでは、Auto Scalingを設定して、トラフィックの変動に対応することが重要です。</p>
+      
+      <pre><code># サービス定義内のAuto Scaling設定
+{
+  "deploymentConfiguration": {
+    "maximumPercent": 200,
+    "minimumHealthyPercent": 100
+  },
+  "desiredCount": 3,
+  "enableECSManagedTags": true,
+  "capacityProviderStrategy": [
+    {
+      "capacityProvider": "FARGATE_SPOT",
+      "weight": 1
+    }
+  ]
+}</code></pre>
+      
+      <h4>3. デプロイ戦略の最適化</h4>
+      <p>大規模サービスでは、デプロイ戦略を最適化して、ダウンタイムを最小限に抑えることが重要です。</p>
+      
+      <pre><code># Blue/Greenデプロイの設定
+# ecspresso.yml
+deployment_controller:
+  type: CODE_DEPLOY
+appspec: appspec.yaml
+
+# appspec.yaml
+version: 0.0
+Resources:
+  - TargetService:
+      Type: AWS::ECS::Service
+      Properties:
+        TaskDefinition: "&lt;TASK_DEFINITION&gt;"
+        LoadBalancerInfo:
+          ContainerName: "web"
+          ContainerPort: 80
+        PlatformVersion: "LATEST"
+Hooks:
+  - BeforeInstall: "LambdaFunctionToValidateBeforeInstall"
+  - AfterInstall: "LambdaFunctionToValidateAfterInstall"
+  - AfterAllowTestTraffic: "LambdaFunctionToValidateAfterTestTrafficStarts"
+  - BeforeAllowTraffic: "LambdaFunctionToValidateBeforeAllowingProductionTraffic"
+  - AfterAllowTraffic: "LambdaFunctionToValidateAfterAllowingProductionTraffic"</code></pre>
+      
+      <h3>モニタリングと可観測性</h3>
+      
+      <h4>1. CloudWatchとの統合</h4>
+      <p>大規模サービスでは、CloudWatchを使用して、サービスのパフォーマンスを監視することが重要です。</p>
+      
+      <pre><code># タスク定義内のCloudWatch Logs設定
+{
+  "logConfiguration": {
+    "logDriver": "awslogs",
+    "options": {
+      "awslogs-group": "/ecs/service-name",
+      "awslogs-region": "ap-northeast-1",
+      "awslogs-stream-prefix": "ecs"
+    }
+  }
+}</code></pre>
+      
+      <h4>2. X-Rayとの統合</h4>
+      <p>大規模サービスでは、X-Rayを使用して、分散トレーシングを実装することが重要です。</p>
+      
+      <pre><code># タスク定義内のX-Ray設定
+{
+  "containerDefinitions": [
+    {
+      "name": "web",
+      "image": "web-service:latest",
+      "essential": true
+    },
+    {
+      "name": "xray-daemon",
+      "image": "amazon/aws-xray-daemon",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 2000,
+          "hostPort": 2000,
+          "protocol": "udp"
+        }
+      ]
+    }
+  ]
+}</code></pre>
+      
+      <h3>大規模デプロイのベストプラクティス</h3>
+      
+      <h4>1. 段階的デプロイ</h4>
+      <p>大規模サービスでは、段階的にデプロイして、問題を早期に検出することが重要です。</p>
+      
+      <pre><code>#!/bin/bash
+# 段階的デプロイスクリプト
+
+# 最初に1つのサービスをデプロイしてテスト
+echo "Deploying to canary service..."
+ecspresso --config=ecspresso.canary.yml deploy
+echo "Waiting for canary service to stabilize..."
+ecspresso --config=ecspresso.canary.yml wait
+
+# テストが成功したら、残りのサービスをデプロイ
+echo "Canary deployment successful. Deploying to remaining services..."
+for service in "${REMAINING_SERVICES[@]}"; do
+  echo "Deploying $service service..."
+  ecspresso --config=ecspresso.$service.yml deploy --no-wait
+done</code></pre>
+      
+      <h4>2. ロールバック計画</h4>
+      <p>大規模サービスでは、問題が発生した場合に備えて、ロールバック計画を準備することが重要です。</p>
+      
+      <pre><code>#!/bin/bash
+# ロールバックスクリプト
+
+if [ "$1" == "all" ]; then
+  # すべてのサービスをロールバック
+  for service in "${ALL_SERVICES[@]}"; do
+    echo "Rolling back $service service..."
+    ecspresso --config=ecspresso.$service.yml rollback
+  done
+else
+  # 特定のサービスをロールバック
+  echo "Rolling back $1 service..."
+  ecspresso --config=ecspresso.$1.yml rollback
+fi</code></pre>
+      
+      <h4>3. デプロイ履歴の管理</h4>
+      <p>大規模サービスでは、デプロイ履歴を管理して、問題が発生した場合に原因を特定することが重要です。</p>
+      
+      <pre><code>#!/bin/bash
+# デプロイ履歴を記録するスクリプト
+
+DEPLOY_ID=$(date +%Y%m%d%H%M%S)
+DEPLOY_LOG="deploy_history/$DEPLOY_ID.log"
+
+mkdir -p deploy_history
+
+echo "Starting deployment $DEPLOY_ID at $(date)" > $DEPLOY_LOG
+echo "Git commit: $(git rev-parse HEAD)" >> $DEPLOY_LOG
+
+# デプロイを実行
+for service in "${ALL_SERVICES[@]}"; do
+  echo "Deploying $service service..." | tee -a $DEPLOY_LOG
+  ecspresso --config=ecspresso.$service.yml deploy --no-wait 2>&1 | tee -a $DEPLOY_LOG
+done
+
+echo "Deployment $DEPLOY_ID completed at $(date)" >> $DEPLOY_LOG</code></pre>
+    </section>
+  </main>
+  <footer>
+    <p>&copy; 2023 ecspresso</p>
+  </footer>
+</body>
+</html>

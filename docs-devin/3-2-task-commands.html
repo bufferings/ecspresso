@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ecspresso - タスク関連コマンド</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>ecspresso - タスク関連コマンド</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">ホーム</a></li>
+        <li><a href="1-introduction.html">はじめに</a></li>
+        <li><a href="2-quickstart.html">クイックスタート</a></li>
+        <li><a href="3-command-reference.html">コマンドリファレンス</a></li>
+        <li><a href="4-practical-guide.html">実践ガイド</a></li>
+        <li><a href="5-troubleshooting.html">トラブルシューティング</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <section>
+      <h2>3.2 タスク関連コマンド</h2>
+      
+      <h3>run コマンド</h3>
+      <p>ECSタスクを実行します。一時的なバッチ処理やデータベースマイグレーションなどに便利です。</p>
+      
+      <h4>基本的な使い方</h4>
+      <pre><code>$ ecspresso run [オプション]</code></pre>
+      
+      <h4>主なオプション</h4>
+      <table>
+        <tr>
+          <th>オプション</th>
+          <th>説明</th>
+          <th>デフォルト値</th>
+        </tr>
+        <tr>
+          <td>--dry-run</td>
+          <td>実際の変更を行わずに実行内容を表示</td>
+          <td>false</td>
+        </tr>
+        <tr>
+          <td>--task-def</td>
+          <td>使用するタスク定義ファイルのパス</td>
+          <td>設定ファイルの値</td>
+        </tr>
+        <tr>
+          <td>--revision</td>
+          <td>使用するタスク定義のリビジョン</td>
+          <td>0（最新）</td>
+        </tr>
+        <tr>
+          <td>--count</td>
+          <td>起動するタスクの数</td>
+          <td>1</td>
+        </tr>
+        <tr>
+          <td>--launch-type</td>
+          <td>起動タイプ（EC2/FARGATE）</td>
+          <td>設定による</td>
+        </tr>
+        <tr>
+          <td>--network-configuration</td>
+          <td>ネットワーク設定のJSONファイル</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>--overrides</td>
+          <td>タスク定義のオーバーライドを含むJSONファイル</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>--container</td>
+          <td>コマンドを実行するコンテナ名</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>--command</td>
+          <td>実行するコマンド（JSON配列形式）</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>--env</td>
+          <td>環境変数（KEY=VALUE形式）</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>--wait</td>
+          <td>タスクの完了を待つ</td>
+          <td>false</td>
+        </tr>
+        <tr>
+          <td>--latest-task-definition</td>
+          <td>最新のタスク定義を使用</td>
+          <td>false</td>
+        </tr>
+        <tr>
+          <td>--no-wait-task-running</td>
+          <td>タスクの実行開始を待たない</td>
+          <td>false</td>
+        </tr>
+      </table>
+      
+      <h4>使用例</h4>
+      <pre><code>$ ecspresso run --task-def=custom-task.json --command='["bin/migrate", "up"]' --wait</code></pre>
+      <p>カスタムタスク定義を使用してマイグレーションコマンドを実行し、完了を待ちます。</p>
+      
+      <h3>tasks コマンド</h3>
+      <p>ECSタスクの一覧表示や停止を行います。</p>
+      
+      <h4>基本的な使い方</h4>
+      <pre><code>$ ecspresso tasks [オプション]</code></pre>
+      
+      <h4>主なオプション</h4>
+      <table>
+        <tr>
+          <th>オプション</th>
+          <th>説明</th>
+          <th>デフォルト値</th>
+        </tr>
+        <tr>
+          <td>--id</td>
+          <td>特定のタスクIDを指定</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>--find</td>
+          <td>タスクIDの一部で検索</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>--stop</td>
+          <td>タスクを停止</td>
+          <td>false</td>
+        </tr>
+        <tr>
+          <td>--trace</td>
+          <td>タスクのトレース情報を表示</td>
+          <td>false</td>
+        </tr>
+        <tr>
+          <td>--output</td>
+          <td>出力形式（json/table）</td>
+          <td>table</td>
+        </tr>
+        <tr>
+          <td>--status</td>
+          <td>フィルタリングするタスクのステータス</td>
+          <td>RUNNING</td>
+        </tr>
+      </table>
+      
+      <h4>使用例</h4>
+      <pre><code>$ ecspresso tasks --find=migration --stop</code></pre>
+      <p>IDに「migration」を含むタスクを検索して停止します。</p>
+      
+      <h3>exec コマンド</h3>
+      <p>実行中のECSタスク内でコマンドを実行します。デバッグやトラブルシューティングに便利です。</p>
+      
+      <h4>基本的な使い方</h4>
+      <pre><code>$ ecspresso exec [オプション]</code></pre>
+      
+      <h4>主なオプション</h4>
+      <table>
+        <tr>
+          <th>オプション</th>
+          <th>説明</th>
+          <th>デフォルト値</th>
+        </tr>
+        <tr>
+          <td>--id</td>
+          <td>特定のタスクIDを指定</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>--container</td>
+          <td>コマンドを実行するコンテナ名</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>--command</td>
+          <td>実行するコマンド</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>--port-forward</td>
+          <td>ポートフォワーディング（ローカル:リモート）</td>
+          <td>-</td>
+        </tr>
+        <tr>
+          <td>--interactive</td>
+          <td>対話モードで実行</td>
+          <td>true</td>
+        </tr>
+      </table>
+      
+      <h4>使用例</h4>
+      <pre><code>$ ecspresso exec --command="/bin/bash"</code></pre>
+      <p>実行中のコンテナでbashシェルを起動します。</p>
+      
+      <pre><code>$ ecspresso exec --port-forward=8080:80</code></pre>
+      <p>コンテナの80番ポートをローカルの8080番ポートにフォワードします。</p>
+    </section>
+  </main>
+  <footer>
+    <p>&copy; 2023 ecspresso</p>
+  </footer>
+</body>
+</html>

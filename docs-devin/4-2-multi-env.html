@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ecspresso - 複数環境での運用</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({ startOnLoad: true });
+  </script>
+</head>
+<body>
+  <header>
+    <h1>ecspresso - 複数環境での運用</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">ホーム</a></li>
+        <li><a href="1-introduction.html">はじめに</a></li>
+        <li><a href="2-quickstart.html">クイックスタート</a></li>
+        <li><a href="3-command-reference.html">コマンドリファレンス</a></li>
+        <li><a href="4-practical-guide.html">実践ガイド</a></li>
+        <li><a href="5-troubleshooting.html">トラブルシューティング</a></li>
+      </ul>
+    </nav>
+  </header>
+  <main>
+    <section>
+      <h2>4.2 複数環境での運用</h2>
+      
+      <p>多くの組織では、開発、テスト、ステージング、本番など、複数の環境でアプリケーションを運用しています。ecspressoを使用して、これらの環境間で一貫したデプロイを実現する方法を説明します。</p>
+      
+      <h3>環境別の設定ファイル管理</h3>
+      <div class="mermaid">
+      flowchart TD
+        Base[共通設定\necspresso.yml] --> Dev[開発環境\necspresso.dev.yml]
+        Base --> Staging[ステージング環境\necspresso.staging.yml]
+        Base --> Prod[本番環境\necspresso.prod.yml]
+      </div>
+      
+      <h4>1. 環境別の設定ファイル</h4>
+      <p>各環境ごとに別々の設定ファイルを作成します。</p>
+      
+      <pre><code># ecspresso.dev.yml
+region: ap-northeast-1
+cluster: app-dev
+service: web-service-dev
+service_definition: ecs-service-def.json
+task_definition: ecs-task-def.json
+timeout: 5m
+
+# ecspresso.staging.yml
+region: ap-northeast-1
+cluster: app-staging
+service: web-service-staging
+service_definition: ecs-service-def.json
+task_definition: ecs-task-def.json
+timeout: 10m
+
+# ecspresso.prod.yml
+region: ap-northeast-1
+cluster: app-prod
+service: web-service-prod
+service_definition: ecs-service-def.json
+task_definition: ecs-task-def.json
+timeout: 15m</code></pre>
+      
+      <h4>2. 環境変数による設定ファイルの選択</h4>
+      <p>環境変数を使用して、使用する設定ファイルを選択します。</p>
+      
+      <pre><code>$ ENV=dev ecspresso --config=ecspresso.$ENV.yml deploy</code></pre>
+      
+      <h3>タスク定義とサービス定義のテンプレート化</h3>
+      <p>タスク定義とサービス定義をテンプレート化して、環境ごとの違いを管理します。</p>
+      
+      <h4>1. 環境変数の使用</h4>
+      <p>タスク定義内で環境変数を使用します。</p>
+      
+      <pre><code>{
+  "family": "web-service-{{env}}",
+  "containerDefinitions": [
+    {
+      "name": "web",
+      "image": "{{ecr_repository}}:{{image_tag}}",
+      "environment": [
+        {
+          "name": "APP_ENV",
+          "value": "{{env}}"
+        },
+        {
+          "name": "LOG_LEVEL",
+          "value": "{{log_level}}"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/web-service-{{env}}",
+          "awslogs-region": "{{region}}",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}</code></pre>
+      
+      <h4>2. 環境別の変数ファイル</h4>
+      <p>環境ごとに変数ファイルを作成します。</p>
+      
+      <pre><code># dev.env
+env=dev
+ecr_repository=123456789012.dkr.ecr.ap-northeast-1.amazonaws.com/web-service
+image_tag=latest
+log_level=debug
+region=ap-northeast-1
+
+# staging.env
+env=staging
+ecr_repository=123456789012.dkr.ecr.ap-northeast-1.amazonaws.com/web-service
+image_tag=stable
+log_level=info
+region=ap-northeast-1
+
+# prod.env
+env=prod
+ecr_repository=123456789012.dkr.ecr.ap-northeast-1.amazonaws.com/web-service
+image_tag=v1.0.0
+log_level=warn
+region=ap-northeast-1</code></pre>
+      
+      <h4>3. 環境ファイルの使用</h4>
+      <p>ecspressoコマンドで環境ファイルを指定します。</p>
+      
+      <pre><code>$ ecspresso --config=ecspresso.dev.yml --env-file=dev.env deploy</code></pre>
+      
+      <h3>プラグインを使用した設定管理</h3>
+      <p>ecspressoのプラグイン機能を使用して、Terraform状態ファイルやCloudFormationスタックから値を取得できます。</p>
+      
+      <h4>1. Terraformプラグインの設定</h4>
+      <pre><code># ecspresso.yml
+region: ap-northeast-1
+cluster: app-{{env}}
+service: web-service-{{env}}
+service_definition: ecs-service-def.json
+task_definition: ecs-task-def.json
+timeout: 10m
+plugins:
+  - name: tfstate
+    config:
+      path: terraform.tfstate
+      vars:
+        vpc_id: $.outputs.vpc_id.value
+        subnet_ids: $.outputs.private_subnet_ids.value</code></pre>
+      
+      <h4>2. CloudFormationプラグインの設定</h4>
+      <pre><code># ecspresso.yml
+region: ap-northeast-1
+cluster: app-{{env}}
+service: web-service-{{env}}
+service_definition: ecs-service-def.json
+task_definition: ecs-task-def.json
+timeout: 10m
+plugins:
+  - name: cloudformation
+    config:
+      stack_name: network-{{env}}
+      vars:
+        vpc_id: VpcId
+        subnet_ids: PrivateSubnetIds</code></pre>
+      
+      <h3>環境間のプロモーション戦略</h3>
+      <p>アプリケーションを開発環境からステージング、本番環境へと段階的にプロモーションする戦略を説明します。</p>
+      
+      <div class="mermaid">
+      flowchart LR
+        Dev[開発環境] -->|テスト合格| Staging[ステージング環境]
+        Staging -->|受入テスト合格| Prod[本番環境]
+      </div>
+      
+      <h4>1. イメージタグ戦略</h4>
+      <p>環境間でイメージを昇格させる方法：</p>
+      <ul>
+        <li><strong>開発環境</strong>: 最新のコミットからビルドされたイメージ（<code>latest</code>タグ）</li>
+        <li><strong>ステージング環境</strong>: 開発環境でテスト済みのイメージ（<code>stable</code>タグ）</li>
+        <li><strong>本番環境</strong>: ステージング環境で検証済みのイメージ（<code>v1.0.0</code>などのバージョンタグ）</li>
+      </ul>
+      
+      <h4>2. イメージのプロモーションスクリプト例</h4>
+      <pre><code>#!/bin/bash
+# 開発環境からステージング環境へのプロモーション
+SOURCE_TAG="latest"
+TARGET_TAG="stable"
+ECR_REPO="123456789012.dkr.ecr.ap-northeast-1.amazonaws.com/web-service"
+
+# イメージのプル
+docker pull $ECR_REPO:$SOURCE_TAG
+
+# 新しいタグを付ける
+docker tag $ECR_REPO:$SOURCE_TAG $ECR_REPO:$TARGET_TAG
+
+# イメージのプッシュ
+docker push $ECR_REPO:$TARGET_TAG
+
+# ステージング環境にデプロイ
+ecspresso --config=ecspresso.staging.yml --env-file=staging.env deploy</code></pre>
+      
+      <h3>環境固有の考慮事項</h3>
+      
+      <h4>1. スケーリング設定</h4>
+      <p>環境ごとに異なるスケーリング設定を適用します。</p>
+      <pre><code># 開発環境（最小限のリソース）
+$ ecspresso --config=ecspresso.dev.yml deploy --tasks=1
+
+# ステージング環境（中程度のリソース）
+$ ecspresso --config=ecspresso.staging.yml deploy --tasks=2
+
+# 本番環境（高可用性のためのリソース）
+$ ecspresso --config=ecspresso.prod.yml deploy --tasks=3</code></pre>
+      
+      <h4>2. デプロイ戦略</h4>
+      <p>環境ごとに異なるデプロイ戦略を適用します。</p>
+      <ul>
+        <li><strong>開発環境</strong>: ECSローリングアップデート（迅速なデプロイ）</li>
+        <li><strong>ステージング環境</strong>: ECSローリングアップデート（検証用）</li>
+        <li><strong>本番環境</strong>: CodeDeployによるBlue/Greenデプロイ（安全なデプロイ）</li>
+      </ul>
+      
+      <h4>3. モニタリングとアラート</h4>
+      <p>環境ごとに異なるモニタリング設定を適用します。</p>
+      <ul>
+        <li><strong>開発環境</strong>: 最小限のアラート（重大なエラーのみ）</li>
+        <li><strong>ステージング環境</strong>: 中程度のアラート（エラーと警告）</li>
+        <li><strong>本番環境</strong>: 包括的なアラート（エラー、警告、パフォーマンス指標）</li>
+      </ul>
+    </section>
+  </main>
+  <footer>
+    <p>&copy; 2023 ecspresso</p>
+  </footer>
+</body>
+</html>

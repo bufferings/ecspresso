@@ -16,8 +16,9 @@ jobs:
         run: |
           SLACK_TEXT="<@U08PYJ5B9LK> "
 
-          SLACK_TEXT+="bufferings/ecspresso リポジトリのv2ブランチをチェックアウトして"
-          SLACK_TEXT+=".github/workflows/devin/gen-doc-instruction.md に従ってPRを作成してください。\n"
+          SLACK_TEXT+="bufferings/ecspresso リポジトリのv2ブランチが対象です。"
+          SLACK_TEXT+=".github/workflows/devin/gen-doc-instruction.md に従ってPRを作成してください。"
+          SLACK_TEXT+="指示ファイルに従って作業をする以外には何も読み込まないでください。\n"
 
           payload="{\"text\":\"${SLACK_TEXT//\"/\\\"}\"}"
 

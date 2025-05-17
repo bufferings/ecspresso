@@ -36,15 +36,23 @@
         <h2>CI/CDパイプラインの概要</h2>
         <p>ecspressoは、CI/CDパイプラインと簡単に統合できるように設計されています。一般的なCI/CDツール（GitHub Actions、CircleCI、AWS CodePipelineなど）と組み合わせて使用することで、ECSサービスの継続的なデプロイを自動化できます。</p>
         
-        <pre class="mermaid">
-graph LR
-    A[コード変更] --> B[ビルド]
-    B --> C[テスト]
-    C --> D[イメージ作成]
-    D --> E[ecspresso verify]
-    E --> F[ecspresso deploy]
-    F --> G[デプロイ完了]
-        </pre>
+        <table class="diagram-table">
+            <tr>
+                <td class="center">コード変更</td>
+                <td class="center">→</td>
+                <td class="center">ビルド</td>
+                <td class="center">→</td>
+                <td class="center">テスト</td>
+                <td class="center">→</td>
+                <td class="center">イメージ作成</td>
+                <td class="center">→</td>
+                <td class="center">ecspresso verify</td>
+                <td class="center">→</td>
+                <td class="center">ecspresso deploy</td>
+                <td class="center">→</td>
+                <td class="center">デプロイ完了</td>
+            </tr>
+        </table>
         
         <h2>GitHub Actionsとの統合</h2>
         <p>GitHub Actionsを使用したCI/CDパイプラインの例を以下に示します。</p>

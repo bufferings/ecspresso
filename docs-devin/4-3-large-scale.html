@@ -49,15 +49,31 @@
         <h2>マイクロサービスアーキテクチャの管理</h2>
         <p>マイクロサービスアーキテクチャでは、多数の小さなサービスを管理する必要があります。ecspressoを使用して、各サービスを個別に管理できます。</p>
         
-        <pre class="mermaid">
-graph TD
-    A[マイクロサービスアーキテクチャ] --> B[サービスA]
-    A --> C[サービスB]
-    A --> D[サービスC]
-    B --> E[ecspresso設定A]
-    C --> F[ecspresso設定B]
-    D --> G[ecspresso設定C]
-        </pre>
+        <table class="diagram-table">
+            <tr>
+                <td colspan="3" class="center">マイクロサービスアーキテクチャ</td>
+            </tr>
+            <tr>
+                <td class="center">↓</td>
+                <td class="center">↓</td>
+                <td class="center">↓</td>
+            </tr>
+            <tr>
+                <td class="center">サービスA</td>
+                <td class="center">サービスB</td>
+                <td class="center">サービスC</td>
+            </tr>
+            <tr>
+                <td class="center">↓</td>
+                <td class="center">↓</td>
+                <td class="center">↓</td>
+            </tr>
+            <tr>
+                <td class="center">ecspresso設定A</td>
+                <td class="center">ecspresso設定B</td>
+                <td class="center">ecspresso設定C</td>
+            </tr>
+        </table>
         
         <p>ディレクトリ構造の例:</p>
         <pre><code>project/
@@ -127,24 +143,78 @@ echo "All services deployed successfully"
 </code></pre>
         
         <p>ブルー/グリーンデプロイメントのフロー:</p>
-        <pre class="mermaid">
-sequenceDiagram
-    participant User
-    participant Ecspresso
-    participant CodeDeploy
-    participant ECS
-    participant ALB
-    
-    User->>Ecspresso: deploy
-    Ecspresso->>CodeDeploy: createDeployment
-    CodeDeploy->>ECS: 新しいタスク定義を登録
-    CodeDeploy->>ECS: グリーン環境を作成
-    CodeDeploy->>ALB: テストリスナーにトラフィックを送信
-    CodeDeploy->>CodeDeploy: テスト実行
-    CodeDeploy->>ALB: 本番リスナーにトラフィックを移行
-    CodeDeploy->>ECS: ブルー環境を終了
-    CodeDeploy->>Ecspresso: デプロイ完了
-        </pre>
+        <table class="diagram-table">
+            <tr>
+                <th>User</th>
+                <th>Ecspresso</th>
+                <th>CodeDeploy</th>
+                <th>ECS</th>
+                <th>ALB</th>
+            </tr>
+            <tr>
+                <td>deploy ↓</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>createDeployment ↓</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td>新しいタスク定義を登録 →</td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td>グリーン環境を作成 →</td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td>テストリスナーにトラフィックを送信 →</td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td>テスト実行</td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td>本番リスナーにトラフィックを移行 →</td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td>ブルー環境を終了 →</td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>← デプロイ完了</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        </table>
         
         <h2>キャパシティプロバイダー戦略</h2>
         <p>大規模なサービスでは、リソースを効率的に使用するためにキャパシティプロバイダー戦略を活用できます。</p>

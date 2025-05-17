@@ -36,15 +36,31 @@
         <h2>複数環境の管理</h2>
         <p>多くのプロジェクトでは、開発（dev）、ステージング（staging）、本番（production）など、複数の環境でECSサービスを運用する必要があります。ecspressoを使用して、これらの環境を効率的に管理する方法を説明します。</p>
         
-        <pre class="mermaid">
-graph TD
-    A[共通設定] --> B[開発環境]
-    A --> C[ステージング環境]
-    A --> D[本番環境]
-    B --> E[開発用デプロイ]
-    C --> F[ステージング用デプロイ]
-    D --> G[本番用デプロイ]
-        </pre>
+        <table class="diagram-table">
+            <tr>
+                <td colspan="3" class="center">共通設定</td>
+            </tr>
+            <tr>
+                <td class="center">↓</td>
+                <td class="center">↓</td>
+                <td class="center">↓</td>
+            </tr>
+            <tr>
+                <td class="center">開発環境</td>
+                <td class="center">ステージング環境</td>
+                <td class="center">本番環境</td>
+            </tr>
+            <tr>
+                <td class="center">↓</td>
+                <td class="center">↓</td>
+                <td class="center">↓</td>
+            </tr>
+            <tr>
+                <td class="center">開発用デプロイ</td>
+                <td class="center">ステージング用デプロイ</td>
+                <td class="center">本番用デプロイ</td>
+            </tr>
+        </table>
         
         <h2>環境ごとの設定ファイル</h2>
         <p>環境ごとに異なる設定ファイルを用意することで、各環境に適した設定でデプロイできます。</p>
@@ -270,18 +286,38 @@ echo "Generated task definition for $ENV environment"
         <h2>環境間のプロモーション</h2>
         <p>アプリケーションを開発環境からステージング環境、そして本番環境へとプロモーションする際のワークフローを以下に示します。</p>
         
-        <pre class="mermaid">
-sequenceDiagram
-    participant Dev as 開発環境
-    participant Staging as ステージング環境
-    participant Prod as 本番環境
-    
-    Dev->>Dev: 開発とテスト
-    Dev->>Staging: イメージをプロモーション
-    Staging->>Staging: 統合テスト
-    Staging->>Prod: イメージをプロモーション
-    Prod->>Prod: 本番デプロイ
-        </pre>
+        <table class="diagram-table">
+            <tr>
+                <th>開発環境</th>
+                <th>ステージング環境</th>
+                <th>本番環境</th>
+            </tr>
+            <tr>
+                <td>開発とテスト ↓</td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>→→→→→→→→→→→→→→→→→→→→→</td>
+                <td>イメージをプロモーション</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>統合テスト ↓</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>→→→→→→→→→→→→→→→→→→→→→</td>
+                <td>イメージをプロモーション</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td></td>
+                <td>本番デプロイ</td>
+            </tr>
+        </table>
         
         <p>イメージのプロモーションスクリプト例:</p>
         <pre><code>#!/bin/bash

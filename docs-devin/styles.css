@@ -119,6 +119,27 @@ table th {
     margin: 30px 0;
 }
 
+.diagram-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    text-align: center;
+}
+
+.diagram-table th, .diagram-table td {
+    border: 1px solid var(--border-color);
+    padding: 10px;
+}
+
+.diagram-table th {
+    background-color: var(--secondary-color);
+    font-weight: bold;
+}
+
+.center {
+    text-align: center;
+}
+
 footer {
     text-align: center;
     padding: 20px 0;

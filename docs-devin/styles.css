@@ -1,140 +1,159 @@
-/* 基本スタイル */
+:root {
+    --primary-color: #0066cc;
+    --secondary-color: #f8f9fa;
+    --text-color: #333;
+    --link-color: #0066cc;
+    --border-color: #ddd;
+}
+
 * {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 body {
-  font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
-  line-height: 1.6;
-  color: #333;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
 }
 
 header {
-  background-color: #f8f9fa;
-  padding: 20px;
-  margin-bottom: 30px;
-  border-radius: 5px;
+    background-color: var(--secondary-color);
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+header h1 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
 }
 
 nav ul {
-  display: flex;
-  flex-wrap: wrap;
-  list-style: none;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
 }
 
-nav ul li {
-  margin-right: 15px;
-  margin-bottom: 10px;
+nav li {
+    margin-right: 20px;
+    margin-bottom: 10px;
 }
 
-nav ul li a {
-  text-decoration: none;
-  color: #0066cc;
-  padding: 5px 10px;
-  border-radius: 3px;
-  transition: background-color 0.3s;
+nav a {
+    color: var(--link-color);
+    text-decoration: none;
+    font-weight: 500;
 }
 
-nav ul li a:hover {
-  background-color: #e9ecef;
-}
-
-/* サブナビゲーションスタイル */
-.subnav {
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid #dee2e6;
-}
-
-.subnav ul {
-  font-size: 0.9em;
-}
-
-.subnav ul li a {
-  color: #495057;
+nav a:hover {
+    text-decoration: underline;
 }
 
 main {
-  padding: 20px 0;
+    padding: 30px 0;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  margin-bottom: 15px;
-  margin-top: 30px;
+    margin-bottom: 15px;
+    margin-top: 30px;
 }
 
-p {
-  margin-bottom: 20px;
+p, ul, ol, pre, table {
+    margin-bottom: 20px;
+}
+
+a {
+    color: var(--link-color);
 }
 
 code {
-  font-family: Monaco, Consolas, "Courier New", monospace;
-  background-color: #f5f5f5;
-  padding: 2px 4px;
-  border-radius: 3px;
+    background-color: var(--secondary-color);
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 pre {
-  background-color: #f8f9fa;
-  padding: 15px;
-  border-radius: 5px;
-  overflow-x: auto;
-  margin-bottom: 20px;
+    background-color: var(--secondary-color);
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto;
 }
 
 pre code {
-  background-color: transparent;
-  padding: 0;
-}
-
-.mermaid {
-  margin: 30px 0;
-  text-align: center;
+    padding: 0;
+    background-color: transparent;
 }
 
 table {
-  border-collapse: collapse;
-  width: 100%;
-  margin-bottom: 20px;
+    width: 100%;
+    border-collapse: collapse;
 }
 
-table, th, td {
-  border: 1px solid #dee2e6;
+table th, table td {
+    padding: 8px;
+    border: 1px solid var(--border-color);
 }
 
-th, td {
-  padding: 10px;
-  text-align: left;
+table th {
+    background-color: var(--secondary-color);
 }
 
-th {
-  background-color: #f8f9fa;
+.section-nav {
+    background-color: var(--secondary-color);
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 30px;
+}
+
+.section-nav ul {
+    list-style: none;
+    margin-bottom: 0;
+}
+
+.mermaid {
+    margin: 30px 0;
+}
+
+.diagram-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    text-align: center;
+}
+
+.diagram-table th, .diagram-table td {
+    border: 1px solid var(--border-color);
+    padding: 10px;
+}
+
+.diagram-table th {
+    background-color: var(--secondary-color);
+    font-weight: bold;
+}
+
+.center {
+    text-align: center;
 }
 
 footer {
-  margin-top: 50px;
-  padding: 20px;
-  text-align: center;
-  color: #6c757d;
-  border-top: 1px solid #dee2e6;
+    text-align: center;
+    padding: 20px 0;
+    border-top: 1px solid var(--border-color);
+    margin-top: 50px;
 }
 
-/* レスポンシブデザイン */
+/* Responsive design */
 @media (max-width: 768px) {
-  body {
-    padding: 10px;
-  }
-  
-  nav ul {
-    flex-direction: column;
-  }
-  
-  nav ul li {
-    margin-right: 0;
-  }
+    nav ul {
+        flex-direction: column;
+    }
+    
+    nav li {
+        margin-right: 0;
+    }
 }

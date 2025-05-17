@@ -1,124 +1,107 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ecspresso - インストール方法</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-  <script>
-    mermaid.initialize({ startOnLoad: true });
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>インストール方法 - ecspresso ドキュメント</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header>
-    <h1>ecspresso - インストール方法</h1>
-    <nav>
-      <ul>
-        <li><a href="index.html">ホーム</a></li>
-        <li><a href="1-introduction.html">はじめに</a></li>
-        <li><a href="2-quickstart.html">クイックスタート</a></li>
-        <li><a href="3-command-reference.html">コマンドリファレンス</a></li>
-        <li><a href="4-practical-guide.html">実践ガイド</a></li>
-        <li><a href="5-troubleshooting.html">トラブルシューティング</a></li>
-      </ul>
-    </nav>
-  </header>
-  <main>
-    <section>
-      <h2>1.2 インストール方法</h2>
-      
-      <h3>バイナリからのインストール</h3>
-      <p>ecspressoは、Go言語で書かれたシングルバイナリアプリケーションです。GitHubリリースページから、お使いのプラットフォーム向けの最新バイナリをダウンロードして使用できます。</p>
-      
-      <h4>Linux / macOS</h4>
-      <pre><code>$ curl -sL https://github.com/kayac/ecspresso/releases/latest/download/ecspresso-{プラットフォーム}-{アーキテクチャ} -o ecspresso
-$ chmod +x ecspresso
-$ sudo mv ecspresso /usr/local/bin/</code></pre>
-      
-      <h4>Homebrew（macOS）</h4>
-      <pre><code>$ brew install kayac/tap/ecspresso</code></pre>
-      
-      <h3>ソースからのビルド</h3>
-      <p>Go言語の開発環境がある場合は、ソースからecspressoをビルドすることもできます。</p>
-      <pre><code>$ go install github.com/kayac/ecspresso/v2/cmd/ecspresso@latest</code></pre>
-      
-      <h3>Dockerでの実行</h3>
-      <p>Dockerがインストールされている環境では、ecspressoのDockerイメージを使用することも可能です。</p>
-      <pre><code>$ docker run -it --rm \
-  -v ~/.aws:/home/ecspresso/.aws \
+    <header>
+        <h1>ecspresso</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">ホーム</a></li>
+                <li><a href="1-introduction.html">はじめに</a></li>
+                <li><a href="2-quickstart.html">クイックスタート</a></li>
+                <li><a href="3-command-reference.html">コマンドリファレンス</a></li>
+                <li><a href="4-practical-guide.html">実践ガイド</a></li>
+                <li><a href="5-troubleshooting.html">トラブルシューティング</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h1>1.2 インストール方法</h1>
+        
+        <div class="section-nav">
+            <h3>はじめに</h3>
+            <ul>
+                <li><a href="1-1-about.html">1.1 ecspressoとは</a></li>
+                <li><a href="1-2-installation.html">1.2 インストール方法</a></li>
+            </ul>
+        </div>
+        
+        <h2>バイナリのダウンロード</h2>
+        <p>ecspressoは、GitHub Releasesからプラットフォーム別のバイナリをダウンロードして使用できます。</p>
+        
+        <pre><code>$ curl -sL https://github.com/kayac/ecspresso/releases/latest | \
+  grep -o '/kayac/ecspresso/releases/download/v[0-9.]*/ecspresso_.*_linux_amd64.zip' | \
+  xargs -I{} curl -sL https://github.com{} -o ecspresso.zip
+$ unzip ecspresso.zip
+$ mv ecspresso /usr/local/bin/
+$ ecspresso --version
+</code></pre>
+        
+        <h2>Homebrewを使用したインストール (macOS)</h2>
+        <p>macOSユーザーは、Homebrewを使用して簡単にインストールできます。</p>
+        
+        <pre><code>$ brew install kayac/tap/ecspresso
+</code></pre>
+        
+        <h2>Docker イメージの使用</h2>
+        <p>Dockerを使用している場合は、公式のDockerイメージを利用できます。</p>
+        
+        <pre><code>$ docker run --rm -it \
+  -v ~/.aws:/root/.aws:ro \
   -v $(pwd):/work \
   -w /work \
-  kayac/ecspresso:latest [コマンド]</code></pre>
-      
-      <h3>AWS認証の設定</h3>
-      <p>ecspressoはAWS SDKを使用してAWSリソースにアクセスします。以下のいずれかの方法でAWS認証情報を設定してください。</p>
-      
-      <h4>AWS CLIの認証情報を使用</h4>
-      <p>すでにAWS CLIが設定されている場合は、その認証情報がecspressoでも使用されます。</p>
-      <pre><code>$ aws configure
-AWS Access Key ID [None]: [アクセスキー]
-AWS Secret Access Key [None]: [シークレットキー]
-Default region name [None]: ap-northeast-1
-Default output format [None]: json</code></pre>
-      
-      <h4>環境変数の使用</h4>
-      <pre><code>export AWS_ACCESS_KEY_ID=[アクセスキー]
-export AWS_SECRET_ACCESS_KEY=[シークレットキー]
-export AWS_REGION=ap-northeast-1</code></pre>
-      
-      <h4>IAMロールの使用（EC2、ECSタスク、Lambda内）</h4>
-      <p>AWS環境内で実行する場合は、インスタンスプロファイルやタスクロールを使用できます。この場合、明示的な認証情報設定は不要です。</p>
-      
-      <h3>必要なIAM権限</h3>
-      <p>ecspressoを使用するには、以下のAWSサービスへのアクセス権限が必要です：</p>
-      <ul>
-        <li><strong>Amazon ECS</strong>: サービス、タスク定義、タスクの管理</li>
-        <li><strong>AWS CodeDeploy</strong>: Blue/Greenデプロイを使用する場合</li>
-        <li><strong>Amazon CloudWatch Logs</strong>: ログの表示</li>
-        <li><strong>AWS Auto Scaling</strong>: Auto Scalingの設定を管理する場合</li>
-        <li><strong>AWS Systems Manager Parameter Store</strong>: パラメータを参照する場合</li>
-        <li><strong>AWS Secrets Manager</strong>: シークレットを参照する場合</li>
-        <li><strong>Elastic Load Balancing</strong>: ロードバランサーを使用する場合</li>
-        <li><strong>AWS Service Discovery</strong>: サービスディスカバリーを使用する場合</li>
-        <li><strong>VPC Lattice</strong>: VPC Latticeを使用する場合</li>
-      </ul>
-      
-      <h3>バージョンの確認</h3>
-      <p>インストールが正常に完了したことを確認するには、バージョン情報を表示します。</p>
-      <pre><code>$ ecspresso version</code></pre>
-      
-      <h3>初期設定</h3>
-      <p>ecspressoを初めて使用する場合は、以下のコマンドで初期設定ファイルを生成できます：</p>
-      <pre><code>$ ecspresso init --region ap-northeast-1 --service your-service-name --cluster your-cluster-name</code></pre>
-      <p>このコマンドは、カレントディレクトリに<code>ecspresso.yml</code>ファイルを生成します。このファイルを編集して、サービスの設定を行います。</p>
-      
-      <h3>設定ファイルの構造</h3>
-      <p>ecspressoの設定ファイル（ecspresso.yml）には、以下の主要な設定項目があります：</p>
-      <pre><code>region: ap-northeast-1
-cluster: your-cluster-name
-service: your-service-name
-service_definition: ecs-service-def.json
-task_definition: ecs-task-def.json
-timeout: 10m
-plugins:
-  - name: tfstate
-    config:
-      path: terraform.tfstate</code></pre>
-      <p>各項目の説明：</p>
-      <ul>
-        <li><strong>region</strong>: AWSリージョン</li>
-        <li><strong>cluster</strong>: ECSクラスター名</li>
-        <li><strong>service</strong>: ECSサービス名</li>
-        <li><strong>service_definition</strong>: サービス定義ファイルのパス（JSON/YAML）</li>
-        <li><strong>task_definition</strong>: タスク定義ファイルのパス（JSON/YAML）</li>
-        <li><strong>timeout</strong>: 操作のタイムアウト時間</li>
-        <li><strong>plugins</strong>: 使用するプラグインの設定</li>
-      </ul>
-    </section>
-  </main>
-  <footer>
-    <p>&copy; 2023 ecspresso</p>
-  </footer>
+  kayac/ecspresso:latest --help
+</code></pre>
+        
+        <h2>Go言語からのインストール</h2>
+        <p>Go言語の環境がある場合は、go installコマンドを使用してインストールできます。</p>
+        
+        <pre><code>$ go install github.com/kayac/ecspresso/v2/cmd/ecspresso@latest
+</code></pre>
+        
+        <h2>必要な権限</h2>
+        <p>ecspressoを使用するには、AWSアカウントに適切な権限が必要です。以下は、最小限必要なIAMポリシーの例です。</p>
+        
+        <pre><code>{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ecs:DescribeServices",
+        "ecs:DescribeTaskDefinition",
+        "ecs:DescribeTasks",
+        "ecs:ListTasks",
+        "ecs:RegisterTaskDefinition",
+        "ecs:UpdateService",
+        "ecs:RunTask",
+        "ecs:StopTask",
+        "ecs:DescribeClusters",
+        "iam:PassRole"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+</code></pre>
+        
+        <p>より詳細な権限設定や、特定の機能を使用する場合の追加権限については、<a href="4-practical-guide.html">実践ガイド</a>を参照してください。</p>
+        
+        <h2>動作確認</h2>
+        <p>インストールが完了したら、以下のコマンドでバージョンを確認できます。</p>
+        
+        <pre><code>$ ecspresso version
+</code></pre>
+        
+        <p>これでecspressoのインストールは完了です。次のステップとして、<a href="2-quickstart.html">クイックスタート</a>に進み、基本的な使い方を学びましょう。</p>
+    </main>
+    <footer>
+        <p>&copy; ecspresso プロジェクト</p>
+    </footer>
 </body>
 </html>

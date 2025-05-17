@@ -1,75 +1,106 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ecspresso - コマンドリファレンス</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-  <script>
-    mermaid.initialize({ startOnLoad: true });
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>コマンドリファレンス - ecspresso ドキュメント</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header>
-    <h1>ecspresso - コマンドリファレンス</h1>
-    <nav>
-      <ul>
-        <li><a href="index.html">ホーム</a></li>
-        <li><a href="1-introduction.html">はじめに</a></li>
-        <li><a href="2-quickstart.html">クイックスタート</a></li>
-        <li><a href="3-command-reference.html">コマンドリファレンス</a></li>
-        <li><a href="4-practical-guide.html">実践ガイド</a></li>
-        <li><a href="5-troubleshooting.html">トラブルシューティング</a></li>
-      </ul>
-    </nav>
-    <nav class="subnav">
-      <ul>
-        <li><a href="3-1-deployment-commands.html">3.1 デプロイ関連コマンド</a></li>
-        <li><a href="3-2-task-commands.html">3.2 タスク関連コマンド</a></li>
-        <li><a href="3-3-config-commands.html">3.3 設定・検証コマンド</a></li>
-      </ul>
-    </nav>
-  </header>
-  <main>
-    <section>
-      <h2>目次</h2>
-      <ul>
-        <li><a href="3-1-deployment-commands.html">3.1 デプロイ関連コマンド</a></li>
-        <li><a href="3-2-task-commands.html">3.2 タスク関連コマンド</a></li>
-        <li><a href="3-3-config-commands.html">3.3 設定・検証コマンド</a></li>
-      </ul>
-      
-      <h2>セクション概要</h2>
-      <p>このセクションでは、ecspressoで利用可能な全コマンドの詳細な説明と使用例を提供します。デプロイ関連コマンド、タスク関連コマンド、設定・検証コマンドの3つのカテゴリに分けて解説します。</p>
-      
-      <p class="text-center">
-        <strong>ecspresso コマンド構造</strong>
-      </p>
-      <pre class="mermaid">
-graph TD
-  A[ecspresso] --> B[デプロイ関連]
-  A --> C[タスク関連]
-  A --> D[設定・検証]
-  
-  B --> B1[deploy]
-  B --> B2[rollback]
-  B --> B3[refresh]
-  B --> B4[scale]
-  
-  C --> C1[run]
-  C --> C2[exec]
-  C --> C3[tasks]
-  
-  D --> D1[init]
-  D --> D2[verify]
-  D --> D3[diff]
-  D --> D4[status]
-      </pre>
-    </section>
-  </main>
-  <footer>
-    <p>&copy; 2023 ecspresso</p>
-  </footer>
+    <header>
+        <h1>ecspresso</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">ホーム</a></li>
+                <li><a href="1-introduction.html">はじめに</a></li>
+                <li><a href="2-quickstart.html">クイックスタート</a></li>
+                <li><a href="3-command-reference.html">コマンドリファレンス</a></li>
+                <li><a href="4-practical-guide.html">実践ガイド</a></li>
+                <li><a href="5-troubleshooting.html">トラブルシューティング</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h1>コマンドリファレンス</h1>
+        
+        <div class="section-nav">
+            <h3>このセクションの内容</h3>
+            <ul>
+                <li><a href="3-1-deployment-commands.html">3.1 デプロイ関連コマンド</a></li>
+                <li><a href="3-2-task-commands.html">3.2 タスク関連コマンド</a></li>
+                <li><a href="3-3-config-commands.html">3.3 設定・検証コマンド</a></li>
+            </ul>
+        </div>
+        
+        <p>このセクションでは、ecspressoで使用できるすべてのコマンドとそのオプションについて詳しく説明します。コマンドは機能別に分類されており、それぞれのコマンドの使用方法、オプション、実行例を提供しています。</p>
+        
+        <p>ecspressoのコマンドは大きく分けて、デプロイ関連コマンド、タスク関連コマンド、設定・検証コマンドの3つのカテゴリに分類されます。各カテゴリのコマンドの詳細については、対応するサブセクションを参照してください。</p>
+        
+        <h2>共通オプション</h2>
+        <p>すべてのecspressoコマンドで使用できる共通オプションは以下の通りです：</p>
+        
+        <table>
+            <tr>
+                <th>オプション</th>
+                <th>説明</th>
+                <th>デフォルト値</th>
+            </tr>
+            <tr>
+                <td>--config</td>
+                <td>設定ファイルのパス</td>
+                <td>ecspresso.yml</td>
+            </tr>
+            <tr>
+                <td>--envfile</td>
+                <td>環境変数ファイルのパス</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>--debug</td>
+                <td>デバッグログを有効にする</td>
+                <td>false</td>
+            </tr>
+            <tr>
+                <td>--ext-str</td>
+                <td>Jsonnet用の外部文字列値</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>--ext-code</td>
+                <td>Jsonnet用の外部コード値</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>--assume-role-arn</td>
+                <td>引き受けるロールのARN</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>--timeout</td>
+                <td>タイムアウト時間</td>
+                <td>設定ファイルの値</td>
+            </tr>
+            <tr>
+                <td>--filter-command</td>
+                <td>フィルターコマンド</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td>--color/--no-color</td>
+                <td>カラー出力を有効/無効にする</td>
+                <td>true</td>
+            </tr>
+            <tr>
+                <td>--log-format</td>
+                <td>ログフォーマット（text/json）</td>
+                <td>text</td>
+            </tr>
+        </table>
+        
+        <p>各コマンドの詳細なオプションと使用例については、対応するサブセクションを参照してください。</p>
+    </main>
+    <footer>
+        <p>&copy; ecspresso プロジェクト</p>
+    </footer>
 </body>
 </html>

@@ -1,107 +1,90 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ecspresso - ecspressoとは</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-  <script>
-    mermaid.initialize({ startOnLoad: true });
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ecspressoとは - ecspresso ドキュメント</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header>
-    <h1>ecspresso - ecspressoとは</h1>
-    <nav>
-      <ul>
-        <li><a href="index.html">ホーム</a></li>
-        <li><a href="1-introduction.html">はじめに</a></li>
-        <li><a href="2-quickstart.html">クイックスタート</a></li>
-        <li><a href="3-command-reference.html">コマンドリファレンス</a></li>
-        <li><a href="4-practical-guide.html">実践ガイド</a></li>
-        <li><a href="5-troubleshooting.html">トラブルシューティング</a></li>
-      </ul>
-    </nav>
-  </header>
-  <main>
-    <section>
-      <h2>1.1 ecspressoとは</h2>
-      
-      <p>ecspressoは、Amazon Elastic Container Service (ECS) のデプロイと管理を簡素化するコマンドラインツールです。AWS CLIやSDKを直接操作するよりも簡単な方法で、ECSサービスのライフサイクル管理を提供します。</p>
-      
-      <h3>主な特徴</h3>
-      <ul>
-        <li>設定ファイルベースの宣言的なアプローチ</li>
-        <li>サービスとタスク定義のデプロイとロールバック</li>
-        <li>複数のデプロイ戦略（ECSローリングアップデート、CodeDeployによるBlue/Green）</li>
-        <li>ワンオフタスクの実行と管理</li>
-        <li>コンテナ内でのコマンド実行</li>
-        <li>リソース設定の検証と差分検出</li>
-        <li>Auto Scalingの設定と管理</li>
-        <li>プラグインシステムによる拡張性</li>
-      </ul>
-      
-      <h3>アーキテクチャ概要</h3>
-      <p class="text-center">
-        <strong>ecspresso コンポーネント構成</strong>
-      </p>
-      <pre class="mermaid">
+    <header>
+        <h1>ecspresso</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">ホーム</a></li>
+                <li><a href="1-introduction.html">はじめに</a></li>
+                <li><a href="2-quickstart.html">クイックスタート</a></li>
+                <li><a href="3-command-reference.html">コマンドリファレンス</a></li>
+                <li><a href="4-practical-guide.html">実践ガイド</a></li>
+                <li><a href="5-troubleshooting.html">トラブルシューティング</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h1>1.1 ecspressoとは</h1>
+        
+        <div class="section-nav">
+            <h3>はじめに</h3>
+            <ul>
+                <li><a href="1-1-about.html">1.1 ecspressoとは</a></li>
+                <li><a href="1-2-installation.html">1.2 インストール方法</a></li>
+            </ul>
+        </div>
+        
+        <h2>概要</h2>
+        <p>ecspressoは、Amazon Elastic Container Service (ECS) へのデプロイを簡素化・自動化するためのコマンドラインツールです。DevOpsエンジニア、SREチーム、クラウドエンジニアなど、AWSでコンテナ化されたアプリケーションを管理する方々のために設計されています。</p>
+        
+        <h2>主な機能</h2>
+        <ul>
+            <li>宣言的な設定ファイルを使用したECSサービスのデプロイ、スケーリング、ロールバック</li>
+            <li>ローカル設定と実際のデプロイされたリソースの比較によるドリフト検出</li>
+            <li>ECSコンテナ内での一時的なタスクやコマンドの実行</li>
+            <li>デプロイ前のリソース設定の検証</li>
+            <li>AWS CodeDeployを通じたブルー/グリーンデプロイのサポート</li>
+        </ul>
+        
+        <h2>ecspressoのアーキテクチャ</h2>
+        <pre class="mermaid">
 graph TD
-  A[設定ファイル] --> B[ecspresso]
-  C[タスク定義] --> B
-  D[サービス定義] --> B
-  
-  subgraph コア機能
-    B --> E[デプロイ]
-    B --> F[ロールバック]
-    B --> G[タスク実行]
-    B --> H[コマンド実行]
-    B --> I[検証]
-    B --> J[差分比較]
-  end
-  
-  B --> K[AWS SDK]
-  K --> L[ECS]
-  K --> M[CodeDeploy]
-  K --> N[Auto Scaling]
-  K --> O[CloudWatch]
-      </pre>
-      
-      <h3>主なユースケース</h3>
-      <p>ecspressoは以下のようなシナリオで特に役立ちます：</p>
-      <ul>
-        <li>CI/CDパイプラインにおけるコンテナデプロイの自動化</li>
-        <li>複数環境（開発、ステージング、本番）での一貫したデプロイ</li>
-        <li>サービス設定のドリフト（ずれ）の検出</li>
-        <li>Blue/Greenデプロイによる安全なリリース</li>
-        <li>一時的なタスクの実行（バッチ処理、マイグレーションなど）</li>
-        <li>コンテナ内でのトラブルシューティングやデバッグ</li>
-      </ul>
-      
-      <h3>ecspressoのメリット</h3>
-      <ul>
-        <li>AWS CLIよりも簡潔なコマンド体系</li>
-        <li>宣言的な設定による予測可能な結果</li>
-        <li>デプロイの状態追跡と履歴管理</li>
-        <li>環境間でのポータビリティ</li>
-        <li>デプロイ戦略の柔軟な選択</li>
-        <li>GitOpsワークフローとの相性の良さ</li>
-        <li>Auto Scalingとの統合</li>
-      </ul>
-      
-      <h3>コアコンポーネント</h3>
-      <ul>
-        <li><strong>App構造体</strong>: すべての操作を調整する中心的なコンポーネント</li>
-        <li><strong>Config構造体</strong>: ecspresso.ymlから読み込まれた設定値を保持</li>
-        <li><strong>CLI関数</strong>: コマンドライン引数を解析し、適切なハンドラーに転送</li>
-        <li><strong>AWS SDK統合</strong>: ECS、CodeDeploy、Auto Scaling、CloudWatchなどのAWSサービスとの連携</li>
-        <li><strong>プラグインシステム</strong>: 機能拡張のためのプラグインをサポート</li>
-      </ul>
-    </section>
-  </main>
-  <footer>
-    <p>&copy; 2023 ecspresso</p>
-  </footer>
+    A[ecspresso CLI] --> B[設定管理]
+    A --> C[デプロイ操作]
+    A --> D[タスク操作]
+    A --> E[リソース検証]
+    A --> F[プラグインシステム]
+    B --> G[AWS SDK]
+    C --> G
+    D --> G
+    E --> G
+    F --> G
+    G --> H[AWS サービス]
+        </pre>
+        
+        <h2>ecspressoの利点</h2>
+        <ul>
+            <li><strong>インフラストラクチャ・アズ・コード</strong>: 設定ファイルを通じてECSリソースを宣言的に定義</li>
+            <li><strong>シンプルなワークフロー</strong>: AWS CLIやSDKを直接使用する場合と比較して、ECSデプロイの複雑さを大幅に削減</li>
+            <li><strong>複数のデプロイ戦略</strong>: ECSのローリングアップデートとCodeDeployのブルー/グリーンデプロイの両方をサポート</li>
+            <li><strong>統合されたサービスディスカバリ</strong>: AWS Service Discoveryとの統合をサポート</li>
+            <li><strong>自動スケーリング設定</strong>: Application Auto Scalingの設定と管理</li>
+            <li><strong>シークレット管理</strong>: AWS Systems Manager Parameter StoreとSecrets Managerとの統合</li>
+        </ul>
+        
+        <h2>ユースケース</h2>
+        <p>ecspressoは以下のようなシナリオで特に役立ちます：</p>
+        <ul>
+            <li>マイクロサービスアーキテクチャのデプロイと管理</li>
+            <li>CI/CDパイプラインでの自動デプロイ</li>
+            <li>複数環境（開発、ステージング、本番）にわたるECSサービスの一貫した管理</li>
+            <li>大規模なECSサービスフリートの効率的な運用</li>
+            <li>コンテナ化されたアプリケーションのゼロダウンタイムデプロイ</li>
+        </ul>
+    </main>
+    <footer>
+        <p>&copy; ecspresso プロジェクト</p>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true });
+    </script>
 </body>
 </html>

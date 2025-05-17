@@ -1,212 +1,328 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ecspresso - トラブルシューティング</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>トラブルシューティング - ecspresso ドキュメント</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header>
-    <h1>ecspresso - トラブルシューティング</h1>
-    <nav>
-      <ul>
-        <li><a href="index.html">ホーム</a></li>
-        <li><a href="1-introduction.html">はじめに</a></li>
-        <li><a href="2-quickstart.html">クイックスタート</a></li>
-        <li><a href="3-command-reference.html">コマンドリファレンス</a></li>
-        <li><a href="4-practical-guide.html">実践ガイド</a></li>
-        <li><a href="5-troubleshooting.html">トラブルシューティング</a></li>
-      </ul>
-    </nav>
-  </header>
-  <main>
-    <section>
-      <h2>5. トラブルシューティング</h2>
-      
-      <p>ecspressoを使用する際に発生する可能性のある一般的な問題とその解決方法を説明します。</p>
-      
-      <h3>一般的なエラーと解決策</h3>
-      
-      <h4>1. AWS認証エラー</h4>
-      <p><strong>症状</strong>: 「Unable to locate credentials」や「Access denied」などのエラーが表示される。</p>
-      <p><strong>解決策</strong>:</p>
-      <ul>
-        <li>AWS CLIが正しく設定されていることを確認します。</li>
-        <li>AWS認証情報が正しく設定されていることを確認します。</li>
-        <li>IAMロールに必要な権限があることを確認します。</li>
-      </ul>
-      <pre><code>$ aws configure
-$ export AWS_PROFILE=your-profile
-$ aws sts get-caller-identity</code></pre>
-      
-      <h4>2. サービス定義エラー</h4>
-      <p><strong>症状</strong>: 「Invalid service definition」などのエラーが表示される。</p>
-      <p><strong>解決策</strong>:</p>
-      <ul>
-        <li>サービス定義ファイルが有効なJSONまたはYAMLであることを確認します。</li>
-        <li>必須フィールドがすべて含まれていることを確認します。</li>
-        <li><code>render</code>コマンドを使用して、レンダリングされたサービス定義を確認します。</li>
-      </ul>
-      <pre><code>$ ecspresso render --service-definition</code></pre>
-      
-      <h4>3. タスク定義エラー</h4>
-      <p><strong>症状</strong>: 「Invalid task definition」などのエラーが表示される。</p>
-      <p><strong>解決策</strong>:</p>
-      <ul>
-        <li>タスク定義ファイルが有効なJSONまたはYAMLであることを確認します。</li>
-        <li>必須フィールドがすべて含まれていることを確認します。</li>
-        <li><code>render</code>コマンドを使用して、レンダリングされたタスク定義を確認します。</li>
-      </ul>
-      <pre><code>$ ecspresso render --task-definition</code></pre>
-      
-      <h4>4. デプロイタイムアウト</h4>
-      <p><strong>症状</strong>: デプロイが完了する前にタイムアウトする。</p>
-      <p><strong>解決策</strong>:</p>
-      <ul>
-        <li>設定ファイルのタイムアウト値を増やします。</li>
-        <li>ヘルスチェックの設定を確認します。</li>
-        <li><code>--no-wait</code>オプションを使用して、デプロイ後の待機をスキップします。</li>
-      </ul>
-      <pre><code># ecspresso.yml
+    <header>
+        <h1>ecspresso</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">ホーム</a></li>
+                <li><a href="1-introduction.html">はじめに</a></li>
+                <li><a href="2-quickstart.html">クイックスタート</a></li>
+                <li><a href="3-command-reference.html">コマンドリファレンス</a></li>
+                <li><a href="4-practical-guide.html">実践ガイド</a></li>
+                <li><a href="5-troubleshooting.html">トラブルシューティング</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h1>トラブルシューティング</h1>
+        
+        <p>このセクションでは、ecspressoを使用する際に発生する可能性のある一般的な問題と、その解決方法について説明します。</p>
+        
+        <h2>デプロイの問題</h2>
+        
+        <h3>サービスが安定しない</h3>
+        <p><strong>症状:</strong> デプロイ後、サービスが安定状態に達しない。</p>
+        <p><strong>考えられる原因:</strong></p>
+        <ul>
+            <li>タスク定義のヘルスチェックが失敗している</li>
+            <li>コンテナが起動時にクラッシュしている</li>
+            <li>必要なリソースが不足している</li>
+        </ul>
+        <p><strong>解決策:</strong></p>
+        <ol>
+            <li>サービスのステータスを確認する:
+                <pre><code>$ ecspresso status --events 20</code></pre>
+            </li>
+            <li>タスクのログを確認する:
+                <pre><code>$ ecspresso tasks
+$ aws logs get-log-events --log-group-name /ecs/your-service --log-stream-name ecs/container-name/task-id</code></pre>
+            </li>
+            <li>ヘルスチェックの設定を見直す</li>
+            <li>必要に応じてタスク定義のリソース（CPU、メモリ）を増やす</li>
+        </ol>
+        
+        <h3>デプロイがタイムアウトする</h3>
+        <p><strong>症状:</strong> デプロイコマンドがタイムアウトする。</p>
+        <p><strong>考えられる原因:</strong></p>
+        <ul>
+            <li>タイムアウト設定が短すぎる</li>
+            <li>サービスの起動に時間がかかっている</li>
+        </ul>
+        <p><strong>解決策:</strong></p>
+        <ol>
+            <li>タイムアウト設定を長くする:
+                <pre><code># ecspresso.yml
 timeout: 20m
 
-$ ecspresso deploy --no-wait</code></pre>
-      
-      <h4>5. リソース検証エラー</h4>
-      <p><strong>症状</strong>: 「Resource validation failed」などのエラーが表示される。</p>
-      <p><strong>解決策</strong>:</p>
-      <ul>
-        <li>必要なリソース（IAMロール、ECRイメージなど）が存在することを確認します。</li>
-        <li><code>--secrets=false</code>オプションを使用して、シークレットの検証をスキップします。</li>
-        <li>詳細なログを確認するために<code>--debug</code>オプションを使用します。</li>
-      </ul>
-      <pre><code>$ ecspresso verify --secrets=false --debug</code></pre>
-      
-      <h3>よくある質問（FAQ）</h3>
-      
-      <h4>1. ecspressoが最新のタスク定義を使用しない</h4>
-      <p><strong>質問</strong>: デプロイ時に最新のタスク定義が使用されません。</p>
-      <p><strong>回答</strong>: デフォルトでは、ecspressoはローカルのタスク定義ファイルから新しいタスク定義を登録します。最新の登録済みタスク定義を使用するには、<code>--latest-task-definition</code>オプションを使用します。</p>
-      <pre><code>$ ecspresso deploy --latest-task-definition</code></pre>
-      
-      <h4>2. 特定のリビジョンにロールバックする方法</h4>
-      <p><strong>質問</strong>: 特定のタスク定義リビジョンにロールバックするにはどうすればよいですか？</p>
-      <p><strong>回答</strong>: <code>--skip-task-definition</code>と<code>--revision</code>オプションを使用して、特定のリビジョンにロールバックできます。</p>
-      <pre><code>$ ecspresso deploy --skip-task-definition --revision=10</code></pre>
-      
-      <h4>3. デプロイ中にサービスが不安定になる</h4>
-      <p><strong>質問</strong>: デプロイ中にサービスが不安定になり、ヘルスチェックに失敗します。</p>
-      <p><strong>回答</strong>: デプロイ設定を調整して、最小ヘルスパーセントと最大パーセントを変更します。また、ヘルスチェックの設定も確認してください。</p>
-      <pre><code># サービス定義内のデプロイ設定
+# または、コマンドラインで指定
+$ ecspresso deploy --timeout 20m</code></pre>
+            </li>
+            <li>デプロイの進行状況を別のターミナルで確認する:
+                <pre><code>$ ecspresso status --events 20</code></pre>
+            </li>
+        </ol>
+        
+        <h3>CodeDeployデプロイの失敗</h3>
+        <p><strong>症状:</strong> CodeDeployを使用したブルー/グリーンデプロイが失敗する。</p>
+        <p><strong>考えられる原因:</strong></p>
+        <ul>
+            <li>AppSpecの設定が正しくない</li>
+            <li>ターゲットグループのヘルスチェックが失敗している</li>
+            <li>デプロイフックスクリプトが失敗している</li>
+        </ul>
+        <p><strong>解決策:</strong></p>
+        <ol>
+            <li>CodeDeployのデプロイステータスを確認する（AWSコンソールまたはAWS CLI）</li>
+            <li>AppSpecの設定を確認する:
+                <pre><code>$ ecspresso appspec</code></pre>
+            </li>
+            <li>ターゲットグループのヘルスチェック設定を確認する</li>
+            <li>デプロイフックスクリプトのログを確認する</li>
+        </ol>
+        
+        <h2>タスクの問題</h2>
+        
+        <h3>タスクが起動しない</h3>
+        <p><strong>症状:</strong> タスクが起動せず、すぐに停止する。</p>
+        <p><strong>考えられる原因:</strong></p>
+        <ul>
+            <li>コンテナのエントリポイントまたはコマンドが正しくない</li>
+            <li>必要な環境変数が設定されていない</li>
+            <li>リソース制約（CPU、メモリ）</li>
+            <li>ネットワーク設定の問題</li>
+        </ul>
+        <p><strong>解決策:</strong></p>
+        <ol>
+            <li>タスクのステータスを確認する:
+                <pre><code>$ ecspresso tasks --status STOPPED</code></pre>
+            </li>
+            <li>タスクのログを確認する（CloudWatch Logs）</li>
+            <li>タスク定義を検証する:
+                <pre><code>$ ecspresso verify</code></pre>
+            </li>
+            <li>デバッグモードでecspressoを実行する:
+                <pre><code>$ ecspresso --debug run</code></pre>
+            </li>
+        </ol>
+        
+        <h3>execコマンドが失敗する</h3>
+        <p><strong>症状:</strong> <code>ecspresso exec</code>コマンドが失敗する。</p>
+        <p><strong>考えられる原因:</strong></p>
+        <ul>
+            <li>タスクでECS Execが有効になっていない</li>
+            <li>必要なIAM権限がない</li>
+            <li>SSMセッションマネージャーの設定が正しくない</li>
+        </ul>
+        <p><strong>解決策:</strong></p>
+        <ol>
+            <li>タスク定義でECS Execを有効にする:
+                <pre><code># ecs-service-def.json
 {
-  "deploymentConfiguration": {
-    "maximumPercent": 200,
-    "minimumHealthyPercent": 100,
-    "deploymentCircuitBreaker": {
-      "enable": true,
-      "rollback": true
-    }
-  }
+  "enableExecuteCommand": true,
+  ...
 }</code></pre>
-      
-      <h4>4. 環境変数の上書き方法</h4>
-      <p><strong>質問</strong>: タスク実行時に環境変数を上書きするにはどうすればよいですか？</p>
-      <p><strong>回答</strong>: <code>run</code>コマンドの<code>--env</code>オプションを使用して、環境変数を上書きできます。</p>
-      <pre><code>$ ecspresso run --env="KEY=VALUE" --env="ANOTHER_KEY=ANOTHER_VALUE"</code></pre>
-      
-      <h4>5. プラグインの設定方法</h4>
-      <p><strong>質問</strong>: Terraformの状態ファイルから値を取得するプラグインを設定するにはどうすればよいですか？</p>
-      <p><strong>回答</strong>: 設定ファイルに<code>plugins</code>セクションを追加します。</p>
-      <pre><code># ecspresso.yml
-plugins:
-  - name: tfstate
-    config:
-      path: terraform.tfstate
-      vars:
-        vpc_id: $.outputs.vpc_id.value
-        subnet_ids: $.outputs.private_subnet_ids.value</code></pre>
-      
-      <h3>デバッグ技法</h3>
-      
-      <h4>1. デバッグログの有効化</h4>
-      <p>詳細なログを表示するには、<code>--debug</code>オプションを使用します。</p>
-      <pre><code>$ ecspresso --debug deploy</code></pre>
-      
-      <h4>2. ドライランの実行</h4>
-      <p>実際の変更を行わずに、実行内容を確認するには、<code>--dry-run</code>オプションを使用します。</p>
-      <pre><code>$ ecspresso deploy --dry-run</code></pre>
-      
-      <h4>3. 差分の確認</h4>
-      <p>ローカルの設定と実際にデプロイされているリソースの差分を確認するには、<code>diff</code>コマンドを使用します。</p>
-      <pre><code>$ ecspresso diff --color</code></pre>
-      
-      <h4>4. サービス状態の確認</h4>
-      <p>サービスの現在の状態を確認するには、<code>status</code>コマンドを使用します。</p>
-      <pre><code>$ ecspresso status --events=20</code></pre>
-      
-      <h4>5. コンテナ内でのデバッグ</h4>
-      <p>実行中のコンテナ内でコマンドを実行してデバッグするには、<code>exec</code>コマンドを使用します。</p>
-      <pre><code>$ ecspresso exec --command="/bin/bash"</code></pre>
-      
-      <h3>一般的なエラーコードと意味</h3>
-      
-      <table>
-        <tr>
-          <th>エラーコード</th>
-          <th>説明</th>
-          <th>解決策</th>
-        </tr>
-        <tr>
-          <td>InvalidParameterException</td>
-          <td>パラメータが無効</td>
-          <td>パラメータの値を確認し、正しい形式で指定します。</td>
-        </tr>
-        <tr>
-          <td>ClusterNotFoundException</td>
-          <td>指定されたクラスターが見つからない</td>
-          <td>クラスター名が正しいことを確認します。</td>
-        </tr>
-        <tr>
-          <td>ServiceNotFoundException</td>
-          <td>指定されたサービスが見つからない</td>
-          <td>サービス名が正しいことを確認します。</td>
-        </tr>
-        <tr>
-          <td>TaskDefinitionNotFoundException</td>
-          <td>指定されたタスク定義が見つからない</td>
-          <td>タスク定義名とリビジョンが正しいことを確認します。</td>
-        </tr>
-        <tr>
-          <td>AccessDeniedException</td>
-          <td>アクセス権限がない</td>
-          <td>IAMロールに必要な権限があることを確認します。</td>
-        </tr>
-        <tr>
-          <td>ResourceInUseException</td>
-          <td>リソースが使用中</td>
-          <td>リソースが他のプロセスで使用されていないことを確認します。</td>
-        </tr>
-        <tr>
-          <td>LimitExceededException</td>
-          <td>リソース制限を超えている</td>
-          <td>AWS Service Quotasを確認し、必要に応じて引き上げを申請します。</td>
-        </tr>
-      </table>
-      
-      <h3>サポートリソース</h3>
-      
-      <h4>1. GitHub Issues</h4>
-      <p>問題が解決しない場合は、GitHubのIssueページで質問や問題を報告できます。</p>
-      <p><a href="https://github.com/kayac/ecspresso/issues">https://github.com/kayac/ecspresso/issues</a></p>
-      
-      <h4>2. AWS ECSドキュメント</h4>
-      <p>AWS ECSの詳細については、AWS公式ドキュメントを参照してください。</p>
-      <p><a href="https://docs.aws.amazon.com/ecs/">https://docs.aws.amazon.com/ecs/</a></p>
-    </section>
-  </main>
-  <footer>
-    <p>&copy; 2023 ecspresso</p>
-  </footer>
+            </li>
+            <li>必要なIAM権限を追加する:
+                <pre><code>{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ssmmessages:CreateControlChannel",
+        "ssmmessages:CreateDataChannel",
+        "ssmmessages:OpenControlChannel",
+        "ssmmessages:OpenDataChannel"
+      ],
+      "Resource": "*"
+    }
+  ]
+}</code></pre>
+            </li>
+            <li>デバッグモードでecspressoを実行する:
+                <pre><code>$ ecspresso --debug exec --command /bin/bash</code></pre>
+            </li>
+        </ol>
+        
+        <h2>設定の問題</h2>
+        
+        <h3>設定ファイルの読み込みエラー</h3>
+        <p><strong>症状:</strong> ecspressoが設定ファイルを読み込めない。</p>
+        <p><strong>考えられる原因:</strong></p>
+        <ul>
+            <li>YAMLまたはJSONの構文エラー</li>
+            <li>設定ファイルが見つからない</li>
+            <li>環境変数の展開に失敗している</li>
+        </ul>
+        <p><strong>解決策:</strong></p>
+        <ol>
+            <li>設定ファイルの構文を確認する:
+                <pre><code>$ yamllint ecspresso.yml
+$ jsonlint ecs-task-def.json</code></pre>
+            </li>
+            <li>設定ファイルをレンダリングして確認する:
+                <pre><code>$ ecspresso render --config</code></pre>
+            </li>
+            <li>デバッグモードでecspressoを実行する:
+                <pre><code>$ ecspresso --debug status</code></pre>
+            </li>
+        </ol>
+        
+        <h3>タスク定義の検証エラー</h3>
+        <p><strong>症状:</strong> <code>ecspresso verify</code>コマンドがエラーを報告する。</p>
+        <p><strong>考えられる原因:</strong></p>
+        <ul>
+            <li>参照しているリソース（IAMロール、セキュリティグループなど）が存在しない</li>
+            <li>シークレットが存在しない</li>
+            <li>ログ設定が正しくない</li>
+        </ul>
+        <p><strong>解決策:</strong></p>
+        <ol>
+            <li>詳細なエラーメッセージを確認する:
+                <pre><code>$ ecspresso --debug verify</code></pre>
+            </li>
+            <li>参照しているリソースが存在することを確認する</li>
+            <li>シークレットの検証をスキップする（必要な場合）:
+                <pre><code>$ ecspresso verify --secrets=false</code></pre>
+            </li>
+        </ol>
+        
+        <h2>権限の問題</h2>
+        
+        <h3>IAM権限エラー</h3>
+        <p><strong>症状:</strong> 「アクセスが拒否されました」などのIAM権限エラーが発生する。</p>
+        <p><strong>考えられる原因:</strong></p>
+        <ul>
+            <li>必要なIAM権限がない</li>
+            <li>ロールの引き受けに失敗している</li>
+        </ul>
+        <p><strong>解決策:</strong></p>
+        <ol>
+            <li>必要なIAM権限を確認する（<a href="1-2-installation.html">インストール方法</a>のIAMポリシー例を参照）</li>
+            <li>AWS認証情報が正しく設定されていることを確認する:
+                <pre><code>$ aws sts get-caller-identity</code></pre>
+            </li>
+            <li>ロールを引き受ける場合は、正しいARNを指定する:
+                <pre><code>$ ecspresso --assume-role-arn arn:aws:iam::123456789012:role/EcsDeployRole status</code></pre>
+            </li>
+        </ol>
+        
+        <h3>タスク実行ロールの問題</h3>
+        <p><strong>症状:</strong> タスクが起動するが、すぐに停止する。CloudWatchログに「アクセスが拒否されました」などのエラーが表示される。</p>
+        <p><strong>考えられる原因:</strong></p>
+        <ul>
+            <li>タスク実行ロールに必要な権限がない</li>
+            <li>タスクロールに必要な権限がない</li>
+        </ul>
+        <p><strong>解決策:</strong></p>
+        <ol>
+            <li>タスク実行ロールに必要な権限を追加する:
+                <pre><code>{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ecr:GetAuthorizationToken",
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:BatchGetImage",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "*"
+    }
+  ]
+}</code></pre>
+            </li>
+            <li>シークレットを使用している場合は、シークレットへのアクセス権を追加する:
+                <pre><code>{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:GetSecretValue",
+        "ssm:GetParameters"
+      ],
+      "Resource": [
+        "arn:aws:secretsmanager:region:account:secret:secret-name",
+        "arn:aws:ssm:region:account:parameter/parameter-name"
+      ]
+    }
+  ]
+}</code></pre>
+            </li>
+        </ol>
+        
+        <h2>その他の問題</h2>
+        
+        <h3>デバッグ情報の取得</h3>
+        <p>問題のトラブルシューティングに役立つデバッグ情報を取得するには、<code>--debug</code>オプションを使用します。</p>
+        <pre><code>$ ecspresso --debug deploy</code></pre>
+        
+        <p>また、ログ形式をJSONに変更することで、より詳細な情報を取得できます。</p>
+        <pre><code>$ ecspresso --log-format json deploy</code></pre>
+        
+        <h3>一般的なエラーメッセージと解決策</h3>
+        <table>
+            <tr>
+                <th>エラーメッセージ</th>
+                <th>考えられる原因</th>
+                <th>解決策</th>
+            </tr>
+            <tr>
+                <td>service xxx is not found</td>
+                <td>指定されたサービスが存在しない</td>
+                <td>サービス名とクラスター名を確認する</td>
+            </tr>
+            <tr>
+                <td>failed to register task definition: InvalidParameterException</td>
+                <td>タスク定義のパラメータが無効</td>
+                <td>タスク定義を検証し、エラーメッセージの詳細を確認する</td>
+            </tr>
+            <tr>
+                <td>failed to update service: InvalidParameterException</td>
+                <td>サービス更新のパラメータが無効</td>
+                <td>サービス定義を検証し、エラーメッセージの詳細を確認する</td>
+            </tr>
+            <tr>
+                <td>failed to run task: ResourceNotFoundException</td>
+                <td>指定されたリソースが存在しない</td>
+                <td>クラスター名、サブネット、セキュリティグループなどを確認する</td>
+            </tr>
+            <tr>
+                <td>failed to verify: resource not found</td>
+                <td>検証中に参照されているリソースが見つからない</td>
+                <td>リソースの存在を確認するか、--secrets=falseオプションを使用する</td>
+            </tr>
+        </table>
+        
+        <h3>サポートの取得</h3>
+        <p>問題が解決しない場合は、以下の方法でサポートを受けることができます。</p>
+        <ul>
+            <li><a href="https://github.com/kayac/ecspresso/issues" target="_blank">GitHubのIssue</a>を作成する</li>
+            <li><a href="https://github.com/kayac/ecspresso/discussions" target="_blank">GitHubのDiscussions</a>で質問する</li>
+        </ul>
+        
+        <p>問題を報告する際は、以下の情報を含めると、より迅速に解決できます。</p>
+        <ul>
+            <li>ecspressoのバージョン（<code>ecspresso version</code>の出力）</li>
+            <li>使用しているAWSリージョン</li>
+            <li>実行したコマンドとオプション</li>
+            <li>エラーメッセージ</li>
+            <li>デバッグログ（<code>--debug</code>オプションを使用して取得）</li>
+        </ul>
+    </main>
+    <footer>
+        <p>&copy; ecspresso プロジェクト</p>
+    </footer>
 </body>
 </html>

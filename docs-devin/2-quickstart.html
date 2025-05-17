@@ -1,61 +1,42 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ecspresso - クイックスタート</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-  <script>
-    mermaid.initialize({ startOnLoad: true });
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>クイックスタート - ecspresso ドキュメント</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header>
-    <h1>ecspresso - クイックスタート</h1>
-    <nav>
-      <ul>
-        <li><a href="index.html">ホーム</a></li>
-        <li><a href="1-introduction.html">はじめに</a></li>
-        <li><a href="2-quickstart.html">クイックスタート</a></li>
-        <li><a href="3-command-reference.html">コマンドリファレンス</a></li>
-        <li><a href="4-practical-guide.html">実践ガイド</a></li>
-        <li><a href="5-troubleshooting.html">トラブルシューティング</a></li>
-      </ul>
-    </nav>
-    <nav class="subnav">
-      <ul>
-        <li><a href="2-1-basic-usage.html">2.1 基本的な使い方</a></li>
-        <li><a href="2-2-common-use-cases.html">2.2 よくあるユースケース</a></li>
-      </ul>
-    </nav>
-  </header>
-  <main>
-    <section>
-      <h2>目次</h2>
-      <ul>
-        <li><a href="2-1-basic-usage.html">2.1 基本的な使い方</a></li>
-        <li><a href="2-2-common-use-cases.html">2.2 よくあるユースケース</a></li>
-      </ul>
-      
-      <h2>セクション概要</h2>
-      <p>このセクションでは、ecspressoを使ってすぐに始められる基本的な使い方と、よく遭遇する実用的なユースケースについて説明します。初めてecspressoを使う方のために、基本的なワークフローと設定ファイルの記述方法を解説します。</p>
-      
-      <p class="text-center">
-        <strong>ecspresso 基本ワークフロー</strong>
-      </p>
-      <pre class="mermaid">
-graph LR
-  A[初期化] --> B[設定編集]
-  B --> C[検証]
-  C --> D[差分確認]
-  D --> E[デプロイ]
-  E --> F[状態確認]
-      </pre>
-    </section>
-  </main>
-  <footer>
-    <p>&copy; 2023 ecspresso</p>
-  </footer>
+    <header>
+        <h1>ecspresso</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">ホーム</a></li>
+                <li><a href="1-introduction.html">はじめに</a></li>
+                <li><a href="2-quickstart.html">クイックスタート</a></li>
+                <li><a href="3-command-reference.html">コマンドリファレンス</a></li>
+                <li><a href="4-practical-guide.html">実践ガイド</a></li>
+                <li><a href="5-troubleshooting.html">トラブルシューティング</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h1>クイックスタート</h1>
+        
+        <div class="section-nav">
+            <h3>このセクションの内容</h3>
+            <ul>
+                <li><a href="2-1-basic-usage.html">2.1 基本的な使い方</a></li>
+                <li><a href="2-2-common-use-cases.html">2.2 よくあるユースケース</a></li>
+            </ul>
+        </div>
+        
+        <p>このセクションでは、ecspressoの基本的な使い方と、よく使われるユースケースについて説明します。初めてecspressoを使用する方は、まず基本的な使い方を理解し、その後よくあるユースケースを参考にして実際のシナリオに適用してみてください。</p>
+        
+        <p>サブセクションでは、設定ファイルの作成方法、デプロイの実行方法、タスクの管理方法など、ecspressoの基本的な機能の使い方と、実際のプロジェクトでよく使われるパターンについて詳しく説明しています。</p>
+    </main>
+    <footer>
+        <p>&copy; ecspresso プロジェクト</p>
+    </footer>
 </body>
 </html>

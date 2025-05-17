@@ -154,7 +154,35 @@
         <h2>コマンドカテゴリ</h2>
         <p>ecspressoのコマンドは以下のカテゴリに分類されます：</p>
         
-        <img src="https://mermaid.ink/img/pako:eNptksFqwzAMhl_F6LTCesghh1HoYYexS2GwDroVHMVpDHHsYDtbS_ruU5J1Y7TMF1n_J-mPpE5QWU1AoDZmrxptyG-tVA-20Y482VY15MU5ZQzZWe3Ieb21jSa71xtSujNkm1qTr0xryHvlHXlxhuz7oDTZF1WTV6ca8hT8BwJBgoIQQQoxZLBcxZBAGkEap_EyzdIUkjiGNEmyZRatojjLkjiGJIqyVRZl8SJLYkggTZJ4lUXLOF5lEUSQwY8dVYOzylcQIIcK9nAABwH2EKCCIwQ4Qg0BHFTQwAEaCHAADweooQ5X8n9wAwc3cNcQ4AYtBLhDgDvcIcAdArQQ4A53eMAd_qGHMPqHHgL0EP7SCGHUQxj1EEY9hFEPYdRDGPUQRj2EUQ9h9BPg0lpdQKla7TSaT61RNRRgem2hhFbpgzHHUg1QoOudQdmiaaeSH1IbFCjRcK1ly60yyC3PpTZQgh204dlxvuU853k-zV-Uy9nF?type=png" alt="ecspressoコマンドカテゴリの図" />
+        <div class="mermaid">
+        flowchart TD
+          A[ecspresso] --> B[デプロイ管理]
+          A --> C[タスク実行]
+          A --> D[設定検証]
+          
+          subgraph "デプロイ関連コマンド"
+            B --> B1[deploy]
+            B --> B2[rollback]
+            B --> B3[scale]
+            B --> B4[wait]
+          end
+          
+          subgraph "タスク関連コマンド"
+            C --> C1[run]
+            C --> C2[register]
+            C --> C3[tasks]
+            C --> C4[exec]
+          end
+          
+          subgraph "設定・検証コマンド"
+            D --> D1[init]
+            D --> D2[verify]
+            D --> D3[diff]
+            D --> D4[render]
+            D --> D5[status]
+            D --> D6[appspec]
+          end
+        </div>
         
         <h3>デプロイ関連コマンド</h3>
         <p>ECSサービスのデプロイ、ロールバック、スケーリングを管理するコマンドです。</p>
@@ -244,7 +272,23 @@
           <h4>処理フロー</h4>
           <p>deployコマンドの基本的な処理フロー：</p>
           
-          <img src="https://mermaid.ink/img/pako:eNp1kU1rwzAMhv-K0GmF9ZBDDmPQww5jl8JgHXQrOIrTGOLYwXa2lvS_z0nWj9EyX2S9j6QnkjpBZTUBgdqYvWq0Ib-1Uj3YRjvyZFvVkBfnlDFkZ7Uj5_XWNprsXm9I6c6QbWpNvjKtIe-Vd-TFGbLvg9JkX1RNXp1qyFPwHwgECQpCBCnEkMFyFUMCaQRpnMbLNFstIYljSJMkW2bRKoqzLIljSKIoW2VRFi-yJIYE0iSJV1m0jONVFkEEGfzYUTU4q3wFDnKoYA8HcOBhDx4qOIKHI9TgwUEFDRygAQ8H8HCAGupwJf8HN3BwA3cNHm7Qgoc7eLjDHTzcwUMLHu5whwfc4R968KN_0IOHHvxfGsGPBvCjB_jRA_zoAX70AD96gB89wI8e4P8EuLRWF1CqVjuN5lNrVA0FmF5bKKFV-mDMsVQDFOh6Z1C2aNqp5LvUBgVKNFxr2XKrDHLLc6kNlGAHbXh2nG85z3meT_MXUvXZxQ?type=png" alt="デプロイコマンドのフロー図" />
+          <div class="mermaid">
+          sequenceDiagram
+            participant App as ecspresso
+            participant Config as 設定
+            participant AWS as AWS API
+            
+            App->>Config: 設定ファイル読み込み
+            App->>Config: タスク定義読み込み
+            App->>Config: サービス定義読み込み
+            App->>AWS: タスク定義登録
+            AWS-->>App: タスク定義ARN
+            App->>AWS: サービス更新
+            AWS-->>App: サービス更新結果
+            App->>AWS: サービス状態確認
+            AWS-->>App: サービス状態
+            App->>App: 安定するまで待機
+          </div>
           
           <h4>使用例</h4>
           <pre><code># 基本的なデプロイ
@@ -311,7 +355,27 @@ ecspresso deploy --tasks 5</code></pre>
           <h4>ロールバックプロセス</h4>
           <p>rollbackコマンドの内部処理フロー：</p>
           
-          <img src="https://mermaid.ink/img/pako:eNp1ksFqwzAMhl_F6LTCesghh1HoYYexS2GwDroVHMVpDHHsYDtbS_ruU5J1Y7TMF1n_J-mPpE5QWU1AoDZmrxptyG-tVA-20Y482VY15MU5ZQzZWe3Ieb21jSa71xtSujNkm1qTr0xryHvlHXlxhuz7oDTZF1WTV6ca8hT8BwJBgoIQQQoxZLBcxZBAGkEap_EyzdIUkjiGNEmyZRatojjLkjiGJIqyVRZl8SJLYkggTZJ4lUXLOF5lEUSQwY8dVYOzylcQIIcK9nAABwH2EKCCIwQ4Qg0BHFTQwAEaCHAADweooQ5X8n9wAwc3cNcQ4AYtBLhDgDvcIcAdArQQ4A53eMAd_qGHMPqHHgL0EP7SCGHUQxj1EEY9hFEPYdRDGPUQRj2EUQ9h9BPg0lpdQKla7TSaT61RNRRgem2hhFbpgzHHUg1QoOudQdmiaaeSH1IbFCjRcK1ly60yyC3PpTZQgh204dlxvuU853k-zV-Uy9nF?type=png" alt="ロールバックコマンドのフロー図" />
+          <div class="mermaid">
+          sequenceDiagram
+            participant App as ecspresso
+            participant Config as 設定
+            participant AWS as AWS API
+            
+            App->>Config: 設定ファイル読み込み
+            App->>AWS: 現在のサービス情報取得
+            AWS-->>App: サービス情報
+            App->>AWS: 前回のタスク定義取得
+            AWS-->>App: タスク定義
+            App->>AWS: サービス更新（前回のタスク定義で）
+            AWS-->>App: サービス更新結果
+            App->>AWS: サービス状態確認
+            AWS-->>App: サービス状態
+            App->>App: 安定するまで待機
+            opt --deregister オプション指定時
+              App->>AWS: 現在のタスク定義を登録解除
+              AWS-->>App: 登録解除結果
+            end
+          </div>
           
           <h4>使用例</h4>
           <pre><code># 基本的なロールバック（前回のタスク定義に戻す）
@@ -364,7 +428,21 @@ ecspresso rollback --no-wait-until-stable</code></pre>
           <h4>スケーリングプロセス</h4>
           <p>scaleコマンドの内部処理フロー：</p>
           
-          <img src="https://mermaid.ink/img/pako:eNp1ksFqwzAMhl_F6LTCesghh1HoYYexS2GwDroVHMVpDHHsYDtbS_ruU5J1Y7TMF1n_J-mPpE5QWU1AoDZmrxptyG-tVA-20Y482VY15MU5ZQzZWe3Ieb21jSa71xtSujNkm1qTr0xryHvlHXlxhuz7oDTZF1WTV6ca8hT8BwJBgoIQQQoxZLBcxZBAGkEap_EyzdIUkjiGNEmyZRatojjLkjiGJIqyVRZl8SJLYkggTZJ4lUXLOF5lEUSQwY8dVYOzylcQIIcK9nAABwH2EKCCIwQ4Qg0BHFTQwAEaCHAADweooQ5X8n9wAwc3cNcQ4AYtBLhDgDvcIcAdArQQ4A53eMAd_qGHMPqHHgL0EP7SCGHUQxj1EEY9hFEPYdRDGPUQRj2EUQ9h9BPg0lpdQKla7TSaT61RNRRgem2hhFbpgzHHUg1QoOudQdmiaaeSH1IbFCjRcK1ly60yyC3PpTZQgh204dlxvuU853k-zV-Uy9nF?type=png" alt="スケールコマンドのシーケンス図" />
+          <div class="mermaid">
+          sequenceDiagram
+            participant App as ecspresso
+            participant Config as 設定
+            participant AWS as AWS API
+            
+            App->>Config: 設定ファイル読み込み
+            App->>AWS: 現在のサービス情報取得
+            AWS-->>App: サービス情報
+            App->>AWS: サービス更新（タスク数変更）
+            AWS-->>App: サービス更新結果
+            App->>AWS: サービス状態確認
+            AWS-->>App: サービス状態
+            App->>App: 安定するまで待機
+          </div>
           
           <h4>使用例</h4>
           <pre><code># タスク数を5に設定
@@ -409,7 +487,28 @@ ecspresso scale --tasks 3 --no-wait-until-stable</code></pre>
           <h4>待機プロセス</h4>
           <p>waitコマンドの内部処理フロー：</p>
           
-          <img src="https://mermaid.ink/img/pako:eNp1ksFqwzAMhl_F6LTCesghh1HoYYexS2GwDroVHMVpDHHsYDtbS_ruU5J1Y7TMF1n_J-mPpE5QWU1AoDZmrxptyG-tVA-20Y482VY15MU5ZQzZWe3Ieb21jSa71xtSujNkm1qTr0xryHvlHXlxhuz7oDTZF1WTV6ca8hT8BwJBgoIQQQoxZLBcxZBAGkEap_EyzdIUkjiGNEmyZRatojjLkjiGJIqyVRZl8SJLYkggTZJ4lUXLOF5lEUSQwY8dVYOzylcQIIcK9nAABwH2EKCCIwQ4Qg0BHFTQwAEaCHAADweooQ5X8n9wAwc3cNcQ4AYtBLhDgDvcIcAdArQQ4A53eMAd_qGHMPqHHgL0EP7SCGHUQxj1EEY9hFEPYdRDGPUQRj2EUQ9h9BPg0lpdQKla7TSaT61RNRRgem2hhFbpgzHHUg1QoOudQdmiaaeSH1IbFCjRcK1ly60yyC3PpTZQgh204dlxvuU853k-zV-Uy9nF?type=png" alt="待機コマンドのフロー図" />
+          <div class="mermaid">
+          sequenceDiagram
+            participant App as ecspresso
+            participant Config as 設定
+            participant AWS as AWS API
+            
+            App->>Config: 設定ファイル読み込み
+            App->>AWS: サービス状態取得
+            AWS-->>App: サービス状態
+            loop タイムアウトまで
+              alt サービスが安定している
+                App->>App: 待機終了
+              else サービスが安定していない
+                App->>App: 一定時間待機
+                App->>AWS: サービス状態再取得
+                AWS-->>App: 更新されたサービス状態
+              end
+            end
+            alt タイムアウト発生
+              App->>App: エラー終了
+            end
+          </div>
           
           <h4>使用例</h4>
           <pre><code># サービスが安定するまで待機
@@ -426,7 +525,20 @@ ecspresso wait --timeout 300</code></pre>
           <h3>デプロイ戦略</h3>
           <p>ecspressoは以下の2つのデプロイ戦略をサポートしています：</p>
           
-          <img src="https://mermaid.ink/img/pako:eNp1ksFqwzAMhl_F6LTCesghh1HoYYexS2GwDroVHMVpDHHsYDtbS_ruU5J1Y7TMF1n_J-mPpE5QWU1AoDZmrxptyG-tVA-20Y482VY15MU5ZQzZWe3Ieb21jSa71xtSujNkm1qTr0xryHvlHXlxhuz7oDTZF1WTV6ca8hT8BwJBgoIQQQoxZLBcxZBAGkEap_EyzdIUkjiGNEmyZRatojjLkjiGJIqyVRZl8SJLYkggTZJ4lUXLOF5lEUSQwY8dVYOzylcQIIcK9nAABwH2EKCCIwQ4Qg0BHFTQwAEaCHAADweooQ5X8n9wAwc3cNcQ4AYtBLhDgDvcIcAdArQQ4A53eMAd_qGHMPqHHgL0EP7SCGHUQxj1EEY9hFEPYdRDGPUQRj2EUQ9h9BPg0lpdQKla7TSaT61RNRRgem2hhFbpgzHHUg1QoOudQdmiaaeSH1IbFCjRcK1ly60yyC3PpTZQgh204dlxvuU853k-zV-Uy9nF?type=png" alt="デプロイ戦略の図" />
+          <div class="mermaid">
+          flowchart TD
+            A[デプロイ戦略] --> B[ECSローリングデプロイ]
+            A --> C[CodeDeployブルー/グリーン]
+            
+            B --> B1[タスクを徐々に置き換え]
+            B --> B2[deploymentConfiguration設定]
+            B --> B3[サーキットブレーカー対応]
+            
+            C --> C1[新環境を作成]
+            C --> C2[トラフィックを徐々に移行]
+            C --> C3[appspec.yaml設定]
+            C --> C4[デプロイフック対応]
+          </div>
           
           <h4>ECSローリングデプロイ</h4>
           <p>ECSローリングデプロイは、タスクを徐々に置き換えていく戦略です。以下のパラメータで設定できます：</p>

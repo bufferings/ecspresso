@@ -84,7 +84,22 @@
           <li><strong>プラグインサポート</strong>: Terraform、CloudFormation、SSM、Secrets Managerなどとの統合をサポートします。</li>
         </ul>
         
-        <img src="https://mermaid.ink/img/pako:eNplUk1rwzAM_SvCp-3gj6Rph10K42ywww5jPahYaUxjO8h2VkLIf5-TrIWyiyW9Jz09aTrDaCmHk0ZvDw3X0PnO2ki-WcxmT6-5ycE_Qwa1b9HIKzz4_fN-ub2D1XZTRJEk8pyKfU67sh6hML6xcHs7FNRV-uLC3cYBDbfFiCf0RTZ_q_fbvcw_NWdOLxll7nrjAkW8Zg7joGDtVQdbKDIYiooc4hP0TJ0CaZvqOsZlDLyZECs--bfg9Kj_0z-QFZaZFA7Z7LM8Z-5kUJwS2NOqpNb9pDQf_OfQ4LaEHAl_bT1c661GnX0zGxVQxx0UaE8GWxg8rnG88JDMCdVl_AVjBpmf?type=png" alt="ecspressoの主要機能を示す図">
+        <div class="mermaid">
+          flowchart TD
+            A[ecspresso] --> B[デプロイ管理]
+            A --> C[タスク実行]
+            A --> D[設定検証]
+            A --> E[差分確認]
+            A --> F[スケーリング]
+            A --> G[ロールバック]
+            
+            B --> H[AWS ECS]
+            C --> H
+            D --> H
+            E --> H
+            F --> H
+            G --> H
+        </div>
       </section>
       
       <section id="use-cases" class="section">
@@ -108,7 +123,19 @@
         <h2>基本アーキテクチャ</h2>
         <p>ecspressoは、Go言語で実装されたコマンドラインツールです。AWS SDK for Go v2を使用してAWSサービスと通信し、ECSリソースを管理します。</p>
         
-        <img src="https://mermaid.ink/img/pako:eNplUE1rwzAM_SvCp-3gNClbDrsUxslgh3FK2EHFSmMW20G2sxGC__uczDDYRdLT00cfzzkaSqDRGLoOAhn6EG0M2pXD-fxlUxhO_hVRRBM609ATbP3jcTvdPcJ8tcyDyEmVYkzFSe9OkNrQOLy8nBJ0Oq2d8LeQsC5N1-GRQ5acF-v1Vk5-jK-dWuRg3fkbJyjBVTAQE5K2t-2VtMw_tO0o3mNm7tXLYww6THCTHj8aF5V59b-FnQ71f_oHRMTcKXMoopVDVu3Yy5jZO0kPikOAQ7aq6dv9JD8f_OfY42qPhDT-3O7h1JqaZfLdrHVAvfEhQX-yiMZ7XLHK3Cf_AS6uUwY?type=png" alt="ecspressoの基本的なワークフローを示す図">
+        <div class="mermaid">
+        sequenceDiagram
+          actor User as ユーザー
+          participant CLI as ecspresso CLI
+          participant Config as 設定ファイル
+          participant AWS as AWS API
+          
+          User->>CLI: コマンド実行
+          CLI->>Config: 設定読み込み
+          CLI->>AWS: APIリクエスト
+          AWS-->>CLI: レスポンス
+          CLI-->>User: 結果表示
+        </div>
         
         <p>ecspressoの基本的なワークフローは以下の通りです：</p>
         <ol>

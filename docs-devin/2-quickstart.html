@@ -98,7 +98,20 @@
             <li><code>ecs-task-def.json</code>: ECSタスク定義</li>
           </ul>
           
-          <img src="https://mermaid.ink/img/pako:eNqNkk9PwzAMxb9K5BMIaO3WP-KAkDhw4MIJcTDNtEZLnMpxQUP97iRrB9I4wC6R_J6f_WznANpZpBz22jTtXlm0rj6RMpqvf7fvdAz2rQZkSXtqYNjCybu72e5v2r-sn3eb5UgCCaRJAT7H_oCSZZVDL0tvyt6o4BOK1vhxRoVIAnHBa7iL_9FkrBpjGeUbq00_a8LkWnWlPs7CI13v85wbpQr91Vet-PhhcpVx9aEKVoh94XLOjs0LzZcHA-XIXQvGcjRSwg_8eZysQbTDmQbP_bvFS9AexhNz1PK50S2pgeoAO-DvU3gc6RvQvZQl?type=png" alt="ecspresso init のシーケンス図">
+          <div class="mermaid">
+          sequenceDiagram
+            actor User as ユーザー
+            participant Ecspresso as ecspresso
+            participant AWS as AWS API
+            
+            User->>Ecspresso: ecspresso init
+            Ecspresso->>AWS: サービス情報取得
+            AWS-->>Ecspresso: サービス定義
+            Ecspresso->>AWS: タスク定義取得
+            AWS-->>Ecspresso: タスク定義
+            Ecspresso->>Ecspresso: 設定ファイル生成
+            Ecspresso-->>User: 完了メッセージ
+          </div>
         </div>
         
         <div id="deploy" class="subsection">
@@ -119,7 +132,18 @@
         <div id="workflow" class="subsection">
           <h3>基本ワークフロー</h3>
           
-          <img src="https://mermaid.ink/img/pako:eNp1kc9qwzAMxl_F-JRB0jRd6WGHwTgb7LDDWA8qVhrT2B6ynZUQ8u5z060w2CWST9_3C6TjiIYKOGn0duekQx8GayN1sZwvHl5KU5J_RRRofI9GXuDO7x_38-0DLLfrKhZJqshpOZZ00O0FCuNbC5eXY0WDNp0X7i4Z2HS2a3HCUFVqW-3Xe1n9aMEKvS1QufM3LlDEm2EQDgppbxTYVrPBqaJFQnqEyKxTIGOjjjPcpMBnE3LFJ_8fVnZo_tM_kDMxn9IcCjM4ZP2OvSxDwk4GxTmBPa0qOlP8KM2H-Dm1uK2hQKKf2z0cGk1BXnJmNjqgIftQoD9Ygil6XON5Yn42B1Kn-RfJOJXA?type=png" alt="ecspressoの基本ワークフロー図">
+          <div class="mermaid">
+          flowchart TD
+            A[設定ファイル編集] --> B[差分確認]
+            B --> C{差分あり?}
+            C -->|はい| D[リソース検証]
+            C -->|いいえ| H[完了]
+            D --> E{検証成功?}
+            E -->|はい| F[デプロイ]
+            E -->|いいえ| A
+            F --> G[デプロイ待機]
+            G --> H[完了]
+          </div>
           
           <p>基本的なワークフローは以下の通りです：</p>
           <ol>

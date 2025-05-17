@@ -85,21 +85,21 @@
         </ul>
         
         <div class="mermaid">
-          flowchart TD
-            A[ecspresso] --> B[デプロイ管理]
-            A --> C[タスク実行]
-            A --> D[設定検証]
-            A --> E[差分確認]
-            A --> F[スケーリング]
-            A --> G[ロールバック]
-            
-            B --> H[AWS ECS]
-            C --> H
-            D --> H
-            E --> H
-            F --> H
-            G --> H
-        </div>
+flowchart TD
+A[ecspresso] --> B[デプロイ管理]
+A --> C[タスク実行]
+A --> D[設定検証]
+A --> E[差分確認]
+A --> F[スケーリング]
+A --> G[ロールバック]
+
+B --> H[AWS ECS]
+C --> H
+D --> H
+E --> H
+F --> H
+G --> H
+</div>
       </section>
       
       <section id="use-cases" class="section">
@@ -124,18 +124,18 @@
         <p>ecspressoは、Go言語で実装されたコマンドラインツールです。AWS SDK for Go v2を使用してAWSサービスと通信し、ECSリソースを管理します。</p>
         
         <div class="mermaid">
-        sequenceDiagram
-          actor User as ユーザー
-          participant CLI as ecspresso CLI
-          participant Config as 設定ファイル
-          participant AWS as AWS API
-          
-          User->>CLI: コマンド実行
-          CLI->>Config: 設定読み込み
-          CLI->>AWS: APIリクエスト
-          AWS-->>CLI: レスポンス
-          CLI-->>User: 結果表示
-        </div>
+sequenceDiagram
+actor User as ユーザー
+participant CLI as ecspresso CLI
+participant Config as 設定ファイル
+participant AWS as AWS API
+
+User->>CLI: コマンド実行
+CLI->>Config: 設定読み込み
+CLI->>AWS: APIリクエスト
+AWS-->>CLI: レスポンス
+CLI-->>User: 結果表示
+</div>
         
         <p>ecspressoの基本的なワークフローは以下の通りです：</p>
         <ol>

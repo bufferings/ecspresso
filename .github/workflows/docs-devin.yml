@@ -16,8 +16,10 @@ jobs:
         run: |
           SLACK_TEXT="<@U08PYJ5B9LK>"
           SLACK_TEXT+="bufferings/ecspresso のブランチ v2 が対象です。\n"
-          SLACK_TEXT+="Goのソースコードの実装詳細に基づいた、ecspressoの利用者向け技術的な日本語ドキュメントをHTMLで作成してください。\n"
-          SLACK_TEXT+="README.mdと既存のドキュメントは参考にせず、「どう使うか」に焦点を当てた内容にしてください。\n"
+          SLACK_TEXT+="Goのソースコードを読み込んでください。\n"
+          SLACK_TEXT+="そして、そのGoのソースコードの実装詳細に基づいた、ecspresso利用者向けの技術的な日本語ドキュメントをHTMLで作成してください。\n"
+          SLACK_TEXT+="README.md、docs、devin-docsなどの既存のドキュメントは参考にしないでください。
+          SLACK_TEXT+="「どう使うか」に焦点を当てた内容にしてください。\n"
           SLACK_TEXT+="スマートフォンでも閲覧できるように、レスポンシブデザインを採用してください。\n"
           SLACK_TEXT+="\n"
           SLACK_TEXT+="以下の目次構造に従ってください：\n"

@@ -29,27 +29,15 @@
       <h2>1.2 インストール方法</h2>
       
       <h3>バイナリからのインストール</h3>
-      <p>ecspressoは、Go言語で書かれたシングルバイナリアプリケーションです。GitHubリリースページから、お使いのプラットフォーム向けの最新バイナリをダウンロードして使用できます。</p>
+      <p>ecspressoは、Go言語で書かれたシングルバイナリアプリケーションです。ビルド済みバイナリを使用してインストールできます。</p>
       
-      <h4>Linux / macOS</h4>
-      <pre><code>$ curl -sL https://github.com/kayac/ecspresso/releases/latest/download/ecspresso-{プラットフォーム}-{アーキテクチャ} -o ecspresso
-$ chmod +x ecspresso
-$ sudo mv ecspresso /usr/local/bin/</code></pre>
-      
-      <h4>Homebrew（macOS）</h4>
-      <pre><code>$ brew install kayac/tap/ecspresso</code></pre>
+      <h4>実行可能ファイルの設定</h4>
+      <pre><code>$ chmod +x ecspresso
+$ mv ecspresso /usr/local/bin/</code></pre>
       
       <h3>ソースからのビルド</h3>
       <p>Go言語の開発環境がある場合は、ソースからecspressoをビルドすることもできます。</p>
       <pre><code>$ go install github.com/kayac/ecspresso/v2/cmd/ecspresso@latest</code></pre>
-      
-      <h3>Dockerでの実行</h3>
-      <p>Dockerがインストールされている環境では、ecspressoのDockerイメージを使用することも可能です。</p>
-      <pre><code>$ docker run -it --rm \
-  -v ~/.aws:/home/ecspresso/.aws \
-  -v $(pwd):/work \
-  -w /work \
-  kayac/ecspresso:latest [コマンド]</code></pre>
       
       <h3>AWS認証の設定</h3>
       <p>ecspressoはAWS SDKを使用してAWSリソースにアクセスします。以下のいずれかの方法でAWS認証情報を設定してください。</p>

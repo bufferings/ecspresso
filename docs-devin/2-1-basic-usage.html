@@ -66,14 +66,17 @@ plugins:
       </ul>
       
       <h3>基本的なワークフロー</h3>
-      <div class="mermaid">
-      flowchart LR
-        Init[初期化\ninit] --> Edit[設定編集]
-        Edit --> Verify[検証\nverify]
-        Verify --> Diff[差分確認\ndiff]
-        Diff --> Deploy[デプロイ\ndeploy]
-        Deploy --> Status[状態確認\nstatus]
-      </div>
+      <p class="text-center">
+        <strong>ecspresso 基本操作フロー</strong>
+      </p>
+      <pre class="mermaid">
+graph LR
+  Init[初期化\ninit] --> Edit[設定編集]
+  Edit --> Verify[検証\nverify]
+  Verify --> Diff[差分確認\ndiff]
+  Diff --> Deploy[デプロイ\ndeploy]
+  Deploy --> Status[状態確認\nstatus]
+      </pre>
       
       <h4>1. サービスの状態確認</h4>
       <p>現在のサービスの状態を確認します。</p>

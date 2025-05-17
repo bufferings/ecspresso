@@ -34,38 +34,39 @@
       <ul>
         <li>設定ファイルベースの宣言的なアプローチ</li>
         <li>サービスとタスク定義のデプロイとロールバック</li>
-        <li>青/緑デプロイのサポート（AWS CodeDeployを通じて）</li>
+        <li>複数のデプロイ戦略（ECSローリングアップデート、CodeDeployによるBlue/Green）</li>
         <li>ワンオフタスクの実行と管理</li>
         <li>コンテナ内でのコマンド実行</li>
-        <li>リソースの検証とドリフト（差分）検出</li>
+        <li>リソース設定の検証と差分検出</li>
+        <li>Auto Scalingの設定と管理</li>
         <li>プラグインシステムによる拡張性</li>
       </ul>
       
       <h3>アーキテクチャ概要</h3>
-      <div class="mermaid">
-      flowchart TB
-        Config[設定ファイル\necspresso.yml] --> Ecspresso
-        TD[タスク定義\nJSON/YAML] --> Ecspresso
-        SD[サービス定義\nJSON/YAML] --> Ecspresso
-        
-        subgraph Ecspresso[ecspressoツール]
-          CLI[CLI処理] --> App[Appコア処理]
-          App --> Deploy[デプロイ機能]
-          App --> Run[タスク実行]
-          App --> Tasks[タスク管理]
-          App --> Exec[コマンド実行]
-          App --> Verify[リソース検証]
-          App --> Diff[差分比較]
-          App --> Rollback[ロールバック]
-        end
-        
-        Ecspresso --> AWS[AWS SDK]
-        AWS --> ECS[Amazon ECS]
-        AWS --> CD[CodeDeploy]
-        AWS --> SSM[SSM/Secrets]
-        AWS --> ECR[Amazon ECR]
-        AWS --> CW[CloudWatch]
-      </div>
+      <p class="text-center">
+        <strong>ecspresso コンポーネント構成</strong>
+      </p>
+      <pre class="mermaid">
+graph TD
+  A[設定ファイル] --> B[ecspresso]
+  C[タスク定義] --> B
+  D[サービス定義] --> B
+  
+  subgraph コア機能
+    B --> E[デプロイ]
+    B --> F[ロールバック]
+    B --> G[タスク実行]
+    B --> H[コマンド実行]
+    B --> I[検証]
+    B --> J[差分比較]
+  end
+  
+  B --> K[AWS SDK]
+  K --> L[ECS]
+  K --> M[CodeDeploy]
+  K --> N[Auto Scaling]
+  K --> O[CloudWatch]
+      </pre>
       
       <h3>主なユースケース</h3>
       <p>ecspressoは以下のようなシナリオで特に役立ちます：</p>
@@ -86,6 +87,16 @@
         <li>環境間でのポータビリティ</li>
         <li>デプロイ戦略の柔軟な選択</li>
         <li>GitOpsワークフローとの相性の良さ</li>
+        <li>Auto Scalingとの統合</li>
+      </ul>
+      
+      <h3>コアコンポーネント</h3>
+      <ul>
+        <li><strong>App構造体</strong>: すべての操作を調整する中心的なコンポーネント</li>
+        <li><strong>Config構造体</strong>: ecspresso.ymlから読み込まれた設定値を保持</li>
+        <li><strong>CLI関数</strong>: コマンドライン引数を解析し、適切なハンドラーに転送</li>
+        <li><strong>AWS SDK統合</strong>: ECS、CodeDeploy、Auto Scaling、CloudWatchなどのAWSサービスとの連携</li>
+        <li><strong>プラグインシステム</strong>: 機能拡張のためのプラグインをサポート</li>
       </ul>
     </section>
   </main>

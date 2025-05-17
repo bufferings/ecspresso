@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ecspresso - コマンドリファレンス</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({ startOnLoad: true });
+  </script>
 </head>
 <body>
   <header>
@@ -38,6 +42,30 @@
       
       <h2>セクション概要</h2>
       <p>このセクションでは、ecspressoで利用可能な全コマンドの詳細な説明と使用例を提供します。デプロイ関連コマンド、タスク関連コマンド、設定・検証コマンドの3つのカテゴリに分けて解説します。</p>
+      
+      <p class="text-center">
+        <strong>ecspresso コマンド構造</strong>
+      </p>
+      <pre class="mermaid">
+graph TD
+  A[ecspresso] --> B[デプロイ関連]
+  A --> C[タスク関連]
+  A --> D[設定・検証]
+  
+  B --> B1[deploy]
+  B --> B2[rollback]
+  B --> B3[refresh]
+  B --> B4[scale]
+  
+  C --> C1[run]
+  C --> C2[exec]
+  C --> C3[tasks]
+  
+  D --> D1[init]
+  D --> D2[verify]
+  D --> D3[diff]
+  D --> D4[status]
+      </pre>
     </section>
   </main>
   <footer>

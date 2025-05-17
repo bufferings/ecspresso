@@ -29,25 +29,32 @@
       <h2>ecspresso について</h2>
       <p>ecspressoは、AWS Elastic Container Service (ECS) のコンテナデプロイと管理を簡素化するコマンドラインツールです。宣言的な設定ファイルを使用して、ECSサービスのデプロイ、スケーリング、ロールバックなどの操作を自動化します。</p>
       
-      <div class="mermaid">
-      flowchart TB
-        User[ユーザー] -->|設定ファイル| Ecspresso[ecspresso]
-        Ecspresso -->|API呼び出し| AWS[AWS API]
-        AWS --> ECS[Amazon ECS]
-        AWS --> CD[CodeDeploy]
-        AWS --> ECR[Amazon ECR]
-        AWS --> CW[CloudWatch]
-        AWS --> IAM[IAM]
-      </div>
+      <p class="text-center">
+        <strong>ecspresso アーキテクチャ</strong>
+      </p>
+      <pre class="mermaid">
+graph TD
+  A[ユーザー] -->|設定ファイル| B[ecspresso]
+  B -->|API呼び出し| C[AWS SDK]
+  C --> D[Amazon ECS]
+  C --> E[CodeDeploy]
+  C --> F[Auto Scaling]
+  C --> G[CloudWatch Logs]
+  C --> H[IAM]
+  C --> I[ELB v2]
+  C --> J[Service Discovery]
+  C --> K[VPC Lattice]
+      </pre>
       
       <h3>主な機能</h3>
       <ul>
-        <li>ECSサービスとタスク定義の管理</li>
-        <li>デプロイとロールバック</li>
-        <li>ワンオフタスクの実行</li>
-        <li>コンテナ内でのコマンド実行</li>
-        <li>リソース設定の検証</li>
-        <li>構成の差分表示</li>
+        <li>ECSサービスとタスク定義の管理（デプロイ、ロールバック、更新）</li>
+        <li>複数のデプロイ戦略（ECSローリングアップデート、CodeDeployによるBlue/Green）</li>
+        <li>ワンオフタスクの実行と管理</li>
+        <li>コンテナ内でのコマンド実行（exec）</li>
+        <li>リソース設定の検証と差分表示</li>
+        <li>Auto Scalingの設定と管理</li>
+        <li>プラグインシステムによる拡張性（Terraform、CloudFormation、SSM、Secrets Manager）</li>
       </ul>
       
       <h3>ドキュメント構成</h3>

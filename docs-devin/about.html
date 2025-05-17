@@ -62,15 +62,7 @@
         <h2>目的と概要</h2>
         <p>ecspressoは、Amazon Elastic Container Service (ECS) 向けのデプロイメントツールです。AWS ECSサービスとタスク定義の管理を簡素化し、デプロイメントプロセスを自動化することを目的としています。コマンドラインインターフェースを通じて、ECSリソースの作成、更新、削除、検証などの操作を行うことができます。</p>
         
-        <div class="mermaid">
-          flowchart LR
-            A[開発者] --> B[ecspresso CLI]
-            B --> C[AWS SDK]
-            C --> D[AWS ECS]
-            C --> E[AWS IAM]
-            C --> F[AWS CloudWatch]
-            C --> G[その他AWSサービス]
-        </div>
+        <img src="https://mermaid.ink/img/pako:eNpVjj0LwjAQhv9KuNGB1iQdXCrODg7SQZzCJZf20CTlcqVF6H93-oF38DzP-wF7cIQS9jZQ3PYqcIh0C8l-JNqM59P1qHMX3FsHltClEXU-QzBOmwiPPrdlGfzgyYXFbkLI9vJERWb2TN2NpSKSLrBSH0Jkt2DRa-v_PG3LUgldlXKjtDR1Jfe1VMqctJRnJj-JhoxUtCRV2bNRR1VpAUGJLUG3R7qwOF9QUWiv?type=png" alt="ecspresso CLI と AWS サービスの関係を示す図">
       </section>
       
       <section id="key-features" class="section">
@@ -96,20 +88,7 @@
           <li>AWS CLIやSDKを直接使用する場合と比較して、作業効率の大幅な向上</li>
         </ul>
         
-        <div class="mermaid">
-          flowchart TD
-            A[問題点] --> B[複雑なECSデプロイ]
-            A --> C[環境間の一貫性]
-            A --> D[運用効率]
-            
-            E[解決策: ecspresso] --> F[宣言的設定]
-            E --> G[自動化]
-            E --> H[簡単な運用]
-            
-            F -.-> B
-            G -.-> C
-            H -.-> D
-        </div>
+        <img src="https://mermaid.ink/img/pako:eNp1kMFqwzAMhl_F-JRB0jRd6WGHwTgb7LDDWA8qVhrT2B6ynZUQ8u5z060w2CWST9_3C6TjiIYKOGn0duekQx8GayN1sZwvHl5KU5J_RRRofI9GXuDO7x_38-0DLLfrKhZJqshpOZZ00O0FCuNbC5eXY0WDNp0X7i4Z2HS2a3HCUFVqW-3Xe1n9aMEKvS1QufM3LlDEm2EQDgppbxTYVrPBqaJFQnqEyKxTIGOjjjPcpMBnE3LFJ_8fVnZo_tM_kDMxn9IcCjM4ZP2OvSxDwk4GxTmBPa0qOlP8KM2H-Dm1uK2hQKKf2z0cGk1BXnJmNjqgIftQoD9Ygil6XON5Yn42B1Kn-RfJOJXA?type=png" alt="ecspressoによる問題解決を示す図">
       </section>
     </div>
   </div>

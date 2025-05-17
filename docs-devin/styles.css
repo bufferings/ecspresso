@@ -44,6 +44,21 @@ nav ul li a:hover {
   background-color: #e9ecef;
 }
 
+/* サブナビゲーションスタイル */
+.subnav {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #dee2e6;
+}
+
+.subnav ul {
+  font-size: 0.9em;
+}
+
+.subnav ul li a {
+  color: #495057;
+}
+
 main {
   padding: 20px 0;
 }
